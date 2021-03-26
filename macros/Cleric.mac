@@ -1,0 +1,78 @@
+#include spell_routines.inc
+#include common.inc
+#include commonCaster.inc
+#include commonHealer.inc
+#turbo
+
+Sub Main
+    /declare clericIniFileName        string  local "Cleric_${MacroQuest.Server}_${Me.CleanName}.ini"
+
+    /call InitClericIni ${clericIniFileName}
+    /if (${Macro.Return} == 0) {
+        /echo "Bootstrapped INI file, please update variables in: ${clericIniFileName}"
+        /endmacro
+    }
+
+    /echo "Cleric all set!"
+    /bca "Cleric all set!"
+    :ClericLoop
+        /call Check_Mana_Status ${_minMana} ${_buffMana}
+        /call Medidate
+        /call DoHeal
+        /goto :ClericLoop
+/return
+
+| ###############################################################################
+| # Checks the tank and specified PC's for hitpoint levels and heals accordingly.
+| # This gets called in the main loop for every healer. It is the primary point 
+| # for all healing.
+| ###############################################################################
+Sub DoHeal
+	|- Check the tank's hitpoints before we start to make sure we have time to check everyone else
+   	| /call CheckTank
+
+	|- Do we use a group heal?
+	| /if (${Me.Gem[${groupHeal}]} >= 0 && ${Heal.InjuredCount[65]} > 2) /call GroupHeal
+	
+	|- Check our group for heals
+	| /if (${Heal.InjuredCount} > 0) /call CheckGroupHeals
+    /call CheckGroupHeals
+
+	|- Check for NetBots heals
+	| /if (${NetBots[${Heal.WorstNetBots.Name}].PctHPs} < 100) /call CheckNetBotsHeals
+	
+/return
+
+| ######################################################################
+| # Casts the group heal if 3 or more group players are in need.
+| ######################################################################
+Sub GroupHeal
+	/if (${Me.CurrentMana} > ${Spell[${GroupHeal}].Mana}) {
+		/gsay <<< ${GroupHeal} >>>			
+		/bca <<< ${GroupHeal} >>>			
+		/call cast "${GroupHeal}"
+		|- Delay to give everyones hp time to update
+		/delay 50
+	}
+/return
+
+| ################################################################################
+| # Create Cleric Ini Section
+| ################################################################################	
+Sub InitClericIni(string iniFileName)
+    /declare options             string  local "HealingOptions"
+    /declare healerInitResult  int     local 1
+    /if (!${Defined[groupHeal]}) /declare groupHeal       string  outer "GroupHeal" 
+        
+    /call InitHealIni "${iniFileName}"
+    /varset healerInitResult ${Macro.Return}
+    
+    /if (${Ini[${iniFileName},${options},GroupHeal].Length}) {
+        /varset groupHeal ${Ini[${iniFileName},${options},GroupHeal]} 
+    } else {
+        /ini "${iniFileName}" "${options}" "GroupHeal" "${groupHeal}"
+        /return 0
+
+    }
+
+/return ${healerInitResult}

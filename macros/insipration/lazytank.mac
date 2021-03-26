@@ -1,0 +1,461 @@
+|- LazyTank.mac Updated by Maskoi May 2010
+|- Orginal author DigitalMocking - June 2005
+|- Code contributions from nils - MQ2 VIP forums 
+|- This macro requires the Leader AA: Health of Target's Target (HOTT)
+|- This macro requires the plugin: MQ2Moveutils, MQ2Exchange, MQ2Moveutils
+|- This macro requires the file: spell_routines.inc 
+|- /makecamp - if you move camps, use this to set your new home point
+|- /setpuller - use this to set whoever is pulling for your group
+
+#Event GotSummoned  "You have been summoned!" 
+#Event MobGate      "|${Target.CleanName}| begins to cast the gate spell#*#" 
+#Event MobDead      "#*#You have slain#*#" 
+#Event MobDead      "#*#has been slain by#*#" 
+#event GotHit       "#*#hits YOU for#*#" 
+#event GotHit       "#*#slashes YOU for#*#" 
+#event GotHit       "#*#crushes YOU for#*#" 
+#event GotHit       "#*#bashes YOU for#*#" 
+#event GotHit       "#*#kicks YOU for#*#" 
+#event GotHit       "#*#smashes YOU for#*#" 
+#event GotHit       "#*#mauls YOU for#*#" 
+#event GotHit       "#*#gores YOU for#*#" 
+#event GotHit       "#*#pierces YOU for#*#" 
+#event GotHit       "#*#kicks YOU for#*#" 
+#event GotHit       "#*#bashes YOU for#*#"  
+#event Zoned        "You have entered#*#" 
+#Event TooFarAway   "#*#Your target is too far away, get closer#*#" 
+#event NotStanding  "#*#You must be standing to attack!#*#" 
+#event NoSeeTarget  "#*#You cannot see your target.#*#" 
+#event NoSeeTarget  "#*#You can't hit them from here#*#" 
+#event Dead         "#*#Returning to home point#*#" 
+#event MakeCamp     "[MQ2] make camp#*#" 
+#event SetPuller    "[MQ2] set puller #1#" 
+#event Restart      "#1# tells the group, #*#reset home!#*#" 
+#event Restart      "#1# tells you, #*#reset home!#*#" 
+#event AssistPuller "|${Puller}| tells the group, 'assist me#*#" 
+
+#include spell_routines.inc 
+
+Sub Main 
+/echo Now running lazytank, combat helper... 
+	
+|===================================================================================
+| - General
+|===================================================================================	
+/declare CallAssist        string outer TRUE 
+/declare ResetMasters      string outer MastersName?
+/declare DefaultPuller     string outer PullersNameHere
+/declare Verbose           bool outer TRUE 
+/declare Channel           string outer /gsay 
+/declare SitAt 				int outer 50
+
+|===================================================================================
+| - Combat
+|===================================================================================
+/declare AssistMeAt        int    outer 98 
+/declare Provoke0           string outer Jeer Rk. II
+/declare Provoke1           string outer Bazu Bluster Rk. II
+
+/declare BDefense 			string outer Bracing Defense Rk. II
+/declare DoBracing bool outer FALSE
+/declare FieldArmorer 		 	string outer Field Armorer Rk. II
+/declare DoFieldArmor		 bool outer TRUE
+/declare Aura 						string outer Champion's Aura
+/declare DoAura 		bool outer TRUE
+/declare RangedWeapon	string outer Guardian Blade
+/declare RangedAmmo string outer Guardian Blade
+/declare DoRanged  bool outer FALSE
+/declare DoAEAggro bool outer TRUE
+/declare AEAggroAttack string outer Maelstrom Blade  
+
+|===================================================================================
+| - Clickys
+|===================================================================================
+	/declare ClickyItemUse 		int outer 1
+	/declare ClickyItem[8]  	string outer
+	/varset ClickyItem[1]		Corundus Band
+	/varset ClickyItem[2]		Oracle's Barb
+	/varset ClickyItem[3]		Band of Subterfuge
+	/varset ClickyItem[4]		Witherskin Cloak
+	/varset ClickyItem[5]		Mask of the Mighty Minotaur
+	/varset ClickyItem[6]		Familiar of the Emerald Jungle
+	/varset ClickyItem[7]		NULL
+	/varset ClickyItem[8]		NULL
+	
+|===================================================================================
+| - Things you don't need worry about and all the stuff I am not sure what they do.
+|===================================================================================
+/declare validtarget bool outer
+/declare INCTimer       timer  outer 
+/declare CurrentZone       string local ${Zone}
+/declare PullerID          int    outer 
+/declare HomeXLoc          int    outer ${Me.X} 
+/declare HomeYLoc          int    outer ${Me.Y} 
+/declare Berated                  outer FALSE 
+/declare Engaged                  outer TRUE 
+/declare DeadTarget               outer FALSE 
+/declare Puller            string outer 
+/declare TargetArray[4]    string outer 
+
+/squelch /alias /makecamp /echo make camp 
+/squelch /alias /setpuller /echo set puller 
+/squelch /alias /melee  /melee
+
+|===================================================================================
+| - Check Plugins - Set Variables
+|===================================================================================
+/if (!${Bool[${Plugin[mq2moveutils]}]}) { 
+	/echo MQ2MoveUtils not detected!  This macro requires it! 
+	/plugin mq2moveutils
+	} 
+/if (!${Bool[${Plugin[mq2melee]}]}) { 
+	/echo MQ2Melee not detected!  This macro requires it! 
+	/plugin mq2melee
+	} 
+	/if (${Bool[${Plugin[mq2melee]}]}) {
+			/if (${Me.Class.Name.Equal[Warrior]}) {
+			/melee melee=on
+			/melee aggro=on
+			/melee enrage=on
+			/melee kick=on
+			/melee provoke0=${Me.CombatAbility[${Me.CombatAbility[${Provoke0}]}].ID}
+			/melee provoke1=${Me.CombatAbility[${Me.CombatAbility[${Provoke1}]}].ID}
+			/melee provokeend=30
+			/melee provokeonce=on
+			/melee taunt=on
+			/if (${Me.AltAbility[Blast of Anger]}>0) /melee anger=on
+			/if (${Me.AltAbility[Call of Challenge]}>0) /melee callchallenge=on
+			/if (${Me.Level}>=85 && ${Me.CombatAbility[${BDefense}]}>0 && ${DoBracing}) /melee defense=40 
+			/if (${Me.AltAbility[Gut Punch]}>0) /melee gutpunch=on
+			/if (${Me.AltAbility[Knee Strike]}>0) /melee kneestrike=on
+			/if (${RangedAmmo.NotEqual[NULL]} && ${FindItemCount[${RangedAmmo}]}>0) /melee arrow=${FindItem[${RangedAmmo}].ID}
+			/if (${RangedWeapon.NotEqual[NULL]} && ${FindItemCount[${RangedWeapon}]}>0) /melee bow=${FindItem[${RangedWeapon}].ID}
+			}
+	}
+
+/call FindPuller ${Param0} 
+
+/if (${PullerID}) { 
+		 /echo I Will assist ${Puller} for incoming targets. 
+		 /echo I Will call assist from the group at ${AssistMeAt}% 
+	} else { 
+		 /echo Waiting for mobs to come to camp... 
+} 
+/if (${Verbose}) /echo Default channel for announcements is ${Channel} 
+
+/call Event_MakeCamp
+
+:Main_Loop 
+	/if (${Target.ID}==${Me.ID}) /squelch /target clear 
+	/call Check_Clicky
+	/call CastAura
+	
+	| - Med endurance
+	/if (${Me.State.Equal[Stand]} && ${Me.PctEndurance}<${SitAt} && !${Me.Combat} && ${SpawnCount[npc radius 75 zradius 10]}==0) /sit
+
+	| - Aquire Pullers Target
+	/doevents 
+	/call Event_AssistPuller 
+	/if (${Target.ID} && ${Math.Distance[${HomeYLoc},${HomeXLoc}]} < 50 && ${Target.Distance} < 65 && ${Target.Type.Equal[NPC]}) { 
+		/varset Engaged TRUE 
+		/if (${/declare DoRanged}) /throwit
+		/call KillTarget 
+	} 
+  /goto :Main_Loop 
+/return 
+
+Sub CheckForAdds 
+  /if (${DEBUG}) /echo In CheckForAdds! 
+  /declare i int local 1 
+  /declare s int local 
+  /for i 1 to 4 
+    /varset s ${NearestSpawn[${i},npc].ID} 
+    /if (${Spawn[${s}].Distance} < 60 && ${Math.Distance[${Me.Z}:${Spawn[${s}].Z}]} < 40 && ${Spawn[${s}].LineOfSight}) { 
+      /squelch /target npc id ${s} 
+      /if (${Verbose}) /echo Target Information: 
+      /if (${Verbose}) /echo [ ${Target.Level} ${Target.Race} ${Target.Class} ] ${Target} ${Target.Surname} ( ${Target.Type} ) 
+      /varset TargetArray[1] ${Target.CleanName} 
+      /varset TargetArray[2] ${Target.Level} 
+      /varset TargetArray[3] ${Target.Name} 
+      /varset TargetArray[4] ${Target.ID} 
+      /return 
+    } 
+  /next i 
+/return 
+
+Sub KillTarget 
+	/doevents 
+   :Combat
+   	/if (${Target.ID}) { 
+	/face fast nolook 
+	/attack on
+    /if (${CallAssist} && ${Verbose}) /call AssistMe 
+	/if (${SpawnCount[npc radius 30 zradius 10]}>1 && ${Me.CombatAbilityReady[${AEAggroAttack}]} && ${DoAEAggro} && ${Melee.AggroMode}) /disc ${AEAggroAttack}
+	/if (${DoFieldArmor} && ${Me.CombatAbilityReady[${FieldArmorer}]} && !${Me.Song[${FieldArmorer}].ID} && ${Me.PctEndurance}>20) /disc ${FieldArmorer}
+    /if (${Me.PctHPs}<=9) /call DoFurious 
+	} 
+	/if (!${Me.Combat} && ${Int[${Target.Distance}]} < 70) /squelch /stick los 
+	/if (!${Target.ID} || ${Target.Type.Equal[Corpse]}) { 
+		/squelch /target clear 
+		/delay 3 
+		/attack off 
+		/delay 3 
+		/call CheckForAdds 
+		/if (${Target.ID}) /call KillTarget 
+		/doevents MobDead 
+    /return 
+	} 
+  /doevents 
+  /goto :Combat 
+/return    
+  
+Sub DoFurious 
+  /if (${Me.CombatAbilityReady["Furious"]}) { 
+    /disc Furious 
+    /echo Health too low! Hitting Furious! 
+    /if (${Verbose}) ${Channel} Going into Riposte mode!  Will need healing within 12 seconds! 
+  } 
+/return 
+
+Sub AssistMe 
+  /if (${CallAssist} ${Target.PctHPs} <= ${AssistMeAt} && ${Me.Combat}) { 
+    /if (${Verbose}) /gsay Assist me now on [ %t ] 
+    /varset CallAssist FALSE 
+  } 
+/return 
+
+Sub ReturnHome 
+  :MoveHome 
+  /doevents 
+  /face fast nolook loc ${HomeYLoc},${HomeXLoc} 
+  /if (${Math.Distance[${HomeYLoc},${HomeXLoc}]}>20) /keypress forward hold 
+  /call AreWeStuck 
+  /if (${Math.Distance[${HomeYLoc},${HomeXLoc}]}<25) { 
+    /keypress forward 
+    /keypress back 
+    /keypress left 
+    /keypress right 
+    /if (${DEBUG}) /echo Leaving Sub ReturnHome 
+    /return 
+  } 
+  /goto :MoveHome 
+/return 
+
+Sub AreWeStuck 
+  /doevents 
+  /declare  StuckXLoc      int local ${Me.X} 
+  /declare  StuckYLoc      int local ${Me.Y} 
+  /delay 5 
+  /if (${StuckXLoc}==${Me.X} && ${StuckYLoc}==${Me.Y}) /call MoveAround 
+/return 
+
+Sub MoveAround 
+  /doevents 
+  /keypress forward 
+  /keypress back hold 
+  /delay 3 
+  /keypress back 
+  /if (${Math.Rand[2]}) { 
+     /keypress strafe_right hold 
+  } else { 
+     /keypress strafe_left hold 
+  } 
+  /delay 10 
+  /keypress strafe_right 
+  /keypress strafe_left 
+/return 
+
+Sub DoIncite 
+ /if (${Me.PctEndurance} > 40 && !${Berated} && ${Target.Distance} < 50) { 
+    /squelch /face nolook fast 
+    /delay 1 
+    /disc ${Provoke} 
+    /delay 1 
+    /varset Berated TRUE 
+  } 
+/return 
+
+Sub Event_TooFarAway 
+  /if (${Math.Distance[${HomeYLoc},${HomeXLoc}]} > 100) /call ReturnHome 
+  /if (${Spawn[${TargetArray[4]}].ID} && ${Target.ID} != ${TargetArray[4]}) { 
+    /squelch /target id ${TargetArray[4]} 
+    /delay 1s ${Target.ID} == ${TargetArray[4]} 
+    /squelch /stick 12 
+  } else { 
+    /squelch /stick 12 
+  } 
+/return
+
+Sub Event_GotSummoned 
+  /keypress back hold 
+  /delay 5 
+  /keypress back 
+/return 
+
+Sub Event_SetPuller(string Line,string NewPuller) 
+  /varset Puller ${NewPuller} 
+  /target ${Puller} 
+  /delay 2 
+  /varset PullerID ${Target.ID} 
+  /squelch /target clear 
+  /if (${Verbose}) /echo Now assisting ${Puller} for incoming mob target! 
+/return 
+
+Sub Event_MobGate 
+  /if (${Verbose}) ${Channel} ${Target.CleanName} is GATING!  Stun/Mezz! 
+/return 
+
+Sub Event_MakeCamp 
+  /varset HomeXLoc ${Me.X} 
+  /varset HomeYLoc ${Me.Y} 
+/return 
+
+Sub Event_GotHit 
+  /if (!${Engaged}  && !${Target.ID}) { 
+    /target radius 15 npc 
+    /varset Engaged TRUE 
+    /call KillTarget 
+  } 
+/return 
+
+Sub Event_NotStanding 
+  /if (!${Engaged}  || ${Target.ID}) /return 
+  /call MoveAround 
+  /target radius 60 npc 
+  /call KillTarget 
+/return 
+
+Sub Event_NoSeeTarget 
+  /if (!${Engaged}  || ${Target.ID}) /return 
+  /target radius 30 npc 
+  /call KillTarget 
+/return 
+
+Sub Event_MobDead 
+  /delay 3 
+  /call CheckForAdds 
+  /if (${Target.ID}) /return 
+  /varset Engaged FALSE
+  /if (${Math.Distance[${HomeYLoc},${HomeXLoc}]} > 30) /call ReturnHome 
+/return 
+
+Sub Event_Zoned 
+  /varset CurrentZone ${Zone} 
+/return 
+
+Sub Event_Restart(string Line,string Sender) 
+  /if (${ResetMasters.Find[${Sender}]}) { 
+    /squelch /target clear 
+    /delay 1s !${Target.ID} 
+    /varset TargetArray[4] 0 
+    /varset Engaged FALSE 
+    /call ReturnHome 
+  } 
+/return 
+
+Sub Event_AssistPuller 
+| /echo enter assist puller
+  /if (${Spawn[${PullerID}].Distance} > 450 && ${INCTimer}==0) { 
+    /gsay You're too far away from camp to assist! 
+	} else { 
+		/assist ${Puller} 
+		/call ValidateTarget
+			/if (${Target.ID} && ${validtarget}) { 
+			  /face fast 
+			  /if (${DEBUG}) /echo Setting TargetArray 
+			  /varset TargetArray[1] ${Target.CleanName}
+			  /varset TargetArray[2] ${Target.Level} 
+			  /varset TargetArray[3] ${Target.Name} 
+			  /varset TargetArray[4] ${Target.ID} 
+			  /if (${Target.ID} && ${INCTimer}==0 && ${Verbose} && ${validtarget}) ${Channel} Ready to tag ${Target.CleanName} from you, bring it in! 
+			  /varset INCTimer 30s 
+			} 
+		}
+/return 
+
+|----------------------------------------------------------------------------
+| SUB: Check_Clicky
+|----------------------------------------------------------------------------
+Sub Check_Clicky
+ | /echo enter clicky 
+/if (!${ClickyItemUse}) /return
+/declare i int local 1
+| /echo leave clicky
+/if (${Me.Pet.CleanName.Equal[${Me.Name}`s familiar]}) /pet get lost
+/for i 1 to ${ClickyItem.Size}
+	| /echo ${i} ${ClickyItem[${i}]}
+		/if (${FindItemCount[${ClickyItem[${i}]}]}<=0) /next i
+		/if (${FindItem[${ClickyItem[${i}]}].Spell.Stacks} && !${Me.Buff[${FindItem[${ClickyItem[${i}]}].Spell}].ID} && ${NearestSpawn[NPC].Distance}>=25) {
+		/target myself
+		/delay 3
+		/call Cast "${ClickyItem[${i}]}" item
+		}
+   /next i
+/return
+
+|----------------------------------------------------------------------------
+| SUB: Validate Target
+|----------------------------------------------------------------------------
+Sub ValidateTarget
+	/varset validtarget FALSE
+	/if (!${Target.ID}) /return
+	/if (${Target.ID}==${Me.ID}) /return
+	/if (${Select[${Target.Type},PC,CORPSE,CHEST,TRIGGER,TRAP,TIMER,ITEM,MOUNT,MERCENARY]}) /return
+	/varset validtarget TRUE
+/return
+
+|----------------------------------------------------------------------------
+| SUB: Check for Puller
+|----------------------------------------------------------------------------
+Sub FindPuller(string pname)
+/echo looking for puller
+
+	/if (!${Defined[Param0]}) {		
+		/declare i int local 
+		/for i 1 to ${Group.Members}
+			/if (${Group.Member[${i}].Puller} && ${Group.Member[${i}].CleanName.NotEqual[${Me}]}) { 
+				/varset Puller ${Group.Member[${i}]}
+				/varset PullerID ${Group.Member[${i}].ID}
+				/echo  +++ Puller role found! Puller set to >> ${Group.Member[${i}]} <<. +++
+				/return
+			}
+		/next i
+	}
+	
+	/if (${Defined[pname]} && ${pname.NotEqual[NULL]}) {
+		/varset Puller ${pname}
+			/target ${Puller} 
+			/delay 3 
+			/varset PullerID ${Target.ID} 
+			/squelch /target clear  
+		/echo  +++ Puller found from command line! Puller set to >> ${Puller} <<. +++
+		/return
+	}
+	
+	/if (!${Defined[Param0]}) {		
+		/if (!${Target.ID} || !${Select[${Target.Type},PC]} || ${Target.CleanName.Equal[${Me.CleanName}]}) {
+				/if (!${Spawn[${Target}].ID} || !${Select[${Target.Type},PC]}) /echo You do not have a PC targeted using default puller.
+				/if (${Target.CleanName.Equal[${Me.CleanName}]}) /echo You cannot assist yourself using default puller.
+				/varset Puller ${Spawn[PC ${DefaultPuller}].CleanName}
+				/varset PullerID ${Spawn[PC ${DefaultPuller}].ID}
+				/echo  +++ Setting to default puller >> ${DefaultPuller} <<. +++
+			/return
+		} else	/if (${Target.ID} && ${Target.Type.Equal[PC]} && !${Target.Type.Equal[Corpse]}) { 
+			/varset Puller ${Target} 
+			/target ${Puller} 
+			/delay 3 
+			/varset PullerID ${Target.ID} 
+			/squelch /target clear  
+			/echo  +++ Puller found! Puller set to target >> ${Puller} <<. +++
+			/return
+		}
+	}		
+
+/return 
+
+Sub CastAura
+/if (!${Me.Song[${Aura} Effect].ID} && ${DoAura}) {
+	/disc ${Aura}
+	/delay 4s ${Me.Song[${Aura} Effect].ID}
+}
+/return

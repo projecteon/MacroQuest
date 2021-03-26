@@ -1,0 +1,112 @@
+| http://mqemulator.net/forum2/viewtopic.php?t=1551
+| http://mqemulator.net/forum2/viewtopic.php?t=794
+
+#include spell_routines.inc
+#include common.inc
+#include commonCaster.inc
+#turbo
+
+Sub Main
+    /declare wizardIniFileName string local "Wizard_${MacroQuest.Server}_${Me.CleanName}.ini"
+
+    /call InitWizardIni ${wizardIniFileName}
+    /if (${Macro.Return} == 0) {
+        /echo "Bootstrapped INI file, please update variables in: ${wizardIniFileName}"
+        /endmacro
+    }
+
+    /echo "Wizard all fired up!"
+    /bca "Wizard all fired up!"
+    :NukeLoop
+        /call Check_Mana_Status
+        /call Medidate
+        /call Nuke
+        /goto :NukeLoop
+/return
+
+Sub Nuke
+    /if (${Me.Casting.ID} || ${Me.Moving}) {
+        /return
+    }
+
+    /declare targetId int local ${NetBots[${mainAssist}].TargetID}
+    /if (!${targetId}) {
+        /return
+    }
+
+    /target id ${targetId}
+
+    /if (!${Target.ID} || !${Target.Type.Equal[NPC]} || ${Target.PctHPs} > ${nukePct} || !${Target.LineOfSight}) {
+        /return
+    }
+
+    /if (${Target.ID}==${Me.ID}) {
+        /squelch 
+        /target clear 
+        /return
+    }
+
+    /if (!${Defined[_nocast]}) /declare _nocast int   outer 1 
+    /call TryNukeTarget ${mainNuke}
+    /if (${Macro.Return} == ${nocast}) {
+        /call TryNukeTarget ${secondaryNuke}
+    }
+        
+/return
+
+Sub TryNukeTarget(nuke)
+    /if (${Me.Sitting}) {
+        /stand
+    }
+
+    /if (!${Cast.Ready[${nuke}]} || ${Me.CurrentMana} < ${Spell[${nuke}].Mana} || ${Target.Distance} > ${Spell[${nuke}].Range}) {
+        /return ${nocast}
+    }
+    
+    /call cast "${nuke}" gem${Me.Gem[${nuke}]} 0 CancelNuke
+/return 0
+
+| #################################################
+| # Called during the cast of any spell and will
+| # interuppt it if any condition pops true.
+| #################################################
+Sub CancelNuke
+	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
+	| /doevents StartCast
+/return
+
+| ################################################################################
+| # Create Wizard Ini Section
+| ################################################################################	
+Sub InitWizardIni(string iniFileName)
+    /declare nukeOptions        string  outer "NukeOptions"
+    /declare mainNuke           string  outer "YOUR MAIN NUKE"
+    /declare secondaryNuke      string  outer "YOUR SECONDARY NUKE"
+    /declare nukePct            int     outer 97
+    /declare casterInitResult   int     local 1
+
+    /call InitCasterIni "${iniFileName}"
+    /varset casterInitResult ${Macro.Return}
+
+    /if (${Ini[${iniFileName},${nukeOptions},MainNuke].Length}) {
+        /varset mainNuke "${Ini[${iniFileName},${nukeOptions},MainNuke]}"
+    } else {
+        /ini "${iniFileName}" "${nukeOptions}" "MainNuke" "${mainNuke}"
+        /varset casterInitResult 0
+    }
+
+    /if (${Ini[${iniFileName},${nukeOptions},SecondaryNuke].Length}) {
+        /varset secondaryNuke "${Ini[${iniFileName},${nukeOptions},SecondaryNuke]}"       
+    } else {
+        /ini "${iniFileName}" "${nukeOptions}" "SecondaryNuke" "${secondaryNuke}"
+        /varset casterInitResult 0
+    }
+
+    /if (${Ini[${iniFileName},${nukeOptions},NukePct].Length}) {
+        /varset nukePct ${Ini[${iniFileName},${nukeOptions},NukePct]}       
+    } else {
+        /ini "${iniFileName}" "${nukeOptions}" "NukePct" "${nukePct}"
+        /varset casterInitResult 0
+    }
+
+/return ${casterInitResult}

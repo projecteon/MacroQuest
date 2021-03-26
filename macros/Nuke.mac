@@ -1,0 +1,33 @@
+| http://mqemulator.net/forum2/viewtopic.php?t=1551
+| http://mqemulator.net/forum2/viewtopic.php?t=794
+
+#include spell_routines.inc
+#include Nuke.inc
+#turbo
+
+Sub Main
+    | /declare iniFileName        string  outer "${Macro.Name}_${MacroQuest.Server}_${Me.CleanName}.ini"
+    /declare iniFileName        string  local "Nuke_${MacroQuest.Server}_${Me.CleanName}.ini"
+    /declare generalOptions     string  outer "General"
+    /declare mainAssist         string  local "Eredhrin"
+
+    /if (${Ini[${iniFileName},${generalOptions},MainAssist].Length}) {
+       /varset mainAssist ${Ini[${iniFileName},${generalOptions},MainAssist]}
+    }
+
+    /if (!${Ini[${iniFileName},${generalOptions},MainAssist].Length}) {
+        /call MakeIni ${iniFileName} ${mainAssist}
+    }
+
+    /call NukeSetup ${iniFileName}
+    :NukeLoop
+        /call Nuke ${mainAssist}
+        /goto :NukeLoop
+/return
+
+Sub MakeIni(string fileName, mainAssist)
+    |- Build the INI file
+    /echo Building INI file.....
+
+    /ini "${fileName}" "${generalOptions}" "MainAssist" "${mainAssist}"
+/return

@@ -1,0 +1,36 @@
+| http://mqemulator.net/forum2/viewtopic.php?t=1551
+| http://mqemulator.net/forum2/viewtopic.php?t=794
+
+#include spell_routines.inc
+#include common.inc
+#include commonCaster.inc
+#turbo
+
+Sub Main
+    /declare enchanterIniFileName string local "Enchanter_${MacroQuest.Server}_${Me.CleanName}.ini"
+
+    /call InitEnchanterIni ${enchanterIniFileName}
+    /if (${Macro.Return} == 0) {
+        /echo "Bootstrapped INI file, please update variables in: ${enchanterIniFileName}"
+        /endmacro
+    }
+
+    /echo "Enchanter all mezzed up!"
+    /bca "Enchanter all mezzed up!"
+    :NukeLoop
+        /call Check_Mana_Status ${_minMana} ${_buffMana}
+        /call Medidate
+        /goto :NukeLoop
+/return
+
+| ################################################################################
+| # Create Wizard Ini Section
+| ################################################################################	
+Sub InitEnchanterIni(string iniFileName)
+    /declare nukeOptions        string  outer "EnchanterOptions"
+    /declare casterInitResult   int     local 1
+
+    /call InitCasterIni "${iniFileName}"
+    /varset casterInitResult ${Macro.Return}
+
+/return ${casterInitResult}
