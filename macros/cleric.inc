@@ -1,7 +1,6 @@
 | http://mqemulator.net/forum2/viewtopic.php?t=1551
 | http://mqemulator.net/forum2/viewtopic.php?t=794
 
-
 #include spell_routines.inc
 #turbo
 
