@@ -20,7 +20,7 @@ Sub Main
         /call Check_Mana_Status ${_minMana} ${_buffMana}
         /call Medidate
         /call DoHeal
-        /call CheckGroupBuffs
+        |/call CheckGroupBuffs
         /goto :ClericLoop
 /return
 
@@ -79,7 +79,6 @@ Sub InitClericIni(string iniFileName)
     } else {
         /ini "${iniFileName}" "${options}" "GroupHeal" "${groupHeal}"
         /return 0
-
     }
 
 /return ${healerInitResult}

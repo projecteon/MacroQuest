@@ -38,35 +38,13 @@ Sub InitHealIni(string iniFileName)
 
 /return ${casterInitResult}
 
-| ################################################################################
-| # Cast heal if NetBots says its needed
-| ################################################################################
-Sub CheckNetBotsHeals
-	/if (${Heal.WorstNetBots.Type.NotEqual[PC]}) /return
-	|- Casters(wis & int) then Plate, then Melee(bard here)
-	|- Add them to the array if they are in need of a heal
-	/if (${Heal.WorstNetBots.Class.Name.Equal[Shaman]} || ${Heal.WorstNetBots.Class.Name.Equal[Cleric]} || ${Heal.WorstNetBots.Class.Name.Equal[Wizard]} || ${Heal.WorstNetBots.Class.Name.Equal[Magician]} || ${Heal.WorstNetBots.Class.Name.Equal[Enchanter]} || ${Heal.WorstNetBots.Class.Name.Equal[Necromancer]} || ${Heal.WorstNetBots.Class.Name.Equal[Druid]}) {
-		/if (${NetBots[${Heal.WorstNetBots.Name}].PctHPs} <= ${CasterPct}) {
-			/call CastHeal "${CasterHeal}" "${Heal.WorstNetBots.ID}" "${Heal.WorstNetBots.Name}"
-		}
-	} else /if (${Heal.WorstNetBots.Class.Name.Equal[Warrior]} || ${Heal.WorstNetBots.Class.Name.Equal[Shadow Knight]} || ${Heal.WorstNetBots.Class.Name.Equal[Paladin]}) {
-		/if (${NetBots[${Heal.WorstNetBots.Name}].PctHPs} <= ${PlatePct}) {
-			/call CastHeal "${PlateHeal}" "${Heal.WorstNetBots.ID}" "${Heal.WorstNetBots.Name}"
-		}
-	} else /if (${Heal.WorstNetBots.Class.Name.Equal[Ranger]} || ${Heal.WorstNetBots.Class.Name.Equal[Rogue]} || ${Heal.WorstNetBots.Class.Name.Equal[Bard]} || ${Heal.WorstNetBots.Class.Name.Equal[Berserker]} || ${Heal.WorstNetBots.Class.Name.Equal[Beastlord]} || ${Heal.WorstNetBots.Class.Name.Equal[Monk]}) {		
-		/if (${NetBots[${Heal.WorstNetBots.Name}].PctHPs} <= ${MeleePct}) {
-			/call CastHeal "${MeleeHeal}" "${Heal.WorstNetBots.ID}" "${Heal.WorstNetBots.Name}"
-		}
-	}	
-/return
-
 Sub CheckGroupHeals
-    /if (${Me.PctHPs} <= ${mainHealPct}) {
-        /call CastHeal "${mainHeal}" ${Me.ID} "${Me.Name}"
-    }
-
     /if (!${Group.Members}) {
         /return
+    }
+
+    /if (${Me.PctHPs} <= ${mainHealPct}) {
+        /call CastHeal "${mainHeal}" ${Me.ID} "${Me.Name}"
     }
 
     /declare x int local
@@ -84,6 +62,14 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
         /return
     }
 
+    /if (!${Me.Gem[${healSpell}]}) {
+        /echo !!! SPELL NOT MEMORIZED ${healSpell} - SHUTDOWN !!!
+        /bca !!! SPELL NOT MEMORIZED ${healSpell} - SHUTDOWN !!!
+        /endmac
+    }
+
+    /echo CastHeal1 ${Me.SpellReady[${healSpell}]} ${Me.CurrentMana} ${Spell[${healSpell}].Mana}
+    /echo CastHeal2 ${Target.ID} ${healTargetId} ${Target.Distance} ${Spell[${healSpell}].Range}
 	|- Is spell ready?
 	/if (${Me.SpellReady[${healSpell}]}) {
 		|- Do we have mana
@@ -100,6 +86,7 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
             }
 
 			|- If right target and in range, cast the spell
+            /echo ${Target.Name}
 			/if (${Target.ID} == ${healTargetId} && (${Target.Distance} <= ${Spell[${healSpell}].Range}) && ${Target.Type.NotEqual[Corpse]}) {	
                 /if (${Me.Sitting}) {
                     /stand
@@ -118,7 +105,7 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 | # interuppt it if any condition pops true.
 | #################################################
 Sub CancelHeal
-	/if (${Target.PctHPs} >= ${mainHealPct}) /call Interrupt
+	/if (${Target.PctHPs} > ${mainHealPct}) /call Interrupt
 	/if (${Target.Distance} > ${healDist}) /call Interrupt
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
 	| /if (${Me.AltAbilityReady[Divine Arbitration]}) /call DivineArbitration
