@@ -45,16 +45,19 @@ Sub Nuke
         /target clear 
         /return
     }
-
-    /if (!${Defined[_nocast]}) /declare _nocast int   outer 1 
-    /call TryNukeTarget ${mainNuke}
-    /if (${Macro.Return} == ${nocast}) {
-        /call TryNukeTarget ${secondaryNuke}
+    
+    /if (${Select[${Target.Body},Undead]} && ${Cast.Ready[${undeadNuke}]}) {
+        /call TryNukeTarget "${undeadNuke}"
+    } else {
+        /if (!${Defined[_nocast]}) /declare _nocast int   outer 1 
+        /call TryNukeTarget ${mainNuke}
+        /if (${Macro.Return} == ${nocast}) {
+            /call TryNukeTarget ${secondaryNuke}
+        }
     }
-        
 /return
 
-Sub TryNukeTarget(nuke)
+Sub TryNukeTarget(string nuke)
     /if (${Me.Sitting}) {
         /stand
     }
@@ -82,6 +85,7 @@ Sub InitWizardIni(string iniFileName)
     /declare nukeOptions        string  outer "NukeOptions"
     /declare mainNuke           string  outer "YOUR MAIN NUKE"
     /declare secondaryNuke      string  outer "YOUR SECONDARY NUKE"
+    /declare undeadNuke         string  outer "YOUR UNDEAD NUKE"
     /declare nukePct            int     outer 97
     /declare casterInitResult   int     local 1
 
@@ -107,6 +111,10 @@ Sub InitWizardIni(string iniFileName)
     } else {
         /ini "${iniFileName}" "${nukeOptions}" "NukePct" "${nukePct}"
         /varset casterInitResult 0
+    }
+
+    /if (${Ini[${iniFileName},${nukeOptions},UndeadNuke].Length}) {
+       /varset undeadNuke ${Ini[${iniFileName},${nukeOptions},UndeadNuke]}       
     }
 
 /return ${casterInitResult}

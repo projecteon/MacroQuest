@@ -8,7 +8,9 @@ Sub NukeSetup(string fileName)
     /declare nukeOptions        string  outer "NukeOptions"
     /declare mainNuke           string  outer "YOUR MAIN NUKE"
     /declare secondaryNuke      string  outer "YOUR SECONDARY NUKE"
+    /declare undeadNuke         string  outer "YOUR UNDEAD NUKE"
     /declare nukePct            int     outer 97
+    /declare stopNukePct        int     outer 0
     /declare nocast             string  outer 1
 
     /if (${Ini[${fileName},${nukeOptions},MainNuke].Length}) {
@@ -19,8 +21,12 @@ Sub NukeSetup(string fileName)
        /varset secondaryNuke "${Ini[${fileName},${nukeOptions},SecondaryNuke]}"       
     }
 
-    /if (${Ini[${fileName},${nukeOptions},NukePct].Length}) {
-       /varset nukePct ${Ini[${fileName},${nukeOptions},NukePct]}       
+    /if (${Ini[${fileName},${nukeOptions},SecondaryNuke].Length}) {
+       /varset secondaryNuke "${Ini[${fileName},${nukeOptions},SecondaryNuke]}"       
+    }
+
+    /if (${Ini[${fileName},${nukeOptions},UndeadNuke].Length}) {
+       /varset undeadNuke ${Ini[${fileName},${nukeOptions},UndeadNuke]}       
     }
 
     /if (!${Ini[${fileName},${nukeOptions},MainNuke].Length}) {
@@ -45,8 +51,13 @@ Sub Nuke(mainAssist)
     }
 
     /if (${Target.ID}==${Me.ID}) {
-        /squelch 
-        /target clear 
+        /squelch /target clear 
+        /return
+    }
+
+    /echo ${Target.Body}
+    /if (${Select[${Target.Body},Undead]} && !${Cast.Ready[${undeadNuke}]}) {
+        /call TryNukeTarget ${undeadNuke}
         /return
     }
 
@@ -66,9 +77,19 @@ Sub TryNukeTarget(nuke)
         /return ${nocast}
     }
     
-    /cast "${nuke}"
+    /call cast "${nuke}" gem${Me.Gem[${nuke}]} 0 CancelNuke
 /return 0
 
+| #################################################
+| # Called during the cast of any spell and will
+| # interuppt it if any condition pops true.
+| #################################################
+Sub CancelNuke
+	/if (${Target.Distance} > ${Spell[${nuke}].Range}) /call Interrupt
+	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
+	| /if (${Me.AltAbilityReady[Divine Arbitration]}) /call DivineArbitration
+	| /doevents StartCast
+/return
 
 Sub MakeNukeIni(string fileName)
     |- Build the INI file
