@@ -68,8 +68,6 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
         /endmac
     }
 
-    /echo CastHeal1 ${Me.SpellReady[${healSpell}]} ${Me.CurrentMana} ${Spell[${healSpell}].Mana}
-    /echo CastHeal2 ${Target.ID} ${healTargetId} ${Target.Distance} ${Spell[${healSpell}].Range}
 	|- Is spell ready?
 	/if (${Me.SpellReady[${healSpell}]}) {
 		|- Do we have mana
