@@ -3,6 +3,7 @@
 #include commonCaster.inc
 #include commonHealer.inc
 #include commonBuffer.inc
+#include nuke.inc
 #turbo
 
 Sub Main
@@ -21,6 +22,7 @@ Sub Main
         /call Medidate
         /call DoHeal
         |/call CheckGroupBuffs
+        /call Nuke
         /goto :ClericLoop
 /return
 
@@ -70,6 +72,11 @@ Sub InitClericIni(string iniFileName)
     /varset healerInitResult ${Macro.Return}
     
     /call InitBufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset healerInitResult 0
+    }
+    
+    /call InitNukeIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset healerInitResult 0
     }

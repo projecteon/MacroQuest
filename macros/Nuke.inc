@@ -2,39 +2,47 @@
 | http://mqemulator.net/forum2/viewtopic.php?t=794
 
 #include spell_routines.inc
+#include commonCaster.inc
 #turbo
 
-Sub NukeSetup(string fileName)
-    /declare nukeOptions        string  outer "NukeOptions"
+Sub InitNukeIni(string fileName)
+     /declare nukeOptions        string  outer "NukeOptions"
     /declare mainNuke           string  outer "YOUR MAIN NUKE"
     /declare secondaryNuke      string  outer "YOUR SECONDARY NUKE"
     /declare undeadNuke         string  outer "YOUR UNDEAD NUKE"
     /declare nukePct            int     outer 97
-    /declare stopNukePct        int     outer 0
-    /declare nocast             string  outer 1
+    /declare casterInitResult   int     local 1
+
+    /call InitCasterIni "${fileName}"
+    /varset casterInitResult ${Macro.Return}
 
     /if (${Ini[${fileName},${nukeOptions},MainNuke].Length}) {
-       /varset mainNuke "${Ini[${fileName},${nukeOptions},MainNuke]}"
+        /varset mainNuke "${Ini[${fileName},${nukeOptions},MainNuke]}"
+    } else {
+        /ini "${fileName}" "${nukeOptions}" "MainNuke" "${mainNuke}"
+        /varset casterInitResult 0
     }
 
     /if (${Ini[${fileName},${nukeOptions},SecondaryNuke].Length}) {
-       /varset secondaryNuke "${Ini[${fileName},${nukeOptions},SecondaryNuke]}"       
+        /varset secondaryNuke "${Ini[${fileName},${nukeOptions},SecondaryNuke]}"       
+    } else {
+        /ini "${fileName}" "${nukeOptions}" "SecondaryNuke" "${secondaryNuke}"
+        /varset casterInitResult 0
     }
 
-    /if (${Ini[${fileName},${nukeOptions},SecondaryNuke].Length}) {
-       /varset secondaryNuke "${Ini[${fileName},${nukeOptions},SecondaryNuke]}"       
+    /if (${Ini[${fileName},${nukeOptions},NukePct].Length}) {
+        /varset nukePct ${Ini[${fileName},${nukeOptions},NukePct]}       
+    } else {
+        /ini "${fileName}" "${nukeOptions}" "NukePct" "${nukePct}"
+        /varset casterInitResult 0
     }
 
     /if (${Ini[${fileName},${nukeOptions},UndeadNuke].Length}) {
        /varset undeadNuke ${Ini[${fileName},${nukeOptions},UndeadNuke]}       
     }
+/return ${casterInitResult}
 
-    /if (!${Ini[${fileName},${nukeOptions},MainNuke].Length}) {
-        /call MakeNukeIni ${fileName}      
-    }
-/return
-
-Sub Nuke(mainAssist)
+Sub Nuke
     /if (${Me.Casting.ID} || ${Me.Moving}) {
         /return
     }
@@ -46,29 +54,28 @@ Sub Nuke(mainAssist)
 
     /target id ${targetId}
 
-    /if (!${Target.ID} || !${Target.Type.Equal[NPC]} || ${Target.PctHPs} > ${nukePct}) {
+    /if (!${Target.ID} || !${Target.Type.Equal[NPC]} || ${Target.PctHPs} > ${nukePct} || !${Target.LineOfSight}) {
         /return
     }
 
     /if (${Target.ID}==${Me.ID}) {
-        /squelch /target clear 
+        /squelch 
+        /target clear 
         /return
     }
-
-    /echo ${Target.Body}
-    /if (${Select[${Target.Body},Undead]} && !${Cast.Ready[${undeadNuke}]}) {
-        /call TryNukeTarget ${undeadNuke}
-        /return
+    
+    /if (${Select[${Target.Body},Undead]} && ${Cast.Ready[${undeadNuke}]}) {
+        /call TryNukeTarget "${undeadNuke}"
+    } else {
+        /if (!${Defined[_nocast]}) /declare _nocast int   outer 1 
+        /call TryNukeTarget ${mainNuke}
+        /if (${Macro.Return} == ${nocast}) {
+            /call TryNukeTarget ${secondaryNuke}
+        }
     }
-
-    /call TryNukeTarget ${mainNuke}
-    /if (${Macro.Return} == ${nocast}) {
-        /call TryNukeTarget ${secondaryNuke}
-    }
-        
 /return
 
-Sub TryNukeTarget(nuke)
+Sub TryNukeTarget(string nuke)
     /if (${Me.Sitting}) {
         /stand
     }
@@ -85,9 +92,7 @@ Sub TryNukeTarget(nuke)
 | # interuppt it if any condition pops true.
 | #################################################
 Sub CancelNuke
-	/if (${Target.Distance} > ${Spell[${nuke}].Range}) /call Interrupt
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
-	| /if (${Me.AltAbilityReady[Divine Arbitration]}) /call DivineArbitration
 	| /doevents StartCast
 /return
 
@@ -97,6 +102,7 @@ Sub MakeNukeIni(string fileName)
 
     /ini "${fileName}" "${nukeOptions}" "MainNuke" "${mainNuke}"
     /ini "${fileName}" "${nukeOptions}" "SecondaryNuke" "${secondaryNuke}"
+    /ini "${fileName}" "${nukeOptions}" "UndeadNuke" "${undeadNuke}"
     /ini "${fileName}" "${nukeOptions}" "NukePct" "${nukePct}"
 /return
 	
