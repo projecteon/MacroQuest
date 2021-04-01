@@ -18,7 +18,7 @@ Sub Main
     /echo "Cleric all set!"
     /bca "Cleric all set!"
     :ClericLoop
-        /call Check_Mana_Status ${_minMana} ${_buffMana}
+        /call Check_Mana_Status
         /call Medidate
         /call DoHeal
         |/call CheckGroupBuffs

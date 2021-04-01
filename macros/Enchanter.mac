@@ -20,9 +20,10 @@ Sub Main
     /echo "Enchanter all mezzed up!"
     /bca "Enchanter all mezzed up!"
     :NukeLoop
-        /call Check_Mana_Status ${_minMana} ${_buffMana}
+        /call Check_Mana_Status
         /call Medidate
         /call Nuke
+        /call CheckGroupBuffs
         /goto :NukeLoop
 /return
 
@@ -30,7 +31,7 @@ Sub Main
 | # Create Wizard Ini Section
 | ################################################################################	
 Sub InitEnchanterIni(string iniFileName)
-    /declare nukeOptions        string  outer "EnchanterOptions"
+    /declare enchanterOptions   string  outer "EnchanterOptions"
     /declare casterInitResult   int     local 1
 
     /call InitCasterIni "${iniFileName}"

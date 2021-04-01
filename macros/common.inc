@@ -23,7 +23,7 @@ Sub InitGenralIni(string iniFileName)
 Sub Is_NPC_In_Camp(int radiusCheck)
 	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local 80
 	
-	/if (${SpawnCount[NPC radius ${radiusCheck}]} < 1) {
+	/if (${SpawnCount[NPC radius los ${radiusCheck}]} < 1) {
 		/return 0
 	} 
 
