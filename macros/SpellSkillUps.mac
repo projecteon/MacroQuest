@@ -1,0 +1,408 @@
+| https://www.redguides.com/community/threads/spell-skill-up-macro.9117/
+
+Sub Main 
+  
+  /declare Maxskill int outer 
+  /declare AlterationSpell outer 
+  /declare AbjurationSpell outer 
+  /declare EvocationSpell outer 
+  /declare DivinationSpell outer 
+  /declare ConjurationSpell outer 
+  /declare SingSong outer 
+  /declare DrumSong outer 
+  /declare StringSong outer 
+  /declare WindSong outer 
+  /declare BrassSong outer 
+
+  /varset Maxskill 234
+  
+  /if (${Me.Class.Name.Equal[Shadow Knight]}) /goto :Skspells 
+  /if (${Me.Class.Name.Equal[Bard]}) /goto :Brdspells 
+  /if (${Me.Class.Name.Equal[Beastlord]}) /goto :Bstspells 
+  /if (${Me.Class.Name.Equal[Cleric]}) /goto :Clrspells 
+  /if (${Me.Class.Name.Equal[Druid]}) /goto :Druspells 
+  /if (${Me.Class.Name.Equal[Enchanter]}) /goto :Encspells 
+  /if (${Me.Class.Name.Equal[Magician]}) /goto :Magspells 
+  /if (${Me.Class.Name.Equal[Necromancer]}) /goto :Necspells 
+  /if (${Me.Class.Name.Equal[Paladin]}) /goto :Palspells 
+  /if (${Me.Class.Name.Equal[Ranger]}) /goto :Rngspells 
+  /if (${Me.Class.Name.Equal[Shaman]}) /goto :Shmspells 
+  /if (${Me.Class.Name.Equal[Wizard]}) /goto :Wizspells 
+
+:Brdspells 
+  /varset SingSong Jonthan's Whistling Warsong 
+  /varset DrumSong Anthem de Arms 
+  /varset StringSong Hymn of Restoration 
+  /varset WindSong Tarew`s Aquatic Ayre 
+  /varset BrassSong Denon`s Disruptive Discord 
+ /if (${Me.Level}<18) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 18. 
+    /endmacro 
+  } 
+/goto :Songreqs 
+
+:Bstspells 
+  /varset AlterationSpell Minor Healing 
+  /varset AbjurationSpell Inner Fire 
+  /varset EvocationSpell Blast of Frost 
+  /varset DivinationSpell Flash of Light 
+  /varset ConjurationSpell Sicken 
+ /if (${Me.Level}<15) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 15. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+
+:Clrspells 
+  /varset AlterationSpell Minor Healing 
+  /varset AbjurationSpell Courage 
+  /varset EvocationSpell Strike 
+  /varset DivinationSpell Flash of Light 
+  /varset ConjurationSpell Summon Drink 
+ /if (${Me.Level}<5) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 5. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+
+:Druspells 
+  /varset AlterationSpell Minor Healing 
+  /varset AbjurationSpell Skin like Wood 
+  /varset EvocationSpell Burst of Flame 
+  /varset DivinationSpell See Invisible
+  /varset ConjurationSpell Stinging Swarm 
+ /if (${Me.Level}<5) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 5. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+
+:Encspells 
+  /varset AlterationSpell Strengthen 
+  /varset AbjurationSpell Minor Shielding 
+  /varset EvocationSpell Chaotic Feedback 
+  /varset DivinationSpell True North 
+  /varset ConjurationSpell Mesmerize 
+ /if (${Me.Level}<8) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 8. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+
+:Magspells 
+  /varset AlterationSpell Renew Elements 
+  /varset AbjurationSpell Minor Shielding 
+  /varset EvocationSpell Burst of Flame 
+  /varset DivinationSpell True North 
+  /varset ConjurationSpell Summon Drink 
+ /if (${Me.Level}<8) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 8. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+
+:Necspells 
+  /varset AlterationSpell Lifetap 
+  /varset AbjurationSpell Minor Shielding 
+  /varset EvocationSpell Ward Undead 
+  /varset DivinationSpell True North 
+  /varset ConjurationSpell Disease Cloud 
+ /if (${Me.Level}<4) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 4. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+
+:Palspells 
+  /varset AlterationSpell Minor Healing 
+  /varset AbjurationSpell Courage 
+  /varset EvocationSpell Cease 
+  /varset DivinationSpell Flash of Light 
+  /varset ConjurationSpell Hammer of Wrath 
+ /if (${Me.Level}<15) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 15. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+
+:Rngspells 
+  /varset AlterationSpell Minor Healing 
+  /varset AbjurationSpell Skin like Wood 
+  /varset EvocationSpell Flame lick 
+  /varset DivinationSpell Camouflage 
+  /varset ConjurationSpell Dance of the fireflies 
+ /if (${Me.Level}<15) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 15. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+
+:Skspells 
+  /varset AlterationSpell Lifetap 
+  /varset AbjurationSpell Numb the dead 
+  /varset EvocationSpell Ward Undead 
+  /varset DivinationSpell Sense the Dead 
+  /varset ConjurationSpell Disease Cloud 
+ /if (${Me.Level}<22) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 22. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+
+:Shmspells 
+  /varset AlterationSpell Minor Healing 
+  /varset AbjurationSpell Inner Fire 
+  /varset EvocationSpell Burst of Flame 
+  /varset DivinationSpell Flash of Light 
+  /varset ConjurationSpell Tainted Breath 
+ /if (${Me.Level}<9) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 9. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+
+:Wizspells 12 
+  /varset AlterationSpell Fade 
+  /varset AbjurationSpell Minor Shielding 
+  /varset EvocationSpell Shock of Frost 
+  /varset DivinationSpell True North 
+  /varset ConjurationSpell Halo of Light 
+  /if (${Me.Level}<12) { 
+    /echo This macro won't function correctly until your ${Me.Class} is level 12. 
+    /endmacro 
+  } 
+/goto :Prereqs 
+:Songreqs 
+ /if (${Bool[${Me.Book[${SingSong}]}]}==FALSE) { 
+    /echo You don't have ${SingSong}.  
+    /echo Please check the songs listed in the macro for what you need. 
+    /endmacro 
+  } 
+
+  /if (${Bool[${Me.Book[${DrumSong}]}]}==FALSE) { 
+    /echo You don't have ${DrumSong}.  
+    /echo Please check the songs listed in the macro for what you need. 
+    /endmacro 
+  } 
+
+  /if (${Bool[${Me.Book[${StringSong}]}]}==FALSE) { 
+    /echo You don't have ${StringSong}.  
+    /echo Please check the songs listed in the macro for what you need. 
+    /endmacro 
+  } 
+
+  /if (${Bool[${Me.Book[${WindSong}]}]}==FALSE) { 
+    /echo You don't have ${WindSong}.  
+    /echo Please check the songs listed in the macro for what you need. 
+    /endmacro 
+  } 
+
+  /if (${Bool[${Me.Book[${BrassSong}]}]}==FALSE) { 
+    /echo You don't have ${BrassSong}.  
+    /echo Please check the songs listed in the macro for what you need. 
+    /endmacro 
+  } 
+/goto :Bardsongprep 
+:Prereqs 
+
+
+  
+
+  /if (${Bool[${Me.Book[${AlterationSpell}]}]}==FALSE) { 
+    /echo You don't have ${AlterationSpell}.  
+    /echo Please check the spells listed in the macro for what you need. 
+    /endmacro 
+  } 
+
+  /if (${Bool[${Me.Book[${AbjurationSpell}]}]}==FALSE) { 
+    /echo You don't have ${AbjurationSpell}.  
+    /echo Please check the spells listed in the macro for what you need. 
+    /endmacro 
+  } 
+
+  /if (${Bool[${Me.Book[${EvocationSpell}]}]}==FALSE) { 
+    /echo You don't have ${EvocationSpell}.  
+    /echo Please check the spells listed in the macro for what you need. 
+    /endmacro 
+  } 
+
+  /if (${Bool[${Me.Book[${DivinationSpell}]}]}==FALSE) { 
+    /echo You don't have ${DivinationSpell}.  
+    /echo Please check the spells listed in the macro for what you need. 
+    /endmacro 
+  } 
+
+  /if (${Bool[${Me.Book[${ConjurationSpell}]}]}==FALSE) { 
+    /echo You don't have ${ConjurationSpell}.  
+    /echo Please check the spells listed in the macro for what you need. 
+    /endmacro 
+  } 
+      
+  /if (${Me.Class.Name.Equal[Magician]}) /goto :Getpet 
+  /if (${Me.Class.Name.Equal[Shadowknight]}) /goto :Getpet 
+  /if (${Me.Class.Name.Equal[Necromancer]}) /goto :Getpet 
+  
+/goto :Castingprep 
+
+:Getpet 
+  /notify CastSpellWnd CSPW_Spell5 rightmouseup  
+  /if (${Me.Class.Name.Equal[Magician]}) { 
+    /call Cast "Elementalkin: Water" gem6 
+  } Else { 
+    /call Cast "Leering Corpse" gem6 
+  } 
+  /goto :Castingprep 
+:Bardsongprep 
+  /mem 1 "${SingSong}" 
+  /delay 5s 
+  /mem 2 "${DrumSong}" 
+  /delay 5s 
+  /mem 3 "${StringSong}" 
+  /delay 5s 
+  /mem 4 "${WindSong}" 
+  /delay 5s 
+  /mem 5 "${BrassSong}" 
+  /delay 5s 
+  /goto :Singing 
+
+:Singing 
+  /if (${Me.Sitting}) /sit off 
+  /targ ${Me} 
+  /if (${Me.Skill[Sing]}>=${MaxSkill}) /goto :Percussion 
+  /if (${Me.SpellReady[${SingSong}]})   /Cast "${SingSong}" 
+  /goto :Singing 
+
+:Percussion 
+  /if (${Me.Sitting}) /sit off 
+  /targ ${Me} 
+  /if (${Me.Skill[Percussion Instruments]}>=${MaxSkill}) /goto :Stringed 
+  /if (${Me.SpellReady[${DrumSong}]})   /Cast "${DrumSong}" 
+  /goto :Percussion 
+
+:Stringed 
+  /if (${Me.Sitting}) /sit off 
+  /targ ${Me} 
+  /if (${Me.Skill[Stringed Instruments]}>=${MaxSkill}) /goto :Wind 
+  /if (${Me.SpellReady[${StringSong}]})   /Cast "${StringSong}" 
+  /goto :Stringed 
+
+:Wind 
+  /if (${Me.Sitting}) /sit off 
+  /targ ${Me} 
+  /if (${Me.Skill[Wind Instruments]}>=${MaxSkill}) /goto :Wind 
+  /if (${Me.SpellReady[${WindSong}]})   /Cast "${WindSong}" 
+  /goto :Wind 
+
+:Brass 
+  /if (${Me.Sitting}) /sit off 
+  /targ ${Me} 
+  /if (${Me.Skill[Brass Instruments]}>=${MaxSkill}) { 
+    /echo Skills are all at max! 
+    /endmacro 
+  } 
+  /if (${Me.SpellReady[${BrassSong}]})   /Cast "${BrassSong}" 
+  /goto :Brass 
+
+:Castingprep 
+  
+  /memspell 1 "${AlterationSpell}" 
+  /delay 5s 
+  /memspell 2 "${AbjurationSpell}" 
+  /delay 5s 
+  /memspell 3 "${EvocationSpell}" 
+  /delay 5s 
+  /memspell 4 "${DivinationSpell}" 
+  /delay 5s 
+  /memspell 5 "${ConjurationSpell}" 
+  /delay 5s 
+  /goto :Alteration 
+
+
+:Manacheck 
+  /if (${Me.CurrentMana}>=100) { 
+    /goto :Alteration 
+  } Else { 
+    /goto :Medup 
+  }  
+
+:Medup 
+  /if (${Me.Sitting}) { 
+  } Else { 
+    /sit 
+  } 
+  /if (${Me.CurrentMana}==${Me.MaxMana}) /goto :Manacheck 
+  /goto :Medup 
+
+
+
+:Alteration 
+  /if (${Me.Sitting}) /sit off 
+  /targ ${Me} 
+  /if (${Me.Class.Name.Equal[Magician]}) /target ${Me.Pet} 
+  /if (${Me.Class.Name.Equal[Shadow Knight]}) /target ${Me.Pet} 
+  /if (${Me.Class.Name.Equal[Necromancer]}) /target ${Me.Pet}  
+  /if (${Me.Skill[Alteration]}>=${MaxSkill}) /goto :Abjuration 
+  /if (${Me.SpellReady[${AlterationSpell}]})   /Cast "${AlterationSpell}" 
+  /goto :Manacheck 
+
+:Abjuration 
+  /if (${Me.Sitting}) /sit off 
+  /targ ${Me} 
+  /if (${Me.Class.Name.Equal[Magician]}) /target ${Me.Pet} 
+  /if (${Me.Class.Name.Equal[Shadow Knight]}) /target ${Me.Pet} 
+  /if (${Me.Class.Name.Equal[Necromancer]}) /target ${Me.Pet} 
+  /if (${Me.Skill[Abjuration]}>=${Maxskill}) /goto :Evocation 
+  /if (${Me.SpellReady[${AbjurationSpell}]})   /Cast "${AbjurationSpell}" 
+  /goto :Manacheck 
+
+:Evocation 
+  /if (${Me.Sitting}) /sit off 
+  /targ ${Me} 
+  /if (${Me.Class.Name.Equal[Magician]}) /target ${Me.Pet} 
+  /if (${Me.Class.Name.Equal[Shadow Knight]}) /target ${Me.Pet} 
+  /if (${Me.Class.Name.Equal[Necromancer]}) /target ${Me.Pet} 
+  /if (${Me.Skill[Evocation]}>=${Maxskill}) /goto :Divination 
+  /if (${Me.SpellReady[${EvocationSpell}]})   /Cast "${EvocationSpell}" 
+  /goto :Manacheck 
+    
+:Divination 
+  /if (${Me.Sitting}) /sit off 
+  /targ ${Me} 
+  /if (${Me.Class.Name.Equal[Magician]}) /target ${Me.Pet} 
+  /if (${Me.Class.Name.Equal[Shadow Knight]}) /target ${Me.Pet} 
+  /if (${Me.Class.Name.Equal[Necromancer]}) /target ${Me.Pet} 
+  /if (${Me.Skill[Divination]}>=${Maxskill}) /goto :Conjuration 
+  /if (${Me.SpellReady[${DivinationSpell}]})   /Cast "${DivinationSpell}" 
+  /goto :Manacheck 
+
+:Conjuration 
+  /if (${Me.Sitting}) /sit off 
+  /targ ${Me} 
+  /if (${Me.Class.Name.Equal[Magician]}) /target ${Me.Pet} 
+  /if (${Me.Class.Name.Equal[Shadow Knight]}) /target ${Me.Pet} 
+  /if (${Me.Class.Name.Equal[Necromancer]}) /target ${Me.Pet} 
+  /if (${Me.Skill[Conjuration]}>=${Maxskill}) { 
+    /echo All spellcasting skills are at max! 
+    /endmacro 
+  } 
+  /if (${Me.Class.Name.Equal[Ranger]}) { 
+    /if (${Time.Night}) { 
+    } Else { 
+      /echo It's daytime and you can't summon globes now. 
+      /echo Try again when it's nighttime, 
+      /echo or get level 30 and use stinging swarm as your conjuration spell. 
+      /endmacro 
+    } 
+  } 
+  /if (${Me.SpellReady[${ConjurationSpell}]}) { 
+    /Cast "${ConjurationSpell}" 
+    /delay 1s 
+  } 
+  /if (${Cursor.Name.Find[Halo of Light]}) /destroy 
+  /if (${Cursor.Name.Find[Globe of Water]}) /destroy 
+  /if (${Cursor.Name.Find[Firefly Globe]}) /destroy 
+  /if (${Cursor.Name.Find[Hammer of Wrath]}) /destroy 
+  
+  /goto :Manacheck 
+  
+/Endmacro

@@ -1,9 +1,9 @@
-#include spell_routines.inc
-#include common.inc
-#include commonCaster.inc
-#include commonHealer.inc
-#include commonBuffer.inc
-#include nuke.inc
+#include includes\spell_routines.inc
+#include includes\common.inc
+#include includes\commonCaster.inc
+#include includes\commonHealer.inc
+#include includes\commonBuffer.inc
+#include includes\nuke.inc
 #turbo
 
 Sub Main

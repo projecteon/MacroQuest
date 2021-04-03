@@ -1,10 +1,10 @@
 | http://mqemulator.net/forum2/viewtopic.php?t=1551
 | http://mqemulator.net/forum2/viewtopic.php?t=794
 
-#include spell_routines.inc
-#include common.inc
-#include commonCaster.inc
-#include nuke.inc
+#include includes\spell_routines.inc
+#include includes\common.inc
+#include includes\commonCaster.inc
+#include includes\nuke.inc
 #turbo
 
 Sub Main

@@ -1,5 +1,6 @@
 | ################################################################################
 | # Create Buffer Ini Section
+| https://www.mmobugs.com/forums/index.php?threads/searching-an-ini-file-without-knowing-section-names.9329/
 | ################################################################################	
 Sub InitBufferIni(string iniFileName)
     /declare options            string  local "BuffOptions"
