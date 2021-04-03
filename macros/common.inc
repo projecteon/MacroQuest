@@ -23,8 +23,23 @@ Sub InitGenralIni(string iniFileName)
 Sub Is_NPC_In_Camp(int radiusCheck)
 	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local 80
 	
-	/if (${SpawnCount[NPC radius los ${radiusCheck}]} < 1) {
+	/if (${SpawnCount[NPC los radius ${radiusCheck}]} < 1) {
 		/return 0
 	} 
 
 /return 1
+
+|------------------------------------------------------------|
+|- Reliably targets specified Target.IDs.					-|
+|------------------------------------------------------------|
+|- @param TargetID: The ID of the spawn you wish to target.	-|
+|------------------------------------------------------------|
+SUB TrueTarget(TargetID)
+	| Check if the target is in zone.
+	/if (${SpawnCount[id ${TargetID}]}) {
+			/squelch /target id ${TargetID}
+			/delay 3s ${Target.ID} == ${TargetID}
+	} else {
+		/echo TrueTarget has no spawncount
+	}
+/RETURN

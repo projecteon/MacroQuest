@@ -43,14 +43,18 @@ Sub CheckGroupHeals
         /return
     }
 
+    /if (${Me.Casting.ID}) {
+        /return
+    }
+
     /if (${Me.PctHPs} <= ${mainHealPct}) {
-        /call CastHeal "${mainHeal}" ${Me.ID} "${Me.Name}"
+        /call CastHeal ${mainHeal} ${Me.ID} "${Me.Name}"
     }
 
     /declare x int local
     /for x 1 to ${Group.Members} {
         /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${mainHealPct} && ${Group.Member[${x}].Distance} <= ${healDist}) {
-            /call CastHeal "${mainHeal}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
+            /call CastHeal ${mainHeal} ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
         }
         /next x
     }
@@ -58,9 +62,6 @@ Sub CheckGroupHeals
 
 Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
     /if (!${Defined[DontStop]}) /declare DontStop bool local FALSE
-    /if (${Me.Casting.ID}) {
-        /return
-    }
 
     /if (!${Me.Gem[${healSpell}]}) {
         /echo !!! SPELL NOT MEMORIZED ${healSpell} - SHUTDOWN !!!
@@ -84,7 +85,6 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
             }
 
 			|- If right target and in range, cast the spell
-            /echo ${Target.Name}
 			/if (${Target.ID} == ${healTargetId} && (${Target.Distance} <= ${Spell[${healSpell}].Range}) && ${Target.Type.NotEqual[Corpse]}) {	
                 /if (${Me.Sitting}) {
                     /stand

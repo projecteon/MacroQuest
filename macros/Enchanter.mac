@@ -9,7 +9,9 @@
 #turbo
 
 Sub Main
-    /declare enchanterIniFileName string local "Enchanter_${MacroQuest.Server}_${Me.CleanName}.ini"
+    /declare enchanterIniFileName   string  local "Enchanter_${MacroQuest.Server}_${Me.CleanName}.ini"
+    /declare autoMez                        outer TRUE
+    /declare mezzRadius              int    outer 40
 
     /call InitEnchanterIni ${enchanterIniFileName}
     /if (${Macro.Return} == 0) {
@@ -22,9 +24,49 @@ Sub Main
     :NukeLoop
         /call Check_Mana_Status
         /call Medidate
+        /call DoMezz
         /call Nuke
         /call CheckGroupBuffs
         /goto :NukeLoop
+/return
+
+sub DoMezz
+    /if (${autoMez}) {
+        /declare mezzSpell string local "Enthrall"
+        /declare i int local
+        /declare s int local
+        /declare mezTarg int local
+        /declare maTargetId int local ${NetBots[${mainAssist}].TargetID}
+
+        /if (!${SpawnCount[playerstate 4 npc targetable radius ${mezzRadius}]}) /return
+        /echo "DoMezz targets" ${SpawnCount[playerstate 4 npc targetable radius ${mezzRadius}]}
+        
+        /for i 1 to ${SpawnCount[playerstate 4 npc targetable radius ${mezzRadius}]}
+            /varset mezTarg ${NearestSpawn[${i},playerstate 4 npc targetable radius ${mezzRadius}].ID}
+            /if (${mezTarg}!=${maTargetId}) {
+                /call TrueTarget ${mezTarg}
+                /delay 1s ${Target.BuffsPopulated}
+                /if (${Select[${AssistTarget},${mezTarg}]}==0 && (!${Bool[${Target.Mezzed}]} || ${Target.Mezzed.Duration.TotalSeconds} < 8)) {
+                    | /for s 1 to ${mezArray2D.Size[1]}
+                    | /call check_Ready "mezArray2D" ${s}
+                    | /if (${c_Ready}) {
+                    |     /if (${check_Mana["mezArray2D",${s}]}) {
+                    |     /if (${check_Distance[${mezTarg},${mezArray2D[${s},${iMyRange}]}]}) {
+                    |         /docommand ${ChatToggle} << Mezzing ${mezTarg} with ${mezArray2D[${s},${iCastName}]} >>
+                    |         /call e3_Cast ${mezTarg} "mezArray2D" "${s}"
+                    |     }
+                    |     }
+                    | }
+                    | /if (!${ActionTaken}) /next s
+                    /if (!${Cast.Ready[${mezzSpell}]} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana} || ${Target.Distance} > ${Spell[${mezzSpell}].Range}) {
+                        /call cast "${mezzSpell}" gem${Me.Gem[${mezzSpell}]}
+                        /return
+                    }
+                }
+            }
+            /next i
+    }
+    /if (${Debug}) /echo <== check_Mez -|
 /return
 
 | ################################################################################

@@ -42,7 +42,6 @@ Sub CheckGroupBuff(string buffSpell, int minMana, string classRestrictions)
     }
 
     /declare buffId int local ${Spell[${buffSpell}].ID}
-
     /if ((!${Me.Buff[${buffSpell}].ID} || ${Me.Buff[${buffSpell}].Duration} < 10) && (${classRestrictions.Equal[NULL]} || ${Select[${Me.Class.ShortName},${classRestrictions}]})) {
         /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
     }
@@ -51,10 +50,18 @@ Sub CheckGroupBuff(string buffSpell, int minMana, string classRestrictions)
         /declare x int local
         /for x 1 to ${Group.Members} {
             /if (${Spawn[${Group.Member[${x}]}].ID} && ${NetBots[${Group.Member[${x}].Name}]} && (${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
-                /if (!${NetBots[${Group.Member[${x}].Name}].Buff.Find[${buffId}]}) {
+                /declare hasBuff int local ${NetBots[${Group.Member[${x}].Name}].Buff.Find[${buffId} ]}
+                /if (!${hasBuff}) {
                     /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
-                } else /if (${NetBots[${Group.Member[${x}].Name}].Buff[${buffSpell}].Duration} < 10) {
-                    /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
+                } else {
+                    /declare k int local
+                    /for k 0 to 15
+                        /if (${Bool[${NetBots[${Group.Member[${x}].Name}].Buff[${k}]}]}) {
+                            /if (${NetBots[${Group.Member[${x}].Name}].Buff[${k}].ID} == ${buffId} && ${NetBots[${Group.Member[${x}].Name}].Duration[${k}]} < 5) {
+                                /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
+                            }
+                        }
+                    /next k
                 }
             }
             /next x
