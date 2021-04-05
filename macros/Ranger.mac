@@ -1,0 +1,30 @@
+| http://mqemulator.net/forum2/viewtopic.php?t=1551
+| http://mqemulator.net/forum2/viewtopic.php?t=794
+
+#turbo
+
+Sub Main
+    /declare rangerIniFileName        string  outer "ini/${MacroQuest.Server}/Ranger_${Me.CleanName}.ini"
+
+    /call InitRangerIni ${rangerIniFileName}
+    /if (${Macro.Return} == 0) {
+        /echo "Bootstrapped INI file, please update variables in: ${rangerIniFileName}"
+        /endmacro
+    }
+
+    /echo "Ranger ready to roll!"
+    /bca "Ranger ready to roll!"
+/return
+
+Sub InitRangerIni(string fileName, string mainAssist)
+    /declare enchanterOptions   string  outer "RangerOptions"
+    /declare parentResult       int     local 1
+
+    /call InitGenralIni "${iniFileName}"
+    /varset parentResult ${Macro.Return}
+    
+    /call InitBufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentResult 0
+    }
+/return ${parentResult}
