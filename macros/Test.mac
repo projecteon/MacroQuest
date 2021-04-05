@@ -2,13 +2,49 @@
 #turbo
 
 Sub Main(string Search)
-    /declare testIniFileName  string outer "Test.ini"
-    /declare mezzRadius              int    outer 40
+    /declare testIniFileName        string  local "ini/${MacroQuest.Server}/Test_${Me.CleanName}.ini"
+    /if (!${Defined[iniBuffDimensions]})                /declare iniBuffDimensions              int     outer 3 
+    /if (!${Defined[iniSelfBuffDimensions]})            /declare iniSelfBuffDimensions          int     outer 2
+   
+    /call iniBuffs ${testIniFileName} "Buffs" "Buff" ${iniBuffDimensions} Buffs
+    /call iniBuffs ${testIniFileName} "SelfBuffs" "SelfBuff" ${iniSelfBuffDimensions} SelfBuffs
+
+    /echo ${Buffs[1,1]} ${Buffs[1,2]} ${Buffs[1,3]}
+    /echo ${SelfBuffs[1,1]} ${SelfBuffs[1,2]}
+/return 
+
+Sub checkMezz
+    /declare mezzRadius       int    local 40
     /echo "DoMezz npc" ${SpawnCount[npc radius ${mezzRadius}]}
     /echo "DoMezz targetable" ${SpawnCount[targetable radius ${mezzRadius}]}
     /echo "DoMezz playerstate 4" ${SpawnCount[playerstate 4 radius ${mezzRadius}]}
     /echo "DoMEzz npc los" ${SpawnCount[npc los radius ${mezzRadius}]}
     /echo "Target level" ${Target.Level}
-   
-/return 
+/return
 
+
+Sub iniBuffs(string INIFile, string section, string keyName, int arrayDimensions, arrayName)
+    /declare Keys       string  local
+    /declare k          int     local
+    /declare s          int     local
+
+    /varset Keys ${Ini[${INIFile},${section}]}
+    :TrimKeys
+        /if (${Keys.Right[1].Equal[|]}) /varset Keys ${Keys.Left[${Math.Calc[${Keys.Length}-1]}]}
+        
+        /if (${Keys.Right[1].Equal[|]}) /goto :TrimKeys
+
+        /declare numberOfBuffs int local ${Math.Calc[${Keys.Count[|]}+1]}
+        /if (${numberOfBuffs} < 1) /return
+
+        /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
+        /declare ${arrayName}[${numberOfBuffs},${arrayDimensions}] string outer
+
+        /declare key string local
+        /for k 1 to ${Math.Calc[${Keys.Count[|]}+1]}
+            /varset key ${Keys.Arg[${k},|]}
+            /for s 1 to ${arrayDimensions}
+                /varset ${arrayName}[${k},${s}] ${Ini[${INIFile},${section},${key}].Token[${s},/]}
+            /next s
+        /next k
+/return

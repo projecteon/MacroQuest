@@ -4,13 +4,14 @@
 #include includes\spell_routines.inc
 #include includes\common.inc
 #include includes\commonCaster.inc
+#include includes\commonBuffer.inc
 #include includes\nuke.inc
 #turbo
 
 Sub Main
     /declare wizardIniFileName string local "ini/${MacroQuest.Server}/Wizard_${Me.CleanName}.ini"
 
-    /call InitNukeIni ${wizardIniFileName}
+    /call InitWizardIni ${wizardIniFileName}
     /if (${Macro.Return} == 0) {
         /echo "Bootstrapped INI file, please update variables in: ${wizardIniFileName}"
         /endmacro
@@ -21,7 +22,24 @@ Sub Main
     :NukeLoop
         /call Check_Mana_Status
         /call Medidate
-        |/call CheckGroupBuffs
+        /call doBuffs
         /call Nuke
         /goto :NukeLoop
 /return
+
+| ################################################################################
+| # Create Wizard Ini Section
+| ################################################################################	
+Sub InitWizardIni(string iniFileName)
+    /declare wizardOptions   string  outer "WizardOptions"
+    /declare casterInitResult   int     local 1
+
+    /call InitNukeIni "${iniFileName}"
+    /varset casterInitResult ${Macro.Return}
+
+    /call InitBufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset casterInitResult 0
+    }
+
+/return ${casterInitResult}

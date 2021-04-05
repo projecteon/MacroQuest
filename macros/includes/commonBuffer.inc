@@ -8,6 +8,7 @@ Sub InitBufferIni(string iniFileName)
     /if (!${Defined[buffNameDimension]})                /declare buffNameDimension              int     outer 1 
     /if (!${Defined[minManaDimensions]})                /declare minManaDimensions              int     outer 2 
     /if (!${Defined[buffClassRestrictionsDimension]})   /declare buffClassRestrictionsDimension int     outer 3 
+    /if (!${Defined[iniSelfBuffDimensions]})            /declare iniSelfBuffDimensions          int     outer 2
     /if (!${Defined[minBuffMana]})                      /declare minBuffMana                    int     outer 80 
 
     /if (${Ini[${iniFileName},${options},MinMana].Length}) {
@@ -17,32 +18,46 @@ Sub InitBufferIni(string iniFileName)
         /return 0
     }
 
-    /call iniBuffs "${iniFileName}" "Buffs"
+    /call iniBuffs "${iniFileName}" "Buffs" "Buff" ${iniBuffDimensions} Buffs
+    /call iniBuffs "${iniFileName}" "SelfBuffs" "SelfBuff" ${iniSelfBuffDimensions} SelfBuffs
 
 /return 1
+
+Sub doBuffs
+    /call CheckSelfBuffs
+    /call CheckGroupBuffs
+/return
+
+Sub CheckSelfBuffs
+    /if (!${Defined[SelfBuffs]}) /return
+    /declare k  int local
+    /for k 1 to ${Math.Calc[${SelfBuffs.Size}/${iniSelfBuffDimensions}]}
+        /call tryDoBuff "${SelfBuffs[${k},${buffNameDimension}]}" ${SelfBuffs[${k},${minManaDimensions}]}
+    /next k 
+/return
 
 Sub CheckGroupBuffs
     /if (!${Defined[Buffs]}) /return
     /declare k  int local
     /for k 1 to ${Math.Calc[${Buffs.Size}/${iniBuffDimensions}]}
-        /call CheckGroupBuff ${Buffs[${k},${buffNameDimension}]} ${Buffs[${k},${minManaDimensions}]} ${Buffs[${k},${buffClassRestrictionsDimension}]}
+        /call tryDoBuff "${Buffs[${k},${buffNameDimension}]}" ${Buffs[${k},${minManaDimensions}]} ${Buffs[${k},${buffClassRestrictionsDimension}]}
     /next k 
 /return
 
-Sub CheckGroupBuff(string buffSpell, int minMana, string classRestrictions)
+Sub tryDoBuff(string buffSpell, int minMana, string classRestrictions)
     /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || !${Cast.Ready[${buffSpell}]}) {
         /return
     }
 
     /declare buffId int local ${Spell[${buffSpell}].ID}
-    /if ((!${Me.Buff[${buffSpell}].ID} || ${Me.Buff[${buffSpell}].Duration} < 10) && (${classRestrictions.Equal[NULL]} || ${Select[${Me.Class.ShortName},${classRestrictions}]})) {
+    /if ((!${Me.Buff[${buffSpell}].ID} || ${Me.Buff[${buffSpell}].Duration} < 10) && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Me.Class.ShortName},${classRestrictions}]})) {
         /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
     }
 
     /if (${Group.Members}) {
         /declare x int local
         /for x 1 to ${Group.Members} {
-            /if (${Spawn[${Group.Member[${x}]}].ID} && ${NetBots[${Group.Member[${x}].Name}]} && (${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
+            /if (${Spawn[${Group.Member[${x}]}].ID} && ${NetBots[${Group.Member[${x}].Name}]} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
                 /declare hasBuff int local ${NetBots[${Group.Member[${x}].Name}].Buff.Find[${buffId} ]}
                 /if (!${hasBuff}) {
                     /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
@@ -73,7 +88,7 @@ Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
 		|- Do we have mana
 		/if (${Me.CurrentMana} < ${Spell[${buffSpell}].Mana}) {		
 			/delay 1s
-			/gsay !!! NO MANA TO BUFF ${buffTargetName} !!!
+			/if (${Group.Members}) /gsay !!! NO MANA TO BUFF ${buffTargetName} !!!
 			/bca !!! NO MANA TO BUFF ${buffTargetName} !!!
 			/return
 		} else {			
@@ -90,7 +105,7 @@ Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
                 /if (${Me.Sitting}) {
                     /stand
                 }
-				/gsay <<< ${buffSpell} -> ${buffTargetName} >>>			
+				/if (${Group.Members}) /gsay <<< ${buffSpell} -> ${buffTargetName} >>>			
 				/bca <<< ${buffSpell} -> ${buffTargetName} >>>
 				/call cast "${buffSpell}" gem${Me.Gem[${buffSpell}]} 0 CancelBuff
 				/bca MANA: ${Me.PctMana}
@@ -99,8 +114,7 @@ Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
 	}
 /return
 
-
-Sub iniBuffs(string INIFile, string section)
+Sub iniBuffs(string INIFile, string section, string keyName, int arrayDimensions, arrayName)
     /declare Keys       string  local
     /declare k          int     local
     /declare s          int     local
@@ -114,12 +128,14 @@ Sub iniBuffs(string INIFile, string section)
         /declare numberOfBuffs int local ${Math.Calc[${Keys.Count[|]}+1]}
         /if (${numberOfBuffs} < 1) /return
 
-        /declare Buffs[${numberOfBuffs},${iniBuffDimensions}] string outer
+        /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
+        /declare ${arrayName}[${numberOfBuffs},${arrayDimensions}] string outer
+
         /declare key string local
         /for k 1 to ${Math.Calc[${Keys.Count[|]}+1]}
             /varset key ${Keys.Arg[${k},|]}
-            /for s 1 to ${iniBuffDimensions}
-                /varset Buffs[${k},${s}] ${Ini[${INIFile},${section},${key}].Token[${s},/]}
+            /for s 1 to ${arrayDimensions}
+                /varset ${arrayName}[${k},${s}] ${Ini[${INIFile},${section},${key}].Token[${s},/]}
             /next s
         /next k
 /return

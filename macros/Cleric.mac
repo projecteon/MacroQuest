@@ -21,8 +21,8 @@ Sub Main
         /call Check_Mana_Status
         /call Medidate
         /call DoHeal
-        |/call CheckGroupBuffs
         /call Nuke
+        /call doBuffs
         /goto :ClericLoop
 /return
 
