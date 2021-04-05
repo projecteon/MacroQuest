@@ -8,15 +8,7 @@ Sub InitBufferIni(string iniFileName)
     /if (!${Defined[buffNameDimension]})                /declare buffNameDimension              int     outer 1 
     /if (!${Defined[minManaDimensions]})                /declare minManaDimensions              int     outer 2 
     /if (!${Defined[buffClassRestrictionsDimension]})   /declare buffClassRestrictionsDimension int     outer 3 
-    /if (!${Defined[minBuffMana]})       /declare minBuffMana       int     outer 80 
-    /if (!${Defined[buff1]})             /declare buff1             string  outer "Buff 1" 
-        
-    /if (${Ini[${iniFileName},${options},Buff1].Length}) {
-       /varset buff1 "${Ini[${iniFileName},${options},Buff1]}"       
-    } else {
-        /ini "${iniFileName}" "${options}" "Buff1" "${buff1}"
-        /return 0
-    }  
+    /if (!${Defined[minBuffMana]})                      /declare minBuffMana                    int     outer 80 
 
     /if (${Ini[${iniFileName},${options},MinMana].Length}) {
        /varset minBuffMana ${Ini[${iniFileName},${options},MinMana]}     
