@@ -4,9 +4,9 @@
 Sub InitHealIni(string iniFileName)
     /declare options            string  local "HealingOptions"
     /declare casterInitResult   int     local 1
-    /if (!${Defined[mainHeal]})     /declare mainHeal       string  outer "Main Heal" 
-    /if (!${Defined[mainHealPct]})  /declare mainHealPct    int     outer 90 
-    /if (!${Defined[healDist]})     /declare healDist       int     outer 200 
+    /if (!${Defined[mainHeal]})     /declare mainHeal                       string  outer "Main Heal" 
+    /if (!${Defined[mainHealPct]})  /declare mainHealPct                    int     outer 90 
+    /if (!${Defined[healDist]})     /declare healDist                       int     outer 200 
         
     /call InitCasterIni "${iniFileName}"
     /varset casterInitResult ${Macro.Return}
@@ -15,21 +15,21 @@ Sub InitHealIni(string iniFileName)
        /varset mainHeal "${Ini[${iniFileName},${options},MainHeal]}"       
     } else {
         /ini "${iniFileName}" "${options}" "MainHeal" "${mainHeal}"
-        /return 0
+        /varset casterInitResult 0
     }
 
     /if (${Ini[${iniFileName},${options},MainHealPct].Length}) {
        /varset mainHealPct ${Ini[${iniFileName},${options},MainHealPct]}       
     } else {
         /ini "${iniFileName}" "${options}" "MainHealPct" "${mainHealPct}"
-        /return 0
+        /varset casterInitResult 0
     }
 
     /if (${Ini[${iniFileName},${options},HealingDist].Length}) {
        /varset healDist ${Ini[${iniFileName},${options},HealingDist]}       
     } else {
-        /ini "${iniFileName}" "${options}" "HealingDist" "${healDist}"   
-        /return 0 
+        /ini "${iniFileName}" "${options}" "HealingDist" "${healDist}"  
+        /varset casterInitResult 0
     }
 
     /if (${Spell[${mainHeal}].Range} < ${healDist}) {
@@ -39,16 +39,16 @@ Sub InitHealIni(string iniFileName)
 /return ${casterInitResult}
 
 Sub CheckGroupHeals
-    /if (!${Group.Members}) {
-        /return
-    }
-
     /if (${Me.Casting.ID}) {
         /return
     }
 
     /if (${Me.PctHPs} <= ${mainHealPct}) {
         /call CastHeal ${mainHeal} ${Me.ID} "${Me.Name}"
+    }
+
+    /if (!${Group.Members}) {
+        /return
     }
 
     /declare x int local
@@ -96,6 +96,14 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 			}
 		}
 	}
+/return
+
+
+Sub iniHeal(string INIFile, string section, string key, array)
+    /declare s int local
+    /for s 1 to ${iniHealDimensions}
+        /varset ${array}[${k},${s}] ${Ini[${INIFile},${section},${key}].Token[${s},/]}
+    /next s
 /return
 
 | #################################################
