@@ -8,7 +8,7 @@
 #turbo
 
 Sub Main
-    /declare wizardIniFileName string local "Wizard_${MacroQuest.Server}_${Me.CleanName}.ini"
+    /declare wizardIniFileName string local "ini/${MacroQuest.Server}/Wizard_${Me.CleanName}.ini"
 
     /call InitNukeIni ${wizardIniFileName}
     /if (${Macro.Return} == 0) {

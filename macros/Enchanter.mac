@@ -9,7 +9,7 @@
 #turbo
 
 Sub Main
-    /declare enchanterIniFileName   string  local "Enchanter_${MacroQuest.Server}_${Me.CleanName}.ini"
+    /declare enchanterIniFileName   string  local "ini/${MacroQuest.Server}/Enchanter_${Me.CleanName}.ini"
     /declare autoMez                        outer TRUE
     /declare mezzRadius              int    outer 40
 

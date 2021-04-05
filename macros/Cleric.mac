@@ -7,7 +7,7 @@
 #turbo
 
 Sub Main
-    /declare clericIniFileName        string  local "Cleric_${MacroQuest.Server}_${Me.CleanName}.ini"
+    /declare clericIniFileName        string  local "ini/${MacroQuest.Server}/Cleric_${Me.CleanName}.ini"
 
     /call InitClericIni ${clericIniFileName}
     /if (${Macro.Return} == 0) {
