@@ -24,7 +24,7 @@ Sub Main
     :NukeLoop
         /call Check_Mana_Status
         /call Medidate
-        /call DoMezz
+        | /call DoMezz
         /call Nuke
         /call doBuffs
         /goto :NukeLoop
