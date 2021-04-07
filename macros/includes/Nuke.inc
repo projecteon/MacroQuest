@@ -51,20 +51,22 @@ Sub Nuke
     /if (!${targetId}) {
         /return
     }
+    
+    /declare isNPC          local ${Spawn[${targetId}].Type.Equal[NPC]}
+    /declare isPet          local ${Spawn[${targetId}].Type.Equal[PET]}
+    /declare hasLineOfSight local ${Spawn[${targetId}].LineOfSight}
+    /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
-    /target id ${targetId}
-
-    /if (!${Target.ID} || !${Target.Type.Equal[NPC]} || ${Target.PctHPs} > ${nukePct} || !${Target.LineOfSight}) {
+    /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${nukePct} || !${hasLineOfSight}) {
         /return
     }
 
-    /if (${Target.ID}==${Me.ID}) {
-        /squelch 
-        /target clear 
+    /target id ${targetId}
+    /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
         /return
     }
     
-    /if (${Select[${Target.Body},Undead]} && ${Cast.Ready[${undeadNuke}]}) {
+    /if (${Select[${Target.Body},Undead]} && ${Me.Gem[${undeadNuke}]}) {
         /call TryNukeTarget "${undeadNuke}"
     } else {
         /if (!${Defined[_nocast]}) /declare _nocast int   outer 1 

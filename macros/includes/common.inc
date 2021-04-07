@@ -33,18 +33,18 @@ Sub Is_NPC_In_Camp(int radiusCheck)
 |------------------------------------------------------------|
 |- Reliably targets specified Target.IDs.					-|
 |------------------------------------------------------------|
-|- @param TargetID: The ID of the spawn you wish to target.	-|
+|- @param newTargetID: The ID of the spawn you wish to target.	-|
 |------------------------------------------------------------|
-SUB TrueTarget(TargetID)
-	| Check if we already have target
-	/if (${Target.ID} != ${TargetID}) {    
-		/return	
-	}
-	| Check if the target is in zone.
-	/if (${SpawnCount[id ${TargetID}]}) {
-			/squelch /target id ${TargetID}
-			/delay 3s ${Target.ID} == ${TargetID}
-	} else {
-		/echo TrueTarget has no spawncount
-	}
-/RETURN
+| SUB TrueTarget(newTargetID)
+| 	| Check if we already have target
+| 	/if (${Target.ID} != ${newTargetID}) {    
+| 		/return	
+| 	}
+| 	| Check if the target is in zone.
+| 	/if (${SpawnCount[id ${newTargetID}]}) {
+| 			/squelch /target id ${newTargetID}
+| 			/delay 3s ${Target.ID} == ${newTargetID}
+| 	} else {
+| 		/echo TrueTarget has no spawncount
+| 	}
+| /RETURN

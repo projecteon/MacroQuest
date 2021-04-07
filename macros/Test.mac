@@ -9,8 +9,11 @@ Sub Main(string Search)
     /call iniBuffs ${testIniFileName} "Buffs" "Buff" ${iniBuffDimensions} Buffs
     /call iniBuffs ${testIniFileName} "SelfBuffs" "SelfBuff" ${iniSelfBuffDimensions} SelfBuffs
 
-    /echo ${Buffs[1,1]} ${Buffs[1,2]} ${Buffs[1,3]}
-    /echo ${SelfBuffs[1,1]} ${SelfBuffs[1,2]}
+    | /echo ${Buffs[1,1]} ${Buffs[1,2]} ${Buffs[1,3]}
+    | /echo ${SelfBuffs[1,1]} ${SelfBuffs[1,2]}
+    
+    /declare targetId int local ${NetBots["Eredhrin"].TargetID}
+    /echo ${Target} ${Spawn[${targetId}]}
 /return 
 
 Sub checkMezz

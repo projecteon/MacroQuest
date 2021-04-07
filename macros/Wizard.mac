@@ -6,7 +6,7 @@
 #include includes\commonCaster.inc
 #include includes\commonBuffer.inc
 #include includes\nuke.inc
-#turbo
+#turbo 40
 
 Sub Main
     /declare wizardIniFileName string local "ini/${MacroQuest.Server}/Wizard_${Me.CleanName}.ini"

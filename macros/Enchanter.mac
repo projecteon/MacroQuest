@@ -6,7 +6,7 @@
 #include includes\commonCaster.inc
 #include includes\commonBuffer.inc
 #include includes\nuke.inc
-#turbo
+#turbo 40
 
 Sub Main
     /declare enchanterIniFileName   string  local "ini/${MacroQuest.Server}/Enchanter_${Me.CleanName}.ini"
@@ -40,11 +40,15 @@ sub DoMezz
 
         /if (!${SpawnCount[playerstate 4 npc targetable radius ${mezzRadius}]}) /return
         /echo "DoMezz targets" ${SpawnCount[playerstate 4 npc targetable radius ${mezzRadius}]}
-        
+
         /for i 1 to ${SpawnCount[playerstate 4 npc targetable radius ${mezzRadius}]}
             /varset mezTarg ${NearestSpawn[${i},playerstate 4 npc targetable radius ${mezzRadius}].ID}
             /if (${mezTarg}!=${maTargetId}) {
-                /call TrueTarget ${mezTarg}
+                /target id ${mezTarg}
+                /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${mezTarg}) {
+                    /return
+                }
+
                 /delay 1s ${Target.BuffsPopulated}
                 /if (${Select[${AssistTarget},${mezTarg}]}==0 && (!${Bool[${Target.Mezzed}]} || ${Target.Mezzed.Duration.TotalSeconds} < 8)) {
                     | /for s 1 to ${mezArray2D.Size[1]}
@@ -71,14 +75,14 @@ sub DoMezz
 
 | ################################################################################
 | # Create Enchanter Ini Section
-| ################################################################################	
+| ################################################################################
 Sub InitEnchanterIni(string iniFileName)
     /declare enchanterOptions   string  outer "EnchanterOptions"
     /declare casterInitResult   int     local 1
 
     /call InitCasterIni "${iniFileName}"
     /varset casterInitResult ${Macro.Return}
-    
+
     /call InitNukeIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset casterInitResult 0
