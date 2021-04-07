@@ -4,9 +4,10 @@
 Sub InitHealIni(string iniFileName)
     /declare options            string  local "HealingOptions"
     /declare casterInitResult   int     local 1
-    /if (!${Defined[mainHeal]})     /declare mainHeal                       string  outer "Main Heal" 
-    /if (!${Defined[mainHealPct]})  /declare mainHealPct                    int     outer 90 
-    /if (!${Defined[healDist]})     /declare healDist                       int     outer 200 
+    /if (!${Defined[mainHeal]})             /declare mainHeal                       string  outer "Main Heal" 
+    /if (!${Defined[mainHealPct]})          /declare mainHealPct                    int     outer 90 
+    /if (!${Defined[healDist]})             /declare healDist                       int     outer 200 
+    /if (!${Defined[hasNotifiedNoMana]})    /declare hasNotifiedNoMana                      outer FALSE
         
     /call InitCasterIni "${iniFileName}"
     /varset casterInitResult ${Macro.Return}
@@ -72,12 +73,18 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 	|- Is spell ready?
 	/if (${Me.SpellReady[${healSpell}]}) {
 		|- Do we have mana
-		/if (${Me.CurrentMana} < ${Spell[${healSpell}].Mana}) {		
+		/if (${Me.CurrentMana} < ${Spell[${healSpell}].Mana}) { 		
+            /if (${hasNotifiedNoMana}) {
+                /return
+            }
+
+            /varset hasNotifiedNoMana TRUE
 			/delay 1s
 			/gsay !!! NO MANA TO HEAL ${healTargetName} !!!
 			/bca !!! NO MANA TO HEAL ${healTargetName} !!!
 			/return
 		} else {			
+            /varset hasNotifiedNoMana FALSE
             /if (${Target.ID} != ${healTargetId}) {
                 /target id ${healTargetId}
                 /delay 2s ${Target.ID} == ${healTargetId}
