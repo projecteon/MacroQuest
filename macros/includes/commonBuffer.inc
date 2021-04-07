@@ -58,8 +58,7 @@ Sub tryDoBuff(string buffSpell, int minMana, string classRestrictions)
         /declare x int local
         /for x 1 to ${Group.Members} {
             /if (${Spawn[${Group.Member[${x}]}].ID} && ${NetBots[${Group.Member[${x}].Name}]} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
-                /declare hasBuff int local ${NetBots[${Group.Member[${x}].Name}].Buff.Find[${buffId} ]}
-                /if (!${hasBuff}) {
+                /if (!${NetBots[${Group.Member[${x}].Name}].Buff.Find[${buffId} ]}) {
                     /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
                 } else {
                     /declare k int local
