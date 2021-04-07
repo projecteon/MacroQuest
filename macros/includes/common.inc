@@ -3,7 +3,8 @@
 | ################################################################################	
 Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
-    /if (!${Defined[mainAssist]})  /declare mainAssist       string   outer "Main Assist" 
+    /if (!${Defined[mainAssist]})  	/declare mainAssist       string	outer "Main Assist" 
+    /if (!${Defined[Debug]})  		/declare Debug       				outer FALSE 
     
     | Use main assist setting to check if ini file is created
     /if (${Ini[${iniFileName},${options},MainAssist].Length}) {
@@ -35,6 +36,10 @@ Sub Is_NPC_In_Camp(int radiusCheck)
 |- @param TargetID: The ID of the spawn you wish to target.	-|
 |------------------------------------------------------------|
 SUB TrueTarget(TargetID)
+	| Check if we already have target
+	/if (${Target.ID} != ${TargetID}) {    
+		/return	
+	}
 	| Check if the target is in zone.
 	/if (${SpawnCount[id ${TargetID}]}) {
 			/squelch /target id ${TargetID}
