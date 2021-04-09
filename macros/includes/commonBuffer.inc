@@ -45,7 +45,7 @@ Sub CheckGroupBuffs
 /return
 
 Sub tryDoBuff(string buffSpell, int minMana, string classRestrictions)
-    /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || !${Cast.Ready[${buffSpell}]}) {
+    /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || !${Cast.Ready[${buffSpell}]} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
         /return
     }
 
@@ -54,21 +54,21 @@ Sub tryDoBuff(string buffSpell, int minMana, string classRestrictions)
         /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
     }
 
-    /if (${Group.Members}) {
+    /if (${Spell[${buffSpell}].TargetType.Equal[Single]} && ${Group.Members}) {
         /declare x int local
         /for x 1 to ${Group.Members} {
             /if (${Spawn[${Group.Member[${x}]}].ID} && ${NetBots[${Group.Member[${x}].Name}]} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
                 /if (!${NetBots[${Group.Member[${x}].Name}].Buff.Find[${buffId} ]}) {
                     /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
                 } else {
-                    /declare k int local
-                    /for k 0 to 15
-                        /if (${Bool[${NetBots[${Group.Member[${x}].Name}].Buff[${k}]}]}) {
-                            /if (${NetBots[${Group.Member[${x}].Name}].Buff[${k}].ID} == ${buffId} && ${NetBots[${Group.Member[${x}].Name}].Duration[${k}]} < 5) {
+                    /if (!${Defined[i]}) /declare i int local
+                    /for i 0 to 15
+                        /if (${Bool[${NetBots[${Group.Member[${x}].Name}].Buff[${i}]}]}) {
+                            /if (${NetBots[${Group.Member[${x}].Name}].Buff[${i}].ID} == ${buffId} && ${NetBots[${Group.Member[${x}].Name}].Duration[${i}]} < 5) {
                                 /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
                             }
                         }
-                    /next k
+                    /next i
                 }
             }
             /next x
