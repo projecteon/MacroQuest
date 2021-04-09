@@ -59,6 +59,9 @@
 ### MQ2NetBots
 * https://www.macroquest2.com/wiki/index.php/MQ2NetBots#Top-Level_Object:_.24.7BNetBots.7D
 
+### MQ2Twist
+* https://www.mmobugs.com/wiki/index.php/MQ2Twist
+
 ### HUD
 * https://www.macroquest2.com/wiki/index.php/MQ2HUD
 * https://www.mmobugs.com/wiki/index.php/MQ2HUD
