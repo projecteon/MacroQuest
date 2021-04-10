@@ -4,6 +4,7 @@
 | ################################################################################	
 Sub InitBufferIni(string iniFileName)
     /declare options            string  local "BuffOptions"
+    /if (!${Defined[maxBuffsPerPerson]})                /declare maxBuffsPerPerson              int     outer 15 
     /if (!${Defined[iniBuffDimensions]})                /declare iniBuffDimensions              int     outer 3 
     /if (!${Defined[buffNameDimension]})                /declare buffNameDimension              int     outer 1 
     /if (!${Defined[minManaDimensions]})                /declare minManaDimensions              int     outer 2 
@@ -62,7 +63,7 @@ Sub tryDoBuff(string buffSpell, int minMana, string classRestrictions)
                     /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
                 } else {
                     /if (!${Defined[i]}) /declare i int local
-                    /for i 0 to 15
+                    /for i 0 to ${maxBuffsPerPerson}
                         /if (${Bool[${NetBots[${Group.Member[${x}].Name}].Buff[${i}]}]}) {
                             /if (${NetBots[${Group.Member[${x}].Name}].Buff[${i}].ID} == ${buffId} && ${NetBots[${Group.Member[${x}].Name}].Duration[${i}]} < 5) {
                                 /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
