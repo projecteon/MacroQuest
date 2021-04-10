@@ -1,0 +1,292 @@
+
+#include Spell_routines.inc
+#turbo 40
+#chat group
+#chat tell
+
+#event buffme "#1# tells the group, 'check buffs'"
+#event givesow   "#1# tells the group, 'sow'"
+#event helpcommands "#1# tells the group, 'shadowolf'"
+#event sowall "#1# tells the group, 'sow all'"
+
+
+
+
+
+
+Sub Main
+
+|****************|
+|   Spells       |
+|****************|
+| Spells and there locations
+|      **MySpells**          **OtherSpells**       **spells not in spell sets**
+| 1. Frost Strike..............------------...........------------------
+| 2. Togor's Insects...........------------...........------------------
+| 3. Malaisement...............------------...........------------------
+| 4. Burst of Strength.........------------...........------------------
+| 5. Talisment of Altuna.......Spirit of Bih'Li
+| 6. Stamina....................Endure Magic...........Chloroplast
+| 7. Agility....................Resist Fire............Cannibalize II
+| 8. Greater Healing...........Resist Cold............------------------
+|-------------------------------------------------------------------------------------|
+
+  /declare agi    string outer Agility
+  /declare sta    string outer Stamina
+  /declare hps    string outer Talisman of Altuna
+  /declare sow    string outer Spirit of Wolf
+  /declare tmpstr string outer Burst of Strength
+
+  /declare debuff   string outer   Malaisement
+  /declare slow     string outer   Togor's Insects
+  /declare dot      string outer   Venom of the Snake
+  /declare heal     string outer   Greater Healing
+  /declare regen    string outer   Chloroplast
+  /declare canni    string outer   Cannibalize II
+  /declare MR       string outer   Endure Magic
+  /declare FR       string outer   Resist Fire
+  /declare RC       string outer   Resist Cold
+
+  /declare regentimer  timer outer
+  /declare BoStimer    timer outer
+  /declare dottimer    timer outer
+  /declare debufftimer timer outer
+  /declare slowtimer   timer outer
+  /declare petimer     timer outer
+  /declare AgiTimer    timer outer
+  /declare StaTimer    timer outer
+  /declare HpsTimer    timer outer
+  /declare MrTimer     timer outer
+  /declare FrTimer     timer outer
+  /declare RcTimer     timer outer
+
+|*********************|
+|     Other Stuff     |
+|*********************|
+
+  /declare x int local
+  /declare MA string outer Backbreaker
+ 
+
+:start
+  /if ((!${Me.Casting.ID}) && (${Me.State.Equal[STAND]}) & (${Me.PctMana}<98)) /sit
+  /doevents
+  /delay 10
+  /if (${Me.PctMana}>10) /goto :next
+  /goto :start
+
+
+
+
+:next
+  /assist ${MA}
+  /delay 2s
+  /if (${Target.PctHPs}<80 && ${Target.PctHPs}>70 && ${Target.Type.Equal["NPC"]} && ${Target.Type.NotEqual[CORPSE]} && ${slowtimer}==0) /call SlowTarget
+  /if (${Target.PctHPs}<80 && ${Target.PctHPs}>70 && ${Target.Type.Equal["NPC"]} && ${Target.Type.NotEqual[CORPSE]} && ${debufftimer}==0) /call Debuffing       
+  /if (${Target.PctHPs}<90 && ${Target.Type.Equal["NPC"]} && ${Target.Type.NotEqual[CORPSE]} && ${petimer}==0) {
+      /pet attack
+          /varset petimer 40s
+}
+|  /if (${Target.PctHPs}<65 && ${Target.Type.NotEqual[CORPSE]} && ${Target.Type.Equal["NPC"]} && ${dottimer}==0) {
+|      /call cast "${dot}" gem1 3s
+|      /delay 3s !${Me.Casting.ID}
+|      /varset dottimer 36s
+|}
+  /if (${Target.Type.Equal[Corpse]} && ${Target.Type.Equal[NPC]}) /varset dottimer 0
+  /if (${Target.PctHPs}<98 && ${Target.Type.Equal["NPC"]} && ${Target.Type.NotEqual[CORPSE]} && ${BoStimer}==0) {
+     /target ${MA}
+     /delay 1s
+     /call cast "${tmpstr}" gem5 3s
+     /delay 3s !${Me.Casting.ID}
+     /varset BoStimer 17s
+}
+  /if (${Target.Type.Equal["NPC"]} && ${regentimer}==0) /call Regeneration
+  /if (${Target.Type.Equal["NPC"]} && ${Target.Type.Equal[CORPSE]}) /varset debufftimer 0
+  /if (${Target.Type.Equal["NPC"]} && ${Target.Type.Equal[CORPSE]}) /varset slowtimer 0
+  /if (${Target.Type.Equal[Corpse]} && ${Target.Type.Equal[NPC]}) /varset petimer 0
+/goto :mana
+
+:mana
+  /if (${Me.PctHPs}>90 && !${Me.Casting.ID} && ${Me.PctMana}<30) {
+     /call cast "${canni}" gem7 3s
+     /call cast "${canni}" gem7 3s
+         /call cast "${canni}" gem7 3s
+         /call cast "${canni}" gem7 3s
+}
+/if (!${Me.Pet.Name.NotEqual[NULL]}) /call cast "Frenzied Spirit" gem5 3s
+
+/goto :healloop
+
+
+|******Healing Loop********|
+
+ :healloop
+  /if (${Group}<1) /goto :start
+  /for x 0 to ${Group}
+  /if ((${Group.Member[${x}].Type.NotEqual[CORPSE]}) && (${Group.Member[${x}].PctHPs}<35)) /call Heal ${Group.Member[${x}].CleanName}
+  /if ((${Group.Member[${x}].Pet.Name.NotEqual[NULL]}) && (${Group.Member[${x}].Pet.PctHPs}<45)) /call Heal ${Group.Member[${x}].Pet.CleanName}
+  /next x
+  /goto :start
+
+ 
+ |---------------|
+ |   Healing     |
+ |---------------|
+ 
+Sub Heal(Targ)
+  /target ${Targ}
+  /delay 1s
+  /if (${Target.ID}) /g ${heal} on %t
+  /if (${Target.Distance}<100) /call Cast "${heal}" gem8 3s
+  /if (${Target.Distance}>100) /g %t is out of range!
+  /keypress ESC
+  /return
+
+|***********************|
+|   Slowing Target Sub  |
+|***********************|
+
+Sub SlowTarget
+  :slowing
+     /assist ${MA}
+     /delay 1s
+     /call cast "${slow}" gem2 3s
+     /if (${Macro.Return.Equal[CAST_SUCCESS]}) /goto :slowed
+     /if (${Macro.Return.Equal[CAST_IMMUNE]})  /goto :slowimmune
+     /if (${Macro.Return.Equal[CAST_RESISTED]}) /goto :resisted
+     /goto :slowingend
+
+:slowed
+     /g [ %t ] is SLOWED!
+     /varset slowtimer 15s
+         /return
+
+:slowimmune
+     /g [ %t ] is IMMUNE to SLOW!
+     /varset slowtimer 15s
+         /return
+
+:resisted
+     /g [ %t ] Resisted Slow! Trying again!
+     /goto :slowing
+     /return
+
+:slowingend
+     /return
+
+
+|*******************|
+|   Debuffing MOB   |
+|*******************|
+
+Sub Debuffing
+  /assist ${MA}
+:debuffingtarget
+     /call cast "${debuff}" gem3 3s
+     /if (${Macro.Return.Equal[CAST_SUCCESS]}) /goto :debuffed
+     /if (${Macro.Return.Equal[CAST_IMMUNE]})  /goto :debuffimmune
+     /if (${Macro.Return.Equal[CAST_RESISTED]}) /goto :debuffresisted
+     /goto :debuffend
+   
+:debuffed
+  /g [ %t ] is DEBUFFED!
+  /varset debufftimer 30s
+  /return
+   
+:debuffimmune
+  /g [ %t ] is IMMUNE to DEBUFF
+  /varset debufftimer 30s
+  /return
+
+:debuffresisted
+  /g [ %t ] RESISTED Debuff! Trying again!
+  /goto :debuffingtarget
+  /return
+
+:debuffend
+  /return
+
+|**************|
+|   Buffs      |
+|**************|
+Sub Regeneration
+  /target ${MA}
+  /call cast "${regen}" gem6 3s
+  /delay 6s !${Me.Casting.ID}
+  /target Shadowolf
+  /delay 1s
+  /call cast "${regen}" gem6 3s
+  /delay 6s !${Me.Casting.ID}
+  /varset regentimer 13m
+  /return
+ 
+Sub Event_buffme(Line,Targ)
+  /target ${Targ.Right[-2].Left[-1]}
+  /delay 1s
+  /g Buffing [ %t ]
+  /if (${Target.ID} && ${AgiTimer}==0) {
+         /call Cast "${agi}" gem7 4s
+         /varset AgiTimer 50m
+  }     
+  /if (${Target.ID} && ${StaTimer}==0) {
+     /call Cast "${sta}" gem6 4s
+     /varset StaTimer 50m
+  }
+  /if (${Target.ID} && ${HpsTimer}==0) {
+         /call Cast "${hps}" gem5 4s
+         /varset HpsTimer 68m
+  }
+  /if (${Target.ID} && ${MrTimer}==0) {
+         /call Cast "${MR}" gem6 4s
+         /varset MrTimer 26m
+  }
+  /if (${Target.ID} && ${FrTimer}==0) {
+         /call Cast "${FR}" gem7 4s
+         /varset FrTimer 26m
+  }
+  /if (${Target.ID} && ${RcTimer}==0) {
+         /call Cast "${RC}" gem8 4s
+         /varset RcTimer 26m
+  }
+  /return
+
+
+|*Other Buffs*|
+
+Sub Event_sowall(Line)
+  /g One Moment Plz Giving Everyone SoW!
+  /declare g int local
+  /for g 0 to ${Group}
+  /if (${Group.Member[${g}].Type.NotEqual[CORPSE]}) /call sowingall ${Group.Member[${g}].CleanName}
+  /next g
+  /return
+
+
+
+Sub sowingall(Targ)
+  /target ${Targ}
+  /delay 1s
+  /if (${Target.ID}) /call cast "${sow}" gem5 4s
+  /return
+
+
+
+
+Sub Event_givesow(Line,Targ)
+  /assist ${Targ.Right[-2].Left[-1]}
+  /delay 1s
+  /g casting ${sow} on [ %t ]
+  /call Cast "${sow}" gem5 4s
+  /return
+
+
+
+sub Event_helpcommands(Line)
+  /g Sow all - I will give the Spirit of Wolf to everyone in the group.
+  /delay 1s
+  /g SoW - I will give sow to you or whom you feel needs it.
+  /delay 1s
+  /g Slow - I will slow our enemy!
+  /delay 1s
+  /g Buff Me - I will give you the buffs that will assist you!
+  /return

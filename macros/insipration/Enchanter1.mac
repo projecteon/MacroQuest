@@ -1,0 +1,82 @@
+
+#include spell_routines.inc
+
+Sub Main
+  /declare MobID[150] int outer
+  /declare j int outer
+  /declare k int outer
+  /declare NumMobs int outer 1
+  /declare MobAdded int outer 0
+  /declare MobRadius int outer 50
+  /declare MATank int outer Backbreaker
+  /declare MezzSpell  string outer Entrance
+
+
+
+  :loop
+   
+    /delay 1
+    /if (${NearestSpawn[1,NPC zradius 20].Distance}>${MobRadius} && ${NumMobs}>1) {
+      /bc Reseting NumMobs = 1
+      /varset NumMobs 1
+    }   
+   
+    /if (${NearestSpawn[1,NPC zradius 20].Distance}>${MobRadius}) /goto :loop
+  /for k 1 to ${SpawnCount[NPC radius ${MobRadius} zradius 20]}
+    /varset MobAdded 0
+ 
+   
+    /for j 1 to ${NumMobs}
+      /if (${MobID[${j}]}==${NearestSpawn[${k},NPC zradius 20 radius ${MobRadius}].ID}) /varset MobAdded 1
+    /next j
+   
+   
+    /if (!${MobAdded}) {
+      /tar id ${NearestSpawn[${k},NPC zradius 20 radius ${MobRadius}].ID}
+      /delay 20 ${Target.ID}==${NearestSpawn[${k},NPC zradius 20 radius ${MobRadius}].ID}
+      /if (${Target.PctHPs}>90) {
+  :CheckTanksTarget
+      /if (${Target.ID}==${NetBots[Backbreaker].TargetID}) /goto :aftermez
+ 
+  :animationcheck
+      /if (${Target.Animation}==32 || ${Target.Animation}==26 || ${Target.Animation}==72 || ${Target.Animation}==71 || ${Target.Animation}==17 || ${Target.Animation}==104 || ${Target.Animation}==18) /goto :aftermez
+     
+  :inicheck
+      /if (${Ini[MobList.ini,${Zone.ID}].Find[${Target.DisplayName}]}) /goto :aftermez
+ 
+  :meztarget
+      /call cast "${MezzSpell}" gem5 5s
+      /if (${Macro.Return.Equal[CAST_SUCCESS]}) {
+        /gsay > %t < Is MEZZED!
+        /goto :aftermez
+        }
+      /if (${Macro.Return.Equal[CAST_RESISTED]}) {
+        /call cast "${MezzSpell}" gem5 3s
+        /if (${Macro.Return.Equal[CAST_SUCCESS]}) /goto :aftermez
+        /if (${Macro.Return.Equal[CAST_RESISTED]}) {
+            /call cast "${MezzSpell}" gem5 3s
+            /if (${Macro.Return.Equal[CAST_SUCCESS]}) /goto :aftermez
+            /if (${Macro.Return.Equal[CAST_RESISTED]}) {
+                /gsay > %t < RESISTED to many times, CAN'T BE MEZZED!
+                /squelch /alert add 1 id ${Target.ID}
+                }
+               }
+              }
+      /if (${Macro.Return.Equal[CAST_INTERRUPTED]}) {
+        /gsay HELP! I'm being interupted!
+        }
+
+      /if (${Macro.Return.Equal[CAST_IMMUNE]}) {
+        /ini "MobList.ini" "${Zone.ID}" "${Target.DisplayName}" "ImmuneToMezz"
+        /gsay ${Target.DisplayName} was IMMUNE to Mezz adding to list.
+        }
+       
+       }
+      }
+     }
+  :aftermez
+  /next k
+
+  /goto :loop
+
+/return

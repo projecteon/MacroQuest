@@ -1,0 +1,47 @@
+| http://mqemulator.net/forum2/viewtopic.php?t=1551
+| http://mqemulator.net/forum2/viewtopic.php?t=794
+
+#include includes\spell_routines.inc
+#include includes\common.inc
+#include includes\commonCaster.inc
+#include includes\commonBuffer.inc
+#include includes\commonPet.inc
+#include includes\nuke.inc
+#turbo
+
+Sub Main
+    /declare mageIniFileName    string  local "ini/${MacroQuest.Server}/Mage_${Me.CleanName}.ini"
+
+    /call InitMageIni ${mageIniFileName}
+    /if (${Macro.Return} == 0) {
+        /echo "Bootstrapped INI file, please update variables in: ${mageIniFileName}"
+        /endmacro
+    }
+
+    /echo "Mage pettified!"
+    /bca "Mage pettified!"
+    :NukeLoop
+        /call Check_Mana_Status
+        /call Medidate
+        /call doBuffs
+        | /call doPet
+        /call Nuke
+        /goto :NukeLoop
+/return
+
+| ################################################################################
+| # Create Mage Ini Section
+| ################################################################################	
+Sub InitMageIni(string iniFileName)
+    /declare mageOptions   string  outer "MageOptions"
+    /declare casterInitResult   int     local 1
+
+    /call InitNukeIni "${iniFileName}"
+    /varset casterInitResult ${Macro.Return}
+
+    /call InitBufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset casterInitResult 0
+    }
+
+/return ${casterInitResult}
