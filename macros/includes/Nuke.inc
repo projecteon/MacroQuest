@@ -6,10 +6,9 @@
 #turbo
 
 Sub InitNukeIni(string fileName)
-     /declare nukeOptions        string  outer "NukeOptions"
-    /declare mainNuke           string  outer "YOUR MAIN NUKE"
-    /declare secondaryNuke      string  outer "YOUR SECONDARY NUKE"
-    /declare undeadNuke         string  outer "YOUR UNDEAD NUKE"
+    /declare nukeOptions        string  outer "NukeOptions"
+    /declare mainNuke           string  outer 
+    /declare undeadNuke         string  outer 
     /declare nukePct            int     outer 97
     /declare casterInitResult   int     local 1
 
@@ -20,13 +19,6 @@ Sub InitNukeIni(string fileName)
         /varset mainNuke "${Ini[${fileName},${nukeOptions},MainNuke]}"
     } else {
         /ini "${fileName}" "${nukeOptions}" "MainNuke" "${mainNuke}"
-        /varset casterInitResult 0
-    }
-
-    /if (${Ini[${fileName},${nukeOptions},SecondaryNuke].Length}) {
-        /varset secondaryNuke "${Ini[${fileName},${nukeOptions},SecondaryNuke]}"       
-    } else {
-        /ini "${fileName}" "${nukeOptions}" "SecondaryNuke" "${secondaryNuke}"
         /varset casterInitResult 0
     }
 
@@ -69,11 +61,7 @@ Sub Nuke
     /if (${Select[${Target.Body},Undead]} && ${Me.Gem[${undeadNuke}]}) {
         /call TryNukeTarget "${undeadNuke}"
     } else {
-        /if (!${Defined[_nocast]}) /declare _nocast int   outer 1 
         /call TryNukeTarget ${mainNuke}
-        /if (${Macro.Return} == ${nocast}) {
-            /call TryNukeTarget ${secondaryNuke}
-        }
     }
 /return
 
@@ -83,11 +71,11 @@ Sub TryNukeTarget(string nuke)
     }
 
     /if (!${Cast.Ready[${nuke}]} || ${Me.CurrentMana} < ${Spell[${nuke}].Mana} || ${Target.Distance} > ${Spell[${nuke}].Range}) {
-        /return ${nocast}
+        /return
     }
     
     /call cast "${nuke}" gem${Me.Gem[${nuke}]} 0 CancelNuke
-/return 0
+/return
 
 | #################################################
 | # Called during the cast of any spell and will
@@ -102,8 +90,8 @@ Sub MakeNukeIni(string fileName)
     |- Build the INI file
     /echo Building INI file.....
 
+    /ini "${fileName}" "${nukeOptions}" "NukePct" "${nukePct}"
     /ini "${fileName}" "${nukeOptions}" "MainNuke" "${mainNuke}"
-    /ini "${fileName}" "${nukeOptions}" "SecondaryNuke" "${secondaryNuke}"
     /ini "${fileName}" "${nukeOptions}" "UndeadNuke" "${undeadNuke}"
     /ini "${fileName}" "${nukeOptions}" "NukePct" "${nukePct}"
 /return
