@@ -24,7 +24,7 @@ Sub Main
         /call Check_Mana_Status
         /call Medidate
         /call doBuffs
-        | /call doPet
+        /call doPet
         /call Nuke
         /goto :NukeLoop
 /return
@@ -40,6 +40,11 @@ Sub InitMageIni(string iniFileName)
     /varset casterInitResult ${Macro.Return}
 
     /call InitBufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset casterInitResult 0
+    }
+
+    /call InitPetIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset casterInitResult 0
     }
