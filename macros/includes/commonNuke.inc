@@ -58,12 +58,12 @@ Sub Nuke
 /return
 
 Sub TryNukeTarget(string nuke)
-    /if (${Me.Sitting}) {
-        /stand
-    }
-
     /if (!${Cast.Ready[${nuke}]} || ${Me.CurrentMana} < ${Spell[${nuke}].Mana} || ${Target.Distance} > ${Spell[${nuke}].Range}) {
         /return
+    }
+
+    /if (${Me.Sitting}) {
+        /stand
     }
     
     /call cast "${nuke}" gem${Me.Gem[${nuke}]} 0 CancelNuke
@@ -74,8 +74,8 @@ Sub TryNukeTarget(string nuke)
 | # interuppt it if any condition pops true.
 | #################################################
 Sub CancelNuke
-	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
     /if (!${Target.ID}) /call Interrupt
+	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
 	| /doevents StartCast
 /return
 
