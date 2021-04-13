@@ -56,6 +56,9 @@
 ### MQ2Cast
 * https://www.mmobugs.com/wiki/index.php/MQ2Cast
 
+### MQ2CastTimer
+* https://www.mmobugs.com/wiki/index.php/MQ2CastTimer
+
 ### MQ2NetBots
 * https://www.macroquest2.com/wiki/index.php/MQ2NetBots#Top-Level_Object:_.24.7BNetBots.7D
 
