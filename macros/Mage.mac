@@ -6,7 +6,7 @@
 #include includes\commonCaster.inc
 #include includes\commonBuffer.inc
 #include includes\commonPet.inc
-#include includes\nuke.inc
+#include includes\commonNuke.inc
 #turbo
 
 Sub Main

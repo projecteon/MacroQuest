@@ -3,7 +3,7 @@
 #include includes\commonCaster.inc
 #include includes\commonHealer.inc
 #include includes\commonBuffer.inc
-#include includes\nuke.inc
+#include includes\commonNuke.inc
 #turbo 40
 
 Sub Main

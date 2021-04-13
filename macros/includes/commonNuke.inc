@@ -9,7 +9,6 @@ Sub InitNukeIni(string fileName)
     /declare nukeOptions        string  outer "NukeOptions"
     /declare mainNuke           string  outer 
     /declare undeadNuke         string  outer 
-    /declare nukePct            int     outer 97
     /declare casterInitResult   int     local 1
 
     /call InitCasterIni "${fileName}"
@@ -19,13 +18,6 @@ Sub InitNukeIni(string fileName)
         /varset mainNuke "${Ini[${fileName},${nukeOptions},MainNuke]}"
     } else {
         /ini "${fileName}" "${nukeOptions}" "MainNuke" "${mainNuke}"
-        /varset casterInitResult 0
-    }
-
-    /if (${Ini[${fileName},${nukeOptions},NukePct].Length}) {
-        /varset nukePct ${Ini[${fileName},${nukeOptions},NukePct]}       
-    } else {
-        /ini "${fileName}" "${nukeOptions}" "NukePct" "${nukePct}"
         /varset casterInitResult 0
     }
 
@@ -49,7 +41,7 @@ Sub Nuke
     /declare hasLineOfSight local ${Spawn[${targetId}].LineOfSight}
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
-    /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${nukePct} || !${hasLineOfSight}) {
+    /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight}) {
         /return
     }
 
@@ -83,16 +75,15 @@ Sub TryNukeTarget(string nuke)
 | #################################################
 Sub CancelNuke
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
+    /if (!${Target.ID}) /call Interrupt
 	| /doevents StartCast
 /return
 
 Sub MakeNukeIni(string fileName)
     |- Build the INI file
-    /echo Building INI file.....
+    /echo Building Nuke INI file.....
 
-    /ini "${fileName}" "${nukeOptions}" "NukePct" "${nukePct}"
     /ini "${fileName}" "${nukeOptions}" "MainNuke" "${mainNuke}"
     /ini "${fileName}" "${nukeOptions}" "UndeadNuke" "${undeadNuke}"
-    /ini "${fileName}" "${nukeOptions}" "NukePct" "${nukePct}"
 /return
 	

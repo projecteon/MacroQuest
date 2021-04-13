@@ -1,6 +1,12 @@
 | http://mqemulator.net/forum2/viewtopic.php?t=1551
 | http://mqemulator.net/forum2/viewtopic.php?t=794
 
+#include includes\spell_routines.inc
+#include includes\common.inc
+#include includes\commonCaster.inc
+#include includes\commonBuffer.inc
+#include includes\commonPet.inc
+#include includes\commonNuke.inc
 #turbo
 
 Sub Main
@@ -24,6 +30,11 @@ Sub InitRangerIni(string fileName, string mainAssist)
     /varset parentResult ${Macro.Return}
     
     /call InitBufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentResult 0
+    }
+    
+    /call InitNukeIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset parentResult 0
     }

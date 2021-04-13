@@ -1,15 +1,14 @@
 Sub InitPetIni(string iniFileName)
     /declare petOptions         string  local "PetOptions"
     /declare petInitResult      int     local 1
-    /declare attackPct          int     outer 0
     /declare currentPetTargetId int     outer 0
 
-    /if (${Ini[${iniFileName},${petOptions},AttackPct].Length}) {
-        /varset attackPct ${Ini[${iniFileName},${petOptions},AttackPct]}
-    } else {
-        /ini "${iniFileName}" "${petOptions}" "AttackPct" "${attackPct}"
-        /varset petInitResult 0
-    }
+    | /if (${Ini[${iniFileName},${petOptions},AttackPct].Length}) {
+    |     /varset assistPct ${Ini[${iniFileName},${petOptions},AttackPct]}
+    | } else {
+    |     /ini "${iniFileName}" "${petOptions}" "AttackPct" "${assistPct}"
+    |     /varset petInitResult 0
+    | }
 /return 1
 
 Sub doPet
@@ -33,7 +32,7 @@ Sub doPet
     /declare hasLineOfSight local ${Spawn[${targetId}].LineOfSight}
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
-    /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${attackPct} || !${hasLineOfSight} || !${SpawnCount[id ${targetId}]} || ${Spawn[${targetId}].Distance} > 100) {
+    /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight} || !${SpawnCount[id ${targetId}]} || ${Spawn[${targetId}].Distance} > 100) {
         /return
     }
 
@@ -49,7 +48,7 @@ Sub doPet
 
 Sub MakePetIni(string fileName)
     |- Build the INI file
-    /echo Building INI file.....
+    /echo Building Pet INI file.....
 
-    /ini "${fileName}" "${petOptions}" "AttackPct" "${attackPct}"
+    | /ini "${fileName}" "${petOptions}" "AttackPct" "${assistPct}"
 /return

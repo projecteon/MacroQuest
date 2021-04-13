@@ -4,6 +4,7 @@
 Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
     /if (!${Defined[mainAssist]})  	/declare mainAssist       string	outer "Main Assist" 
+    /if (!${Defined[assistPct]})  	/declare assistPct        int	    outer 100 
     /if (!${Defined[Debug]})  		/declare Debug       				outer FALSE 
     
     | Use main assist setting to check if ini file is created
@@ -12,7 +13,11 @@ Sub InitGenralIni(string iniFileName)
     } else {
         /ini "${iniFileName}" "${options}" "MainAssist" "${mainAssist}"      
         /return 0   
-    }
+    }    				
+    
+    /if (${Ini[${iniFileName},${options},AssistPct].Length}) {
+        /varset assistPct "${Ini[${iniFileName},${options},AssistPct]}"    
+    } 
 
 /return 1
 
