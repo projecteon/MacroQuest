@@ -55,6 +55,7 @@
 
 ### MQ2Cast
 * https://www.mmobugs.com/wiki/index.php/MQ2Cast
+* https://www.redguides.com/community/resources/mq2cast.290/
 
 ### MQ2CastTimer
 * https://www.mmobugs.com/wiki/index.php/MQ2CastTimer
