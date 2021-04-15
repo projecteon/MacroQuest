@@ -5,13 +5,14 @@
 #include includes\common.inc
 #include includes\commonCaster.inc
 #include includes\commonBuffer.inc
+#include includes\commonDebuffer.inc
 #include includes\commonNuke.inc
 #turbo 40
 
 Sub Main
     /declare enchanterIniFileName   string  local "ini/${MacroQuest.Server}/Enchanter_${Me.CleanName}.ini"
-    /declare autoMez                        outer TRUE
-    /declare mezzRadius              int    outer 40
+    /declare autoMezz               int     outer 1
+    /declare mezzRadius             int     outer 100
 
     /call InitEnchanterIni ${enchanterIniFileName}
     /if (${Macro.Return} == 0) {
@@ -21,56 +22,51 @@ Sub Main
 
     /echo "Enchanter all mezzed up!"
     /bca "Enchanter all mezzed up!"
-    :NukeLoop
+    :EnchanterLoop
+        /call DoMezz
+        /call doDeBuffs
+        /if (${Macro.Return} == 1) /goto :EnchanterLoop
         /call Check_Mana_Status
         /call Medidate
-        | /call DoMezz
         /call Nuke
         /call doBuffs
-        /goto :NukeLoop
+        /goto :EnchanterLoop
 /return
 
 sub DoMezz
-    /if (${autoMez}) {
+    /if (${Debug}) /echo <== DoMezz -|
+    /if (${autoMezz}) {
         /declare mezzSpell string local "Enthrall"
+        /declare retry int local
         /declare i int local
-        /declare s int local
         /declare mezTarg int local
         /declare maTargetId int local ${NetBots[${mainAssist}].TargetID}
 
-        /if (!${SpawnCount[playerstate 4 npc targetable radius ${mezzRadius}]}) /return
-        /echo "DoMezz targets" ${SpawnCount[playerstate 4 npc targetable radius ${mezzRadius}]}
+        /if (!${SpawnCount[npc los targetable radius ${mezzRadius}]} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana}) /return
+        /if (${Debug}) /echo "DoMezz targets" ${SpawnCount[npc los targetable radius ${mezzRadius}]}
 
-        /for i 1 to ${SpawnCount[playerstate 4 npc targetable radius ${mezzRadius}]}
-            /varset mezTarg ${NearestSpawn[${i},playerstate 4 npc targetable radius ${mezzRadius}].ID}
+        /for i 1 to ${SpawnCount[npc los targetable radius ${mezzRadius}]}
+            /varset mezTarg ${NearestSpawn[${i},npc los targetable radius ${mezzRadius}].ID}
             /if (${mezTarg}!=${maTargetId}) {
                 /target id ${mezTarg}
                 /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${mezTarg}) {
                     /return
                 }
 
-                /delay 1s ${Target.BuffsPopulated}
-                /if (${Select[${AssistTarget},${mezTarg}]}==0 && (!${Bool[${Target.Mezzed}]} || ${Target.Mezzed.Duration.TotalSeconds} < 8)) {
-                    | /for s 1 to ${mezArray2D.Size[1]}
-                    | /call check_Ready "mezArray2D" ${s}
-                    | /if (${c_Ready}) {
-                    |     /if (${check_Mana["mezArray2D",${s}]}) {
-                    |     /if (${check_Distance[${mezTarg},${mezArray2D[${s},${iMyRange}]}]}) {
-                    |         /docommand ${ChatToggle} << Mezzing ${mezTarg} with ${mezArray2D[${s},${iCastName}]} >>
-                    |         /call e3_Cast ${mezTarg} "mezArray2D" "${s}"
-                    |     }
-                    |     }
-                    | }
-                    | /if (!${ActionTaken}) /next s
-                    /if (!${Cast.Ready[${mezzSpell}]} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana} || ${Target.Distance} > ${Spell[${mezzSpell}].Range}) {
-                        /call cast "${mezzSpell}" gem${Me.Gem[${mezzSpell}]}
-                        /return
-                    }
+                /if (${SpellTimer[${mezTarg},any,${mezzSpell}]} < 8 && ${Cast.Ready[${mezzSpell}]} && ${Target.Distance} < ${Spell[${mezzSpell}].Range}) {
+                    /call cast "${mezzSpell}" gem${Me.Gem[${mezzSpell}]} 0 CancelMezz 3
+                    /bca ${Target.Name} " mezzed!"
                 }
             }
             /next i
     }
-    /if (${Debug}) /echo <== check_Mez -|
+    /if (${Debug}) /echo <== DoMezz -|
+/return
+
+
+Sub CancelMezz
+	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
+	/if (${Target.ID} == ${NetBots[${mainAssist}].TargetID}) /call Interrupt
 /return
 
 | ################################################################################
@@ -79,6 +75,18 @@ sub DoMezz
 Sub InitEnchanterIni(string iniFileName)
     /declare enchanterOptions   string  outer "EnchanterOptions"
     /declare casterInitResult   int     local 1
+
+    | /if (${Ini[${iniFileName},${enchanterOptions},AutoMezz].Length}) {
+    |    /varset autoMezz ${Ini[${iniFileName},${v},AutoMezz]}     
+    | } else {
+    |     /ini "${iniFileName}" "${enchanterOptions}" "AutoMezz" "${autoMezz}"
+    | }
+
+    | /if (${Ini[${iniFileName},${enchanterOptions},AutoMezzRadius].Length}) {
+    |    /varset mezzRadius ${Ini[${iniFileName},${v},AutoMezzRadius]}     
+    | } else {
+    |     /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzRadius" "${mezzRadius}"
+    | }
 
     /call InitCasterIni "${iniFileName}"
     /varset casterInitResult ${Macro.Return}
@@ -89,6 +97,11 @@ Sub InitEnchanterIni(string iniFileName)
     }
 
     /call InitBufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset casterInitResult 0
+    }
+
+    /call InitDebufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset casterInitResult 0
     }

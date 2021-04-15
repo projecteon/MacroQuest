@@ -1,0 +1,69 @@
+Sub Main(szStacks)
+ /declare DrinkSpell string outer Summon Drink
+ /declare DrinkType  string outer item
+ /declare FoodSpell string outer Summon Food
+ /declare FoodType  string outer item
+ /declare DrinkItem string outer Summoned: Glove of Water
+ /declare FoodItem string outer Summoned: Black Bread
+ /declare nStacks int outer 0
+ /declare Once int outer 0
+    /if (${Defined[szStacks]}) /varset nStacks ${szStacks}
+    /if (${nStacks}<1) /varset Once 1
+    /if (${nStacks}<1 || ${nStacks}>20) /varset nStacks 1
+    /if (${Once}) /echo Summoning up to 1 stack of food and drink, then ending macro.
+    /if (!${Once}) /echo Summoning ${nStacks} stack(s) of food and drink per cycle.
+ /call SummonDrinkFood
+ /echo Done summoning stuff!
+ /return
+
+Sub SummonDrinkFood
+ /declare mycount int local
+ /declare count int local
+
+ /if (${FindItemCount[=${DrinkItem}]} < ${Math.Calc[20*${nStacks}]} || ${FindItemCount[=${FoodItem}]} < ${Math.Calc[20*${nStacks}]}) {
+   /if (!${Me.Gem[${DrinkSpell}]} && ${DrinkType.Find[gem]}) /memspell 1 "${DrinkSpell}"
+   /if (!${Me.Gem[${FoodSpell}]} && ${FoodType.Find[gem]}) /memspell 2 "${FoodSpell}"
+
+   :BigLoop
+   /if (${Me.SpellReady[${DrinkSpell}]} || !${FindItem[${DrinkSpell}].TimerReady} ) {
+       :DrinkLoop
+    /if (${Me.CombatState.Equal[COMBAT]} || ${Me.Moving} || !${Me.State.Equal[STAND]} || ${Cursor.ID} || ${Me.Casting.ID}) {
+      /delay 2s
+      /autoinv
+      /goto :DrinkLoop
+    }
+    /call Summon "${DrinkSpell}" ${DrinkType}
+    /autoinv
+   }
+
+   /if (${Me.SpellReady[${FoodSpell}]} || !${FindItem[${FoodSpell}].TimerReady}) {
+       :FoodLoop
+    /if (${Me.CombatState.Equal[COMBAT]} || ${Me.Moving} || !${Me.State.Equal[STAND]} || ${Cursor.ID} || ${Me.Casting.ID}) {
+      /autoinv
+      /delay 2s
+      /goto :FoodLoop
+    }
+    /call Summon "${FoodSpell}" ${FoodType}
+    /autoinv
+   }
+
+   /if (${Math.Calc[20*${nStacks}]}>=${Math.Calc[${FindItemCount[=${DrinkItem}]}+1]}) /goto :BigLoop
+   /if (${Math.Calc[20*${nStacks}]}>=${Math.Calc[${FindItemCount[=${FoodItem}]}+1]}) /goto :BigLoop
+
+ }
+ /return
+
+Sub Summon(string what, string castType)
+  /if ( ${castType.Equal[item]} ) {
+    /useitem ${FindItem[=${what}].ItemSlot} ${FindItem[=${what}].ItemSlot2}
+  }
+  /if ( ${castType.Find[gem]} ) {
+    /casting "${what}" ${castType}
+  }
+  :castwait
+  /delay 2
+  /if ( ${Me.Casting.ID} ) /goto :castwait
+  /delay 5
+  /autoinv
+  /delay 5
+/return

@@ -18,10 +18,11 @@ Sub Main
     /echo "Cleric all set!"
     /bca "Cleric all set!"
     :ClericLoop
+        /call DoHeal
+        /if (${Macro.Return} == 1) /goto :ClericLoop
         /call Check_Mana_Status
         /call Medidate
-        /call DoHeal
-        /call Nuke
+        | /call Nuke
         /call doBuffs
         /goto :ClericLoop
 /return

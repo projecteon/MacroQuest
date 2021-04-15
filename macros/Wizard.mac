@@ -19,12 +19,12 @@ Sub Main
 
     /echo "Wizard all fired up!"
     /bca "Wizard all fired up!"
-    :NukeLoop
+    :WizardLoop
         /call Check_Mana_Status
         /call Medidate
         /call doBuffs
         /call Nuke
-        /goto :NukeLoop
+        /goto :WizardLoop
 /return
 
 | ################################################################################

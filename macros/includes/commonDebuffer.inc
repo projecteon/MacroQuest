@@ -2,7 +2,7 @@
 | # Create DeBuffer Ini Section
 | https://www.redguides.com/community/resources/mq2cast.290/
 | ################################################################################	
-Sub InitBufferIni(string iniFileName)
+Sub InitDebufferIni(string iniFileName)
     /declare options            string  local "DeBuffOptions"
     /if (!${Defined[debuffDimensions]})         /declare debuffDimensions       int     outer 4 
     /if (!${Defined[debuffNameDimension]})      /declare debuffNameDimension    int     outer 1 
@@ -22,19 +22,18 @@ Sub CheckDeBuffs
     /if (!${Defined[DeBuffs]}) /return
     /declare k  int local
     /for k 1 to ${Math.Calc[${DeBuffs.Size}/${debuffDimensions}]}
-        
         /call tryDoDebuff "${DeBuffs[${k},${debuffNameDimension}]}" ${DeBuffs[${k},${debuffPctHpDimension}]} ${DeBuffs[${k},${debuffManaDimension}]} ${DeBuffs[${k},${debuffTimeDimension}]}
     /next k 
 /return
 
 Sub tryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime)
-    /if (${Me.Casting.ID} || ${Me.Moving} || !${Me.Gem[${debuffSpell}]}) {
-        /return
+    /if (${Me.Casting.ID} || ${Me.Moving} || !${Me.Gem[${debuffSpell}]} || ${minMana} > ${Spell[${debuffSpell}].Mana}) {
+        /return 0
     }
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
-        /return
+        /return 0
     }
     
     /declare isNPC          local ${Spawn[${targetId}].Type.Equal[NPC]}
@@ -43,16 +42,16 @@ Sub tryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
     /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${minPctHp} || !${hasLineOfSight} || ${SpellTimer[${targetId},any,${debuffSpell}]} > ${remainingTime}) {
-        /return
+        /return 0
     }
 
     /target id ${targetId}
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
-        /return
+        /return 0
     }
 
-    /if (!${Cast.Ready[${debuffSpell}]} || ${minMana} < ${Spell[${debuffSpell}].Mana} || ${Target.Distance} > ${Spell[${debuffSpell}].Range}) {
-        /return
+    /if (!${Cast.Ready[${debuffSpell}]} || ${Target.Distance} > ${Spell[${debuffSpell}].Range}) {
+        /return 0
     }
 
     /if (${Me.Sitting}) {
@@ -60,7 +59,8 @@ Sub tryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
     }
 
     /call cast "${debuffSpell}" gem${Me.Gem[${debuffSpell}]} 0 CancelDebuff
-/return
+    /bca ${Target.Name} " debuffed with " ${debuffSpell}
+/return 1
 
 | #################################################
 | # Called during the cast of any spell and will

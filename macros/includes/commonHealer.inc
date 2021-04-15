@@ -75,20 +75,20 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 		|- Do we have mana
 		/if (${Me.CurrentMana} < ${Spell[${healSpell}].Mana}) { 		
             /if (${hasNotifiedNoMana}) {
-                /return
+                /return 0
             }
 
             /varset hasNotifiedNoMana TRUE
 			/delay 1s
 			/gsay !!! NO MANA TO HEAL ${healTargetName} !!!
 			/bca !!! NO MANA TO HEAL ${healTargetName} !!!
-			/return
+			/return 0
 		} else {			
             /varset hasNotifiedNoMana FALSE
             /if (${Target.ID} != ${healTargetId}) {
                 /target id ${healTargetId}
                 /delay 2s ${Target.ID} == ${healTargetId}
-                /if (${Target.ID} != ${healTargetId}) /return
+                /if (${Target.ID} != ${healTargetId}) /return 0
             }
 
 			|- If right target and in range, cast the spell
@@ -103,7 +103,7 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 			}
 		}
 	}
-/return
+/return 1
 
 
 Sub iniHeal(string INIFile, string section, string key, array)

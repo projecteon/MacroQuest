@@ -20,13 +20,13 @@ Sub Main
 
     /echo "Mage pettified!"
     /bca "Mage pettified!"
-    :NukeLoop
+    :MageLoop
         /call Check_Mana_Status
         /call Medidate
         /call doBuffs
         /call doPet
         /call Nuke
-        /goto :NukeLoop
+        /goto :MageLoop
 /return
 
 | ################################################################################

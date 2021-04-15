@@ -16,7 +16,7 @@ Sub InitGenralIni(string iniFileName)
     }    				
     
     /if (${Ini[${iniFileName},${options},AssistPct].Length}) {
-        /varset assistPct "${Ini[${iniFileName},${options},AssistPct]}"    
+        /varset assistPct ${Ini[${iniFileName},${options},AssistPct]}    
     } 
 
 /return 1
@@ -56,25 +56,24 @@ Sub Is_NPC_In_Camp(int radiusCheck)
 
 
 Sub IniArray(string iniFile, string section, string keyName, int arrayDimensions, arrayName)
-    /declare Keys       string  local
+    /declare keys       string  local
     /declare k          int     local
     /declare s          int     local
 
-    /varset Keys ${Ini[${iniFile},${section}]}
+    /varset keys ${Ini[${iniFile},${section}]}
     :TrimKeys
-        /if (${Keys.Right[1].Equal[|]}) /varset Keys ${Keys.Left[${Math.Calc[${Keys.Length}-1]}]}
+        /if (${keys.Right[1].Equal[|]}) /varset keys ${keys.Left[${Math.Calc[${keys.Length}-1]}]}
         
-        /if (${Keys.Right[1].Equal[|]}) /goto :TrimKeys
+        /if (${keys.Right[1].Equal[|]}) /goto :TrimKeys
 
-        /declare numberOfBuffs int local ${Math.Calc[${Keys.Count[|]}+1]}
+        /declare numberOfBuffs int local ${Math.Calc[${keys.Count[|]}+1]}
         /if (${numberOfBuffs} < 1) /return
 
         /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
         /declare ${arrayName}[${numberOfBuffs},${arrayDimensions}] string outer
-
         /declare key string local
-        /for k 1 to ${Math.Calc[${Keys.Count[|]}+1]}
-            /varset key ${Keys.Arg[${k},|]}
+        /for k 1 to ${Math.Calc[${keys.Count[|]}+1]}
+            /varset key ${keys.Arg[${k},|]}
             /for s 1 to ${arrayDimensions}
                 /varset ${arrayName}[${k},${s}] ${Ini[${iniFile},${section},${key}].Token[${s},/]}
             /next s

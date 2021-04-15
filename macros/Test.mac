@@ -15,6 +15,7 @@ Sub Main(string Search)
     /echo ${NetBots} 
     /echo ${NetBots.Client} 
     /echo ${NetBots.Counts}
+    /echo ${SpellTimer[${Target.ID},"Snare"]}
 /return 
 
 Sub checkMezz
