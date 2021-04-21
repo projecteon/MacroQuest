@@ -16,7 +16,7 @@ Sub doPet
         /return
     }
 
-    /if (${currentPetTargetId} > 0 && (${Spawn[${currentPetTargetId}].Type.Equal[Corpse]}|| !${SpawnCount[id ${currentPetTargetId}]})) {
+    /if (${currentPetTargetId} > 0 && (${Spawn[${currentPetTargetId}].Type.Equal[Corpse]} || !${SpawnCount[id ${currentPetTargetId}]})) {
         /varset currentPetTargetId 0
     } else /if (${currentPetTargetId} > 0) {
         /return
@@ -32,7 +32,7 @@ Sub doPet
     /declare hasLineOfSight local ${Spawn[${targetId}].LineOfSight}
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
-    /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight} || !${SpawnCount[id ${targetId}]} || ${Spawn[${targetId}].Distance} > 100) {
+    /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight} || ${Spawn[${targetId}].Distance} > 100) {
         /return
     }
 
