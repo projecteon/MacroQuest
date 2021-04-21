@@ -23,9 +23,9 @@ Sub Main
     /echo "Enchanter all mezzed up!"
     /bca "Enchanter all mezzed up!"
     :EnchanterLoop
-        /call DoMezz
-        /call doDeBuffs
-        /if (${Macro.Return} == 1) /goto :EnchanterLoop
+        | /call DoMezz
+        | /call doDeBuffs
+        | /if (${Macro.Return} == 1) /goto :EnchanterLoop
         /call Check_Mana_Status
         /call Medidate
         /call Nuke
@@ -36,7 +36,7 @@ Sub Main
 sub DoMezz
     /if (${Debug}) /echo <== DoMezz -|
     /if (${autoMezz}) {
-        /declare mezzSpell string local "Enthrall"
+        /declare mezzSpell string local "Entrance"
         /declare retry int local
         /declare i int local
         /declare mezTarg int local
