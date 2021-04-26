@@ -16,13 +16,13 @@ if (!$isRunning)
 
 $eqgamePath='C:\Games\Everquest'
 Start-Process -FilePath "eqgame.exe" -WorkingDirectory $eqgamePath -ArgumentList "patchme -h /login:eqpeon"
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 2
 Start-Process -FilePath "eqgame.exe" -WorkingDirectory $eqgamePath -ArgumentList "patchme -h /login:eqpeon2"
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 2
 Start-Process -FilePath "eqgame.exe" -WorkingDirectory $eqgamePath -ArgumentList "patchme -h /login:eqpeon3"
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 2
 Start-Process -FilePath "eqgame.exe" -WorkingDirectory $eqgamePath -ArgumentList "patchme -h /login:eqbob"
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 2
 Start-Process -FilePath "eqgame.exe" -WorkingDirectory $eqgamePath -ArgumentList "patchme -h /login:eqbob2"
-Start-Sleep -Seconds 3
+Start-Sleep -Seconds 2
 Start-Process -FilePath "eqgame.exe" -WorkingDirectory $eqgamePath -ArgumentList "patchme -h /login:eqbob3"
