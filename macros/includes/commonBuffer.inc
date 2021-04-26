@@ -33,7 +33,7 @@ Sub CheckSelfBuffs
     /if (!${Defined[SelfBuffs]}) /return
     /declare k  int local
     /for k 1 to ${Math.Calc[${SelfBuffs.Size}/${iniSelfBuffDimensions}]}
-        /call tryDoBuff "${SelfBuffs[${k},${buffNameDimension}]}" ${SelfBuffs[${k},${minManaDimensions}]}
+        /call tryDoBuff "${SelfBuffs[${k},${buffNameDimension}]}" ${SelfBuffs[${k},${minManaDimensions}]} "SELF"
     /next k 
 /return
 
@@ -51,11 +51,9 @@ Sub tryDoBuff(string buffSpell, int minMana, string classRestrictions)
     }
 
     /declare buffId int local ${Spell[${buffSpell}].ID}
-    /if ((!${Me.Buff[${buffSpell}].ID} || ${Me.Buff[${buffSpell}].Duration} < 10) && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Me.Class.ShortName},${classRestrictions}]})) {
+    /if ((!${Me.Buff[${buffSpell}].ID} || ${Me.Buff[${buffSpell}].Duration} < 10) && ${classRestrictions.Equal["SELF"]}) {
         /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
-    }
-
-    /if (${Spell[${buffSpell}].TargetType.Equal[Single]} && ${Group.Members}) {
+    } else /if (${Spell[${buffSpell}].TargetType.Equal[Single]} && ${Group.Members}) {
         /declare x int local
         /for x 1 to ${Group.Members} {
             /if (${Spawn[${Group.Member[${x}]}].ID} && ${NetBots[${Group.Member[${x}].Name}]} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
