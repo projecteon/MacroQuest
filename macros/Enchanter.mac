@@ -23,9 +23,9 @@ Sub Main
     /echo "Enchanter all mezzed up!"
     /bca "Enchanter all mezzed up!"
     :EnchanterLoop
-        | /call DoMezz
-        | /call doDeBuffs
-        | /if (${Macro.Return} == 1) /goto :EnchanterLoop
+        /call DoMezz
+        /call doDeBuffs
+        /if (${Macro.Return} == 1) /goto :EnchanterLoop
         /call Check_Mana_Status
         /call Medidate
         /call Nuke
