@@ -8,6 +8,8 @@ Sub InitHealIni(string iniFileName)
     /if (!${Defined[mainHealPct]})          /declare mainHealPct                    int     outer 90 
     /if (!${Defined[healDist]})             /declare healDist                       int     outer 200 
     /if (!${Defined[hasNotifiedNoMana]})    /declare hasNotifiedNoMana                      outer FALSE
+    /if (!${Defined[doHealGroup]})          /declare doHealGroup                    bool    outer false 
+    /if (!${Defined[doHealNetBots]})        /declare doHealNetBots                  bool    outer false 
         
     /call InitCasterIni "${iniFileName}"
     /varset casterInitResult ${Macro.Return}
@@ -37,6 +39,18 @@ Sub InitHealIni(string iniFileName)
         /varset healDist ${Spell[${mainHeal}].Range}
     }
 
+    /if (${Ini[${iniFileName},${options},DoHealGroup].Length}) {
+       /varset doHealGroup ${Bool[${Ini[${iniFileName},${options},DoHealGroup]}]}     
+    } else {
+        /ini "${iniFileName}" "${options}" "DoHealGroup" "${doHealGroup}"
+    }
+
+    /if (${Ini[${iniFileName},${options},DoHealNetBots].Length}) {
+       /varset doHealNetBots ${Bool[${Ini[${iniFileName},${options},DoHealNetBots]}]}
+    } else {
+        /ini "${iniFileName}" "${options}" "DoHealNetBots" "${doHealNetBots}"
+    }
+
 /return ${casterInitResult}
 
 Sub CheckHeals
@@ -48,7 +62,12 @@ Sub CheckHeals
         /call CastHeal ${mainHeal} ${Me.ID} "${Me.Name}"
     }
 
-    /if (!${Group.Members}) {
+    /call CheckHealGroup
+    /call CheckHealNetBots
+/return
+
+Sub CheckHealGroup
+    /if (!${Group.Members} || !${doHealGroup}) {
         /return
     }
 
@@ -59,6 +78,22 @@ Sub CheckHeals
         }
         /next x
     }
+/return
+
+Sub CheckHealNetBots
+    /if (${NetBots.Counts} < 2 || !${doHealNetBots}) {
+        /return
+    }
+
+    /declare x int local
+    /for x 1 to ${NetBots.Counts} {
+        /varset netbotsClient "${NetBots.Client[${x}]}"
+        /if (${NetBots[${netbotsClient}].InZone} && ${NetBots[${netbotsClient}].PctHPs} <= ${mainHealPct} && ${Spawn[${NetBots[${netbotsClient}].ID}].Distance} <= ${healDist}) {
+            /call CastHeal ${mainHeal} ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+        }
+        /next x
+    }
+
 /return
 
 Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
