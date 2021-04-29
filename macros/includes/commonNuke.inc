@@ -26,7 +26,7 @@ Sub InitNukeIni(string fileName)
     }
 /return ${casterInitResult}
 
-Sub Nuke
+Sub doNuke
     /if (${Me.Casting.ID} || ${Me.Moving}) {
         /return
     }

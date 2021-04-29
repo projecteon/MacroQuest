@@ -22,7 +22,7 @@ Sub Main
         /if (${Macro.Return} == 1) /goto :DruidLoop
         /call Check_Mana_Status
         /call Medidate
-        /call Nuke
+        /call doNuke
         /call doBuffs
         /goto :DruidLoop
 /return

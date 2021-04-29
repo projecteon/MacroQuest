@@ -24,7 +24,7 @@ Sub Main
         /call Check_Mana_Status
         /call Medidate
         /call doPet
-        /call Nuke
+        /call doNuke
         /call doBuffs
         /goto :ShamanLoop
 /return

@@ -28,7 +28,7 @@ Sub Main
         /if (${Macro.Return} == 1) /goto :EnchanterLoop
         /call Check_Mana_Status
         /call Medidate
-        /call Nuke
+        /call doNuke
         /call doBuffs
         /goto :EnchanterLoop
 /return
