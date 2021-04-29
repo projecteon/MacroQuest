@@ -1,0 +1,68 @@
+#include includes\spell_routines.inc
+#include includes\common.inc
+#include includes\commonCaster.inc
+#include includes\commonHealer.inc
+#include includes\commonBuffer.inc
+#include includes\commonNuke.inc
+#turbo 40
+
+Sub Main
+    /declare druidIniFileName        string  local "ini/${MacroQuest.Server}/Druid_${Me.CleanName}.ini"
+
+    /call InitDruidIni ${druidIniFileName}
+    /if (${Macro.Return} == 0) {
+        /echo "Bootstrapped INI file, please update variables in: ${druidIniFileName}"
+        /endmacro
+    }
+
+    /echo "Druid sow'ed up!"
+    /bca "Druid sow'ed up!"
+    :DruidLoop
+        /call DoHeal
+        /if (${Macro.Return} == 1) /goto :DruidLoop
+        /call Check_Mana_Status
+        /call Medidate
+        /call Nuke
+        /call doBuffs
+        /goto :DruidLoop
+/return
+
+| ###############################################################################
+| # Checks the tank and specified PC's for hitpoint levels and heals accordingly.
+| # This gets called in the main loop for every healer. It is the primary point 
+| # for all healing.
+| ###############################################################################
+Sub DoHeal
+	|- Check the tank's hitpoints before we start to make sure we have time to check everyone else
+   	| /call CheckTank
+
+	|- Check our group for heals
+	| /if (${Heal.InjuredCount} > 0) /call CheckGroupHeals
+    /call CheckHeals
+
+	|- Check for NetBots heals
+	| /if (${NetBots[${Heal.WorstNetBots.Name}].PctHPs} < 100) /call CheckNetBotsHeals
+	
+/return
+
+| ################################################################################
+| # Create Cleric Ini Section
+| ################################################################################	
+Sub InitDruidIni(string iniFileName)
+    /declare options           string  local "HealingOptions"
+    /declare bootstrapInitResult  int     local 1
+        
+    /call InitHealIni "${iniFileName}"
+    /varset bootstrapInitResult ${Macro.Return}
+    
+    /call InitBufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset bootstrapInitResult 0
+    }
+    
+    /call InitNukeIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset bootstrapInitResult 0
+    }
+
+/return ${bootstrapInitResult}

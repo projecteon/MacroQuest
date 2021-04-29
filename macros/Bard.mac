@@ -1,0 +1,58 @@
+#include includes\common.inc
+
+#turbo
+
+Sub Main
+    /declare bardIniFileName        string  outer "ini/${MacroQuest.Server}/Bard_${Me.CleanName}.ini"
+
+    /call InitBardIni ${bardIniFileName}
+    /if (${Macro.Return} == 0) {
+        /echo "Bootstrapped INI file, please update variables in: ${bardIniFileName}"
+        /endmacro
+    }
+
+    /echo "Bard rock'n'rolling!"
+    /bca "Bard rock'n'rolling!"
+
+    :BardLoop
+        /call doKill
+        /goto :BardLoop
+/return
+
+Sub doKill
+    /if (!${Group.Members}) /return
+	/if (!${Melee.Enable} || ${Melee.Combat}) /return
+    
+    /declare targetId int local ${NetBots[${mainAssist}].TargetID}
+    /declare isNPC        local ${Spawn[${NetBots[${mainAssist}].TargetID}].Type.Equal[NPC]}
+    /declare isPet        local ${Spawn[${NetBots[${mainAssist}].TargetID}].Type.Equal[PET]}
+
+    /if (!${isNPC} || !${isPet}) /return
+	/if (${SpawnCount[los id ${targetId}]} < 1) /return
+	/if (${NetBots[${mainAssist}].TargetHP} > 90) /return
+
+	/target id ${targetId}
+    /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
+        /return
+    }
+    
+	/killthis
+
+    :gotoloopkeepfighting
+        /if (${Target.ID} && ${Me.Combat} && ${Target.Type.Equal[NPC]}) {
+            /delay 10
+            /doevents
+            /if (${Debug}) /echo DEBUG: KillMob: Combat Loop
+            /goto :gotoloopkeepfighting            
+        } 
+/return
+
+
+Sub InitBardIni(string fileName, string mainAssist)
+    /declare rogueOptions       string  outer "BardOptions"
+    /declare parentResult       int     local 1
+
+    /call InitGenralIni "${iniFileName}"
+    /varset parentResult ${Macro.Return}
+    
+/return ${parentResult}
