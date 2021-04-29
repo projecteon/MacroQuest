@@ -41,7 +41,7 @@ Sub DoHeal
 	
 	|- Check our group for heals
 	| /if (${Heal.InjuredCount} > 0) /call CheckGroupHeals
-    /call CheckGroupHeals
+    /call CheckHeals
 
 	|- Check for NetBots heals
 	| /if (${NetBots[${Heal.WorstNetBots.Name}].PctHPs} < 100) /call CheckNetBotsHeals

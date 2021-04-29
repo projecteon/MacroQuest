@@ -39,7 +39,7 @@ Sub InitHealIni(string iniFileName)
 
 /return ${casterInitResult}
 
-Sub CheckGroupHeals
+Sub CheckHeals
     /if (${Me.Casting.ID}) {
         /return
     }
