@@ -10,24 +10,35 @@ Sub InitBufferIni(string iniFileName)
     /if (!${Defined[minManaDimensions]})                /declare minManaDimensions              int     outer 2 
     /if (!${Defined[buffClassRestrictionsDimension]})   /declare buffClassRestrictionsDimension int     outer 3 
     /if (!${Defined[iniSelfBuffDimensions]})            /declare iniSelfBuffDimensions          int     outer 2
-    /if (!${Defined[minBuffMana]})                      /declare minBuffMana                    int     outer 80 
+    /if (!${Defined[doGroupBuffs]})                     /declare doGroupBuffs                   bool    outer false 
+    /if (!${Defined[doNetBotsBuffs]})                   /declare doNetBotsBuffs                 bool    outer false 
 
-    /if (${Ini[${iniFileName},${options},MinMana].Length}) {
-       /varset minBuffMana ${Ini[${iniFileName},${options},MinMana]}     
+    /if (${Ini[${iniFileName},${options},DoGroupBuffs].Length}) {
+       /varset doGroupBuffs ${Bool[${Ini[${iniFileName},${options},DoGroupBuffs]}]}     
     } else {
-        /ini "${iniFileName}" "${options}" "MinMana" "${minBuffMana}"
-        /return 0
+        /ini "${iniFileName}" "${options}" "DoGroupBuffs" "${doGroupBuffs}"
+    }
+
+    /if (${Ini[${iniFileName},${options},DoNetBotspBuffs].Length}) {
+       /varset doNetBotsBuffs ${Bool[${Ini[${iniFileName},${options},DoNetBotspBuffs]}]}
+    } else {
+        /ini "${iniFileName}" "${options}" "DoNetBotspBuffs" "${doNetBotsBuffs}"
     }
 
     /call iniBuffs "${iniFileName}" "Buffs" "Buff" ${iniBuffDimensions} Buffs
     /call iniBuffs "${iniFileName}" "SelfBuffs" "SelfBuff" ${iniSelfBuffDimensions} SelfBuffs
 
+    /if (${Buffs.Size} < 1) {
+        /varset doGroupBuffs false
+        /varset doNetBotsBuffs false
+    }
+
 /return 1
 
 Sub doBuffs
     /call CheckSelfBuffs
-    /call CheckGroupBuffs
-    /call CheckNetBotBuffs
+    /if (${doGroupBuffs}) /call CheckGroupBuffs
+    /if (${doNetBotsBuffs}) /call CheckNetBotBuffs
 /return
 
 Sub CheckSelfBuffs
