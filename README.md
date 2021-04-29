@@ -23,6 +23,7 @@
 * http://eqtitan.com/forums/viewtopic.php?f=53&t=2175
 * https://www.redguides.com/community/threads/my-first-attempt-at-altering-a-macro-trying-to-learn-maco-need-help-lol.20774/
 * https://www.redguides.com/community/threads/tank-macro.10777/
+* https://www.mmobugs.com/forums/index.php?threads/pet-target.31425/
 
 ## Class specific
  
