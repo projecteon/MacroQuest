@@ -10,35 +10,35 @@ Sub InitBufferIni(string iniFileName)
     /if (!${Defined[minManaDimensions]})                /declare minManaDimensions              int     outer 2 
     /if (!${Defined[buffClassRestrictionsDimension]})   /declare buffClassRestrictionsDimension int     outer 3 
     /if (!${Defined[iniSelfBuffDimensions]})            /declare iniSelfBuffDimensions          int     outer 2
-    /if (!${Defined[doGroupBuffs]})                     /declare doGroupBuffs                   bool    outer false 
-    /if (!${Defined[doNetBotsBuffs]})                   /declare doNetBotsBuffs                 bool    outer false 
+    /if (!${Defined[doBuffGroup]})                      /declare doBuffGroup                    bool    outer false 
+    /if (!${Defined[doBuffNetBots]})                    /declare doBuffNetBots                  bool    outer false 
 
-    /if (${Ini[${iniFileName},${options},DoGroupBuffs].Length}) {
-       /varset doGroupBuffs ${Bool[${Ini[${iniFileName},${options},DoGroupBuffs]}]}     
+    /if (${Ini[${iniFileName},${options},DoBuffGroup].Length}) {
+       /varset doBuffGroup ${Bool[${Ini[${iniFileName},${options},DoBuffGroup]}]}     
     } else {
-        /ini "${iniFileName}" "${options}" "DoGroupBuffs" "${doGroupBuffs}"
+        /ini "${iniFileName}" "${options}" "DoBuffGroup" "${doBuffGroup}"
     }
 
-    /if (${Ini[${iniFileName},${options},DoNetBotspBuffs].Length}) {
-       /varset doNetBotsBuffs ${Bool[${Ini[${iniFileName},${options},DoNetBotspBuffs]}]}
+    /if (${Ini[${iniFileName},${options},DoBuffNetBots].Length}) {
+       /varset doBuffNetBots ${Bool[${Ini[${iniFileName},${options},DoBuffNetBots]}]}
     } else {
-        /ini "${iniFileName}" "${options}" "DoNetBotspBuffs" "${doNetBotsBuffs}"
+        /ini "${iniFileName}" "${options}" "DoBuffNetBots" "${doBuffNetBots}"
     }
 
     /call iniBuffs "${iniFileName}" "Buffs" "Buff" ${iniBuffDimensions} Buffs
     /call iniBuffs "${iniFileName}" "SelfBuffs" "SelfBuff" ${iniSelfBuffDimensions} SelfBuffs
 
     /if (${Buffs.Size} < 1) {
-        /varset doGroupBuffs false
-        /varset doNetBotsBuffs false
+        /varset doBuffGroup false
+        /varset doBuffNetBots false
     }
 
 /return 1
 
 Sub doBuffs
     /call CheckSelfBuffs
-    /if (${doGroupBuffs}) /call CheckGroupBuffs
-    /if (${doNetBotsBuffs}) /call CheckNetBotBuffs
+    /if (${doBuffGroup}) /call CheckGroupBuffs
+    /if (${doBuffNetBots}) /call CheckNetBotBuffs
 /return
 
 Sub CheckSelfBuffs
