@@ -70,6 +70,8 @@ Sub Medidate
 |-----------------------------------------------------------|
 SUB check_Manastone
 /if (${Debug}) /echo |- check_Manastone ==>
-    /if ((!${Me.CombatState.Equal[DEBUFFED]}) && !${Me.Invis} && ${Bool[${FindItem[=Manastone]}]} && ${Me.PctMana} < 70 && ${Me.PctHPs} > 70 && ${Me.PctAggro} < 1 && !${Me.CombatState.Equal[COMBAT]} )    /itemnotify Manastone rightmouseup    
+    /if ((!${Me.CombatState.Equal[DEBUFFED]}) && !${Me.Invis} && ${Bool[${FindItem[=Manastone]}]} && ${Me.PctMana} < 70 && ${Me.PctHPs} > 70 && ${Me.PctAggro} < 1 && !${Me.CombatState.Equal[COMBAT]} ) {
+        /casting "Manastone"    
+    }
 /if (${Debug}) /echo <== check_Manastone -|
 /RETURN
