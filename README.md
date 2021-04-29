@@ -16,6 +16,13 @@
 * http://mqemulator.net/forum2/viewtopic.php?t=1047 | Subs, Targets and Events in Macros
 * http://mqemulator.net/forum2/viewtopic.php?t=1058 | A leason on Events
 * http://mqemulator.net/forum2/viewtopic.php?t=1069 | EQBC - The Way To Skip Macros.
+* https://www.mmobugs.com/forums/index.php?threads/target-targets-pet.26694/
+* https://www.mmobugs.com/forums/index.php?threads/pet-target.31425/
+* https://www.mmobugs.com/wiki/index.php/MQ2Bot
+* http://ezserver.online/forums/index.php?topic=5340.0
+* http://eqtitan.com/forums/viewtopic.php?f=53&t=2175
+* https://www.redguides.com/community/threads/my-first-attempt-at-altering-a-macro-trying-to-learn-maco-need-help-lol.20774/
+* https://www.redguides.com/community/threads/tank-macro.10777/
 
 ## Class specific
  
