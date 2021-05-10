@@ -39,7 +39,6 @@ Sub SummonDrinkFood
     :BigLoop
       /varset drinkCount ${Math.Calc[${FindItemCount[=${DrinkItem}]}]}      
       /if (${Me.SpellReady[${DrinkSpell}]} && ${Math.Calc[20*${nStacks}]}>${drinkCount}) {
-        /echo |- DrinkLoop
         :DrinkLoop
           /if (!${Me.State.Equal[STAND]} || ${Cursor.ID} || ${Me.Casting.ID}) {
             /delay 2s
@@ -52,7 +51,6 @@ Sub SummonDrinkFood
 
       /varset foodCount ${Math.Calc[${FindItemCount[=${FoodItem}]}]}
       /if (${Me.SpellReady[${FoodSpell}]} && ${Math.Calc[20*${nStacks}]}>${foodCount}) {
-        /echo |- FoodLoop
         :FoodLoop
           /if (!${Me.State.Equal[STAND]} || ${Cursor.ID} || ${Me.Casting.ID}) {
             /autoinv
