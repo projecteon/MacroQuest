@@ -10,74 +10,149 @@ Sub InitBufferIni(string iniFileName)
     /if (!${Defined[minManaDimensions]})                /declare minManaDimensions              int     outer 2 
     /if (!${Defined[buffClassRestrictionsDimension]})   /declare buffClassRestrictionsDimension int     outer 3 
     /if (!${Defined[iniSelfBuffDimensions]})            /declare iniSelfBuffDimensions          int     outer 2
-    /if (!${Defined[minBuffMana]})                      /declare minBuffMana                    int     outer 80 
+    /if (!${Defined[doBuffGroup]})                      /declare doBuffGroup                    bool    outer false 
+    /if (!${Defined[doBuffNetBots]})                    /declare doBuffNetBots                  bool    outer false 
 
-    /if (${Ini[${iniFileName},${options},MinMana].Length}) {
-       /varset minBuffMana ${Ini[${iniFileName},${options},MinMana]}     
+    /if (${Ini[${iniFileName},${options},DoBuffGroup].Length}) {
+       /varset doBuffGroup ${Bool[${Ini[${iniFileName},${options},DoBuffGroup]}]}     
     } else {
-        /ini "${iniFileName}" "${options}" "MinMana" "${minBuffMana}"
-        /return 0
+        /ini "${iniFileName}" "${options}" "DoBuffGroup" "${doBuffGroup}"
+    }
+
+    /if (${Ini[${iniFileName},${options},DoBuffNetBots].Length}) {
+       /varset doBuffNetBots ${Bool[${Ini[${iniFileName},${options},DoBuffNetBots]}]}
+    } else {
+        /ini "${iniFileName}" "${options}" "DoBuffNetBots" "${doBuffNetBots}"
     }
 
     /call iniBuffs "${iniFileName}" "Buffs" "Buff" ${iniBuffDimensions} Buffs
     /call iniBuffs "${iniFileName}" "SelfBuffs" "SelfBuff" ${iniSelfBuffDimensions} SelfBuffs
 
+    /if (${Buffs.Size} < 1) {
+        /varset doBuffGroup false
+        /varset doBuffNetBots false
+    }
+
 /return 1
 
 Sub doBuffs
     /call CheckSelfBuffs
-    /call CheckGroupBuffs
+    /if (${doBuffGroup}) /call CheckGroupBuffs
+    /if (${doBuffNetBots}) /call CheckNetBotBuffs
 /return
 
 Sub CheckSelfBuffs
     /if (!${Defined[SelfBuffs]}) /return
     /declare k  int local
     /for k 1 to ${Math.Calc[${SelfBuffs.Size}/${iniSelfBuffDimensions}]}
-        /call tryDoBuff "${SelfBuffs[${k},${buffNameDimension}]}" ${SelfBuffs[${k},${minManaDimensions}]}
+        /declare buffSpell string local ${SelfBuffs[${k},${buffNameDimension}]}
+        /call canCastBuff "${buffSpell}" ${SelfBuffs[${k},${minManaDimensions}]}         
+        /if (${Macro.Return} == 1 && (!${Me.Buff[${buffSpell}].ID} || ${Me.Buff[${buffSpell}].Duration} < 10)) {
+            /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
+        }
     /next k 
 /return
 
 Sub CheckGroupBuffs
-    /if (!${Defined[Buffs]}) /return
-    /declare k  int local
-    /for k 1 to ${Math.Calc[${Buffs.Size}/${iniBuffDimensions}]}
-        /call tryDoBuff "${Buffs[${k},${buffNameDimension}]}" ${Buffs[${k},${minManaDimensions}]} ${Buffs[${k},${buffClassRestrictionsDimension}]}
-    /next k 
-/return
-
-Sub tryDoBuff(string buffSpell, int minMana, string classRestrictions)
-    /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || !${Cast.Ready[${buffSpell}]} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
+    /if (${Debug}) /echo  |- CheckGroupBuffs ==>
+    
+    /if (!${Defined[Buffs]}) {
+        /if (${Debug}) /echo No Buffs defined.
+        /if (${Debug}) /echo <== CheckGroupBuffs -|
+        /return
+    }
+    
+    /if (!${Group.Members}) {
+        /if (${Debug}) /echo Not enough in a group. 
+        /if (${Debug}) /echo <== CheckGroupBuffs -|
         /return
     }
 
-    /declare buffId int local ${Spell[${buffSpell}].ID}
-    /if ((!${Me.Buff[${buffSpell}].ID} || ${Me.Buff[${buffSpell}].Duration} < 10) && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Me.Class.ShortName},${classRestrictions}]})) {
-        /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
+    /declare buffSpell string local
+    /declare classRestrictions string local
+    /declare k  int local
+    /for k 1 to ${Math.Calc[${Buffs.Size}/${iniBuffDimensions}]} {
+        /varset buffSpell ${Buffs[${k},${buffNameDimension}]}
+        /call canCastBuff "${buffSpell}" ${Buffs[${k},${minManaDimensions}]}     
+        /if (${Macro.Return} == 1 && ${Spell[${buffSpell}].TargetType.Equal[Single]}) {
+            /varset classRestrictions ${Buffs[${k},${buffClassRestrictionsDimension}]}
+            /if (!${Defined[x]}) /declare x int local
+            /for x 1 to ${Group.Members} {
+                /if (${Spawn[${Group.Member[${x}]}].ID} && ${NetBots[${Group.Member[${x}].Name}]} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
+                    /if (${SpellTimer[${Group.Member[${x}].ID},any,${buffSpell}]} < 5) {
+                        /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
+                    } 
+                }
+                /next x
+            }
+        }
+        /next k 
     }
 
-    /if (${Spell[${buffSpell}].TargetType.Equal[Single]} && ${Group.Members}) {
-        /declare x int local
-        /for x 1 to ${Group.Members} {
-            /if (${Spawn[${Group.Member[${x}]}].ID} && ${NetBots[${Group.Member[${x}].Name}]} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
-                /if (!${NetBots[${Group.Member[${x}].Name}].Buff.Find[${buffId} ]}) {
-                    /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
-                } else {
-                    /if (!${Defined[i]}) /declare i int local
-                    /for i 0 to ${maxBuffsPerPerson}
-                        /if (${Bool[${NetBots[${Group.Member[${x}].Name}].Buff[${i}]}]}) {
-                            /if (${NetBots[${Group.Member[${x}].Name}].Buff[${i}].ID} == ${buffId} && ${NetBots[${Group.Member[${x}].Name}].Duration[${i}]} < 5) {
-                                /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
-                            }
-                        }
-                    /next i
-                }
-            }
-            /next x
-        }
-    }
+    /if (${Debug}) /echo <== CheckGroupBuffs -|
 /return
 
+Sub CheckNetBotBuffs
+    /if (${Debug}) /echo  |- CheckNetBotBuffs ==>
+    
+    /if (!${Defined[Buffs]}) {
+        /if (${Debug}) /echo No Buffs defined.
+        /if (${Debug}) /echo <== CheckNetBotBuffs -|
+        /return
+    }
+    
+    /if (${NetBots.Counts} < 2) {
+        /if (${Debug}) /echo Not enough Nebots clients, current: ${NetBots.Counts} 
+        /if (${Debug}) /echo <== CheckNetBotBuffs -|
+        /return
+    }
+    
+    /declare buffSpell string local
+    /declare buffId int local
+    /declare classRestrictions string local
+    /declare netbotsClient string local
+    /declare k  int local
+    /for k 1 to ${Math.Calc[${Buffs.Size}/${iniBuffDimensions}]} {
+        /varset buffSpell ${Buffs[${k},${buffNameDimension}]}
+        /call canCastBuff "${buffSpell}" ${Buffs[${k},${minManaDimensions}]}   
+        /varset buffId ${Spell[${buffSpell}].ID}
+        /if (${Macro.Return} == 1 && ${Spell[${buffSpell}].TargetType.Equal[Single]}) {
+            /varset classRestrictions ${Buffs[${k},${buffClassRestrictionsDimension}]}
+            /if (!${Defined[x]}) /declare x int local
+            /for x 1 to ${NetBots.Counts} {
+                /varset netbotsClient "${NetBots.Client[${x}]}"
+                /if (${Spawn[${NetBots[${netbotsClient}].Name}].ID} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${NetBots[${netbotsClient}].Class.ShortName},${classRestrictions}]})) {
+                    /if (!${NetBots[${netbotsClient}].Buff.Find[${buffId} ]}) {
+                        /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+                    } else {
+                        /if (!${Defined[i]}) /declare i int local
+                        /for i 0 to ${maxBuffsPerPerson}
+                            /if (${Bool[${NetBots[${netbotsClient}].Buff[${i}]}]}) {
+                                /if (${NetBots[${netbotsClient}].Buff[${i}].ID} == ${buffId} && ${NetBots[${netbotsClient}].Duration[${i}]} < 5) {
+                                    /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+                                }
+                            }
+                        /next i
+                    }
+                }
+                /next x
+            }
+        }
+        /next k 
+    }
+
+    /if (${Debug}) /echo <== CheckNetBotBuffs -|
+/return
+
+Sub canCastBuff(string buffSpell, int minMana)
+    /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || !${Cast.Ready[${buffSpell}]} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
+        /return 0
+    }
+/return 1
+
 Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
+    /if (${Debug}) /echo  |- CastBuff ==> ${buffSpell} -> ${buffTargetName}
+
     /if (!${Defined[DontStop]}) /declare DontStop bool local FALSE
     /if (${Me.Casting.ID}) {
         /return

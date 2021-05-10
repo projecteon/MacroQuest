@@ -3,7 +3,8 @@
 | ################################################################################	
 Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
-    /if (!${Defined[mainAssist]})  	/declare mainAssist       string	outer "Main Assist" 
+    /if (!${Defined[mainAssist]})  	/declare mainAssist       string	outer 
+    /if (!${Defined[mainTank]})  	/declare mainTank         string	outer 
     /if (!${Defined[assistPct]})  	/declare assistPct        int	    outer 100 
     /if (!${Defined[Debug]})  		/declare Debug       				outer FALSE 
     
@@ -13,10 +14,21 @@ Sub InitGenralIni(string iniFileName)
     } else {
         /ini "${iniFileName}" "${options}" "MainAssist" "${mainAssist}"      
         /return 0   
-    }    				
+    }
+    
+    /if (${Ini[${iniFileName},${options},MainTank].Length}) {
+        /varset mainTank "${Ini[${iniFileName},${options},MainTank]}"    
+    } else {
+        /ini "${iniFileName}" "${options}" "MainTank" "${mainTank}"      
+        /return 0   
+    }    				    				
     
     /if (${Ini[${iniFileName},${options},AssistPct].Length}) {
         /varset assistPct ${Ini[${iniFileName},${options},AssistPct]}    
+    } 
+
+    /if (${Ini[${iniFileName},${options},Debug].Length}) {
+       /varset Debug ${Bool[${Ini[${iniFileName},${options},Debug]}]}     
     } 
 
 /return 1
@@ -34,26 +46,6 @@ Sub Is_NPC_In_Camp(int radiusCheck)
 	} 
 
 /return 1
-
-|------------------------------------------------------------|
-|- Reliably targets specified Target.IDs.					-|
-|------------------------------------------------------------|
-|- @param newTargetID: The ID of the spawn you wish to target.	-|
-|------------------------------------------------------------|
-| SUB TrueTarget(newTargetID)
-| 	| Check if we already have target
-| 	/if (${Target.ID} != ${newTargetID}) {    
-| 		/return	
-| 	}
-| 	| Check if the target is in zone.
-| 	/if (${SpawnCount[id ${newTargetID}]}) {
-| 			/squelch /target id ${newTargetID}
-| 			/delay 3s ${Target.ID} == ${newTargetID}
-| 	} else {
-| 		/echo TrueTarget has no spawncount
-| 	}
-| /RETURN
-
 
 Sub IniArray(string iniFile, string section, string keyName, int arrayDimensions, arrayName)
     /declare keys       string  local

@@ -55,6 +55,7 @@ Sub Medidate
         /return
     }
 
+    /call check_Manastone
     /call Is_NPC_In_Camp
     /if (${Math.Calc[${Me.CurrentMana} / ${Me.MaxMana} * 100]} < ${_meditateAt} && !${Me.Sitting} && ${Macro.Return} == 0 && ${Stick.Status.Equal[OFF]}) {
         /sit
@@ -62,3 +63,15 @@ Sub Medidate
         /stand
     }
 /return
+
+|-----------------------------------------------------------|
+|- Uses Manastone whenever nothing else is going on to     -|
+|- bring mana up to 50% while HP is above 70%              -|
+|-----------------------------------------------------------|
+SUB check_Manastone
+/if (${Debug}) /echo |- check_Manastone ==>
+    /if ((!${Me.CombatState.Equal[DEBUFFED]}) && !${Me.Invis} && ${Bool[${FindItem[=Manastone]}]} && ${Me.PctMana} < 70 && ${Me.PctHPs} > 70 && ${Me.PctAggro} < 1 && !${Me.CombatState.Equal[COMBAT]} ) {
+        /casting "Manastone"    
+    }
+/if (${Debug}) /echo <== check_Manastone -|
+/RETURN

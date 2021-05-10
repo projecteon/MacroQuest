@@ -46,6 +46,7 @@ Sub tryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
     }
 
     /target id ${targetId}
+    /delay 2s ${Target.ID}==${targetId}
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
         /return 0
     }

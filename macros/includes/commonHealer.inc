@@ -8,6 +8,8 @@ Sub InitHealIni(string iniFileName)
     /if (!${Defined[mainHealPct]})          /declare mainHealPct                    int     outer 90 
     /if (!${Defined[healDist]})             /declare healDist                       int     outer 200 
     /if (!${Defined[hasNotifiedNoMana]})    /declare hasNotifiedNoMana                      outer FALSE
+    /if (!${Defined[doHealGroup]})          /declare doHealGroup                    bool    outer false 
+    /if (!${Defined[doHealNetBots]})        /declare doHealNetBots                  bool    outer false 
         
     /call InitCasterIni "${iniFileName}"
     /varset casterInitResult ${Macro.Return}
@@ -37,9 +39,21 @@ Sub InitHealIni(string iniFileName)
         /varset healDist ${Spell[${mainHeal}].Range}
     }
 
+    /if (${Ini[${iniFileName},${options},DoHealGroup].Length}) {
+       /varset doHealGroup ${Bool[${Ini[${iniFileName},${options},DoHealGroup]}]}     
+    } else {
+        /ini "${iniFileName}" "${options}" "DoHealGroup" "${doHealGroup}"
+    }
+
+    /if (${Ini[${iniFileName},${options},DoHealNetBots].Length}) {
+       /varset doHealNetBots ${Bool[${Ini[${iniFileName},${options},DoHealNetBots]}]}
+    } else {
+        /ini "${iniFileName}" "${options}" "DoHealNetBots" "${doHealNetBots}"
+    }
+
 /return ${casterInitResult}
 
-Sub CheckGroupHeals
+Sub CheckHeals
     /if (${Me.Casting.ID}) {
         /return
     }
@@ -48,7 +62,14 @@ Sub CheckGroupHeals
         /call CastHeal ${mainHeal} ${Me.ID} "${Me.Name}"
     }
 
-    /if (!${Group.Members}) {
+    /call CheckHealGroup
+    /call CheckHealNetBots
+/return
+
+Sub CheckHealGroup
+    /if (${Debug}) /echo |- CheckHealGroup ==>
+
+    /if (!${Group.Members} || !${doHealGroup}) {
         /return
     }
 
@@ -59,6 +80,29 @@ Sub CheckGroupHeals
         }
         /next x
     }
+    
+    /if (${Debug}) /echo <== CheckHealGroup -|
+/return
+
+Sub CheckHealNetBots
+    /if (${Debug}) /echo |- CheckHealNetBots ==>
+    /if (${NetBots.Counts} < 2 || !${doHealNetBots}) {
+        /if (${Debug} && ${NetBots.Counts} < 2) /echo Not enough Nebots clients, current: ${NetBots.Counts} 
+        /if (${Debug}) /echo <== CheckHealNetBots -|
+        /return
+    }
+
+    /declare netbotsClient string local
+    /declare x int local
+    /for x 1 to ${NetBots.Counts} {
+        /varset netbotsClient "${NetBots.Client[${x}]}"
+        /if (${NetBots[${netbotsClient}].InZone} && ${NetBots[${netbotsClient}].PctHPs} <= ${mainHealPct} && ${Spawn[${NetBots[${netbotsClient}].ID}].Distance} <= ${healDist}) {
+            /call CastHeal ${mainHeal} ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+        }
+        /next x
+    }
+
+    /if (${Debug}) /echo <== CheckHealNetBots -|
 /return
 
 Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
@@ -80,7 +124,7 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 
             /varset hasNotifiedNoMana TRUE
 			/delay 1s
-			/gsay !!! NO MANA TO HEAL ${healTargetName} !!!
+			/if (${Group.Members}) /gsay !!! NO MANA TO HEAL ${healTargetName} !!!
 			/bca !!! NO MANA TO HEAL ${healTargetName} !!!
 			/return 0
 		} else {			
@@ -96,7 +140,7 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
                 /if (${Me.Sitting}) {
                     /stand
                 }
-				/gsay <<< ${healSpell} -> ${healTargetName} >>>			
+				/if (${Group.Members}) /gsay <<< ${healSpell} -> ${healTargetName} >>>			
 				/bca <<< ${healSpell} -> ${healTargetName} >>>
 				/call cast "${healSpell}" gem${Me.Gem[${healSpell}]} 0 CancelHeal
 				/bca MANA: ${Me.PctMana}

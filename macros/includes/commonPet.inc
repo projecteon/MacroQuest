@@ -1,14 +1,28 @@
 Sub InitPetIni(string iniFileName)
     /declare petOptions         string  local "PetOptions"
     /declare petInitResult      int     local 1
+    /declare petSpell           string  outer 
+    /declare petWeaponsSpell    string  outer 
+    /declare petTaunt           bool    outer false
     /declare currentPetTargetId int     outer 0
 
-    | /if (${Ini[${iniFileName},${petOptions},AttackPct].Length}) {
-    |     /varset assistPct ${Ini[${iniFileName},${petOptions},AttackPct]}
-    | } else {
-    |     /ini "${iniFileName}" "${petOptions}" "AttackPct" "${assistPct}"
-    |     /varset petInitResult 0
-    | }
+    /if (${Ini[${iniFileName},${petOptions},"Pet Spell"].Length}) {
+        /varset petSpell ${Ini[${iniFileName},${petOptions},"Pet Spell"]}
+    } else {
+        /ini "${iniFileName}" "${petOptions}" "Pet Spell" "${petSpell}"
+    }
+
+    /if (${Ini[${iniFileName},${petOptions},"Pet Weapons Spell"].Length}) {
+        /varset petWeaponsSpell ${Ini[${iniFileName},${petOptions},"Pet Weapons Spell"]}
+    } else {
+        /ini "${iniFileName}" "${petOptions}" "Pet Weapons Spell" "${petWeaponsSpell}"
+    }
+
+    /if (${Ini[${iniFileName},${petOptions},"Pet Taunt"].Length}) {
+        /varset petTaunt ${Ini[${iniFileName},${petOptions},"Pet Taunt"]}
+    } else {
+        /ini "${iniFileName}" "${petOptions}" "Pet Taunt" "${petTaunt}"
+    }
 /return 1
 
 Sub doPet
@@ -17,6 +31,7 @@ Sub doPet
     }
 
     /if (${currentPetTargetId} > 0 && (${Spawn[${currentPetTargetId}].Type.Equal[Corpse]} || !${SpawnCount[id ${currentPetTargetId}]})) {
+        /pet back off
         /varset currentPetTargetId 0
     } else /if (${currentPetTargetId} > 0) {
         /return
@@ -36,15 +51,78 @@ Sub doPet
         /return
     }
 
-    /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
+    /if (!${Target.ID} || ${Target.ID}!=${targetId}) {
 	    /target id ${targetId}
+        /delay 1s ${Target.ID}==${targetId}
+    }
+
+    /if (!${Target.ID} || ${Target.ID}!=${targetId}) {
         /return
     }
 
     /varset currentPetTargetId ${targetId}
-    /pet back off
+    | /pet back off
     /pet attack
 /return
+
+Sub summonPet
+    /if (!${Me.Gem[${petSpell}]}) {
+        /echo !!! SPELL NOT MEMORIZED ${petSpell} - SHUTDOWN !!!
+        /bca !!! SPELL NOT MEMORIZED ${petSpell} - SHUTDOWN !!!
+        /endmac
+    }
+
+    |handle zone delay to prevent summoning pet if one exists
+    | /if (!${Bool[${Zone.ID}]} || ${currentZone} != ${Zone.ID} || ${SpawnCount[pc = ${Me}]}==0) {
+    |     /delay 3s
+    |     /call check_Zone
+    |     /return
+    | }
+
+    /if (!${Me.Pet.ID} && !${Me.Casting} && ${Me.SpellReady[${petSpell}]} && ${Me.CurrentMana} > ${Spell[${petSpell}].Mana}) {
+        /call cast ${petSpell}
+    }
+
+    /if (${Me.Pet.ID} && ${petTaunt}) {
+        /pet taunt on
+    } else {
+        /pet taunt off
+    }
+
+    /call weaponizePet
+/RETURN
+
+
+
+Sub weaponizePet
+    /if (!${Me.Gem[${petWeaponsSpell}]}) {
+        /echo !!! SPELL NOT MEMORIZED ${petWeaponsSpell} - SHUTDOWN !!!
+        /bca !!! SPELL NOT MEMORIZED ${petWeaponsSpell} - SHUTDOWN !!!
+        /endmac
+    }
+
+    /if (!${Me.Pet.ID} || ${Me.Casting} || !${Me.SpellReady[${petSpell}]} || ${Me.CurrentMana} < ${Spell[${petSpell}].Mana}) {
+        /return
+    }
+
+    /if (!${Target.ID} || ${Target.ID}!=${Pet.ID}) {
+	    /target id ${Pet.ID}
+        /delay 1s ${Target.ID}==${Pet.ID}
+    }
+
+    /declare k  int local
+    /for k 1 to 2 {
+        /call cast ${petWeaponsSpell}
+        /delay 3
+        /click left target
+        /delay 1s ${Window[GiveWnd].Open}
+        /if (${Window[GiveWnd].Open}) {
+            /notify GiveWnd GVW_Give_Button LeftMouseUp
+            /delay 5s !${Window[GiveWnd].Open}
+        }
+        /next k
+    }
+/RETURN
 
 Sub MakePetIni(string fileName)
     |- Build the INI file
