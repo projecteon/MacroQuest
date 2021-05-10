@@ -67,6 +67,8 @@ Sub CheckHeals
 /return
 
 Sub CheckHealGroup
+    /if (${Debug}) /echo |- CheckHealGroup ==>
+
     /if (!${Group.Members} || !${doHealGroup}) {
         /return
     }
@@ -78,13 +80,19 @@ Sub CheckHealGroup
         }
         /next x
     }
+    
+    /if (${Debug}) /echo <== CheckHealGroup -|
 /return
 
 Sub CheckHealNetBots
+    /if (${Debug}) /echo |- CheckHealNetBots ==>
     /if (${NetBots.Counts} < 2 || !${doHealNetBots}) {
+        /if (${Debug} && ${NetBots.Counts} < 2) /echo Not enough Nebots clients, current: ${NetBots.Counts} 
+        /if (${Debug}) /echo <== CheckHealNetBots -|
         /return
     }
 
+    /declare netbotsClient string local
     /declare x int local
     /for x 1 to ${NetBots.Counts} {
         /varset netbotsClient "${NetBots.Client[${x}]}"
@@ -94,6 +102,7 @@ Sub CheckHealNetBots
         /next x
     }
 
+    /if (${Debug}) /echo <== CheckHealNetBots -|
 /return
 
 Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
@@ -115,7 +124,7 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 
             /varset hasNotifiedNoMana TRUE
 			/delay 1s
-			/gsay !!! NO MANA TO HEAL ${healTargetName} !!!
+			/if (${Group.Members}) /gsay !!! NO MANA TO HEAL ${healTargetName} !!!
 			/bca !!! NO MANA TO HEAL ${healTargetName} !!!
 			/return 0
 		} else {			
@@ -131,7 +140,7 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
                 /if (${Me.Sitting}) {
                     /stand
                 }
-				/gsay <<< ${healSpell} -> ${healTargetName} >>>			
+				/if (${Group.Members}) /gsay <<< ${healSpell} -> ${healTargetName} >>>			
 				/bca <<< ${healSpell} -> ${healTargetName} >>>
 				/call cast "${healSpell}" gem${Me.Gem[${healSpell}]} 0 CancelHeal
 				/bca MANA: ${Me.PctMana}

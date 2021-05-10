@@ -24,7 +24,6 @@ Sub Main
     /bca "Enchanter all mezzed up!"
     :EnchanterLoop
         /call DoMezz
-        /if (${Macro.Return} == 1) /goto :EnchanterLoop
         /call doDeBuffs
         /if (${Macro.Return} == 1) /goto :EnchanterLoop
         /call Check_Mana_Status
@@ -43,7 +42,7 @@ sub DoMezz
         /declare mezTarg int local
         /declare maTargetId int local ${NetBots[${mainAssist}].TargetID}
 
-        /if (!${SpawnCount[npc los targetable radius ${mezzRadius}]} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana}) /return 0
+        /if (!${SpawnCount[npc los targetable radius ${mezzRadius}]} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana}) /return
         /if (${Debug}) /echo "DoMezz targets" ${SpawnCount[npc los targetable radius ${mezzRadius}]}
 
         /for i 1 to ${SpawnCount[npc los targetable radius ${mezzRadius}]}
@@ -51,8 +50,8 @@ sub DoMezz
             /if (${mezTarg}!=${maTargetId}) {
                 /target id ${mezTarg}
                 /delay 2s ${Target.ID}==${mezTarg}
-                /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${mezTarg}) {
-                    /return 1
+                /if (!${Target.ID} || ${Target.ID}!=${mezTarg}) {
+                    /return
                 }
 
                 /if (${SpellTimer[${mezTarg},any,${mezzSpell}]} < 8 && ${Cast.Ready[${mezzSpell}]} && ${Target.Distance} < ${Spell[${mezzSpell}].Range}) {
@@ -63,7 +62,7 @@ sub DoMezz
             /next i
     }
     /if (${Debug}) /echo <== DoMezz -|
-/return ${autoMezz}
+/return
 
 
 Sub CancelMezz

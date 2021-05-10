@@ -27,6 +27,10 @@ Sub InitGenralIni(string iniFileName)
         /varset assistPct ${Ini[${iniFileName},${options},AssistPct]}    
     } 
 
+    /if (${Ini[${iniFileName},${options},Debug].Length}) {
+       /varset Debug ${Bool[${Ini[${iniFileName},${options},Debug]}]}     
+    } 
+
 /return 1
 
 
