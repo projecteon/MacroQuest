@@ -9,6 +9,7 @@ Sub InitNukeIni(string fileName)
     /declare nukeOptions        string  outer "NukeOptions"
     /declare mainNuke           string  outer 
     /declare undeadNuke         string  outer 
+    /declare minNukeMana        int     outer 0
     /declare casterInitResult   int     local 1
 
     /call InitCasterIni "${fileName}"
@@ -24,10 +25,14 @@ Sub InitNukeIni(string fileName)
     /if (${Ini[${fileName},${nukeOptions},UndeadNuke].Length}) {
        /varset undeadNuke ${Ini[${fileName},${nukeOptions},UndeadNuke]}       
     }
+
+    /if (${Ini[${fileName},${nukeOptions},MinMana].Length}) {
+       /varset minNukeMana ${Ini[${fileName},${nukeOptions},MinMana]}       
+    }
 /return ${casterInitResult}
 
 Sub doNuke
-    /if (${Me.Casting.ID} || ${Me.Moving}) {
+    /if (${Me.Casting.ID} || ${Me.Moving} || ${Me.CurrentMana} <= ${minNukeMana}) {
         /return
     }
 
@@ -46,6 +51,7 @@ Sub doNuke
     }
 
     /target id ${targetId}
+    /delay 2s ${Target.ID}==${targetId}
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
         /return
     }
