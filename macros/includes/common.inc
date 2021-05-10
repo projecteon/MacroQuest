@@ -1,12 +1,9 @@
-| ################################################################################
-| # Create General Ini Section
-| ################################################################################	
 Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
     /if (!${Defined[mainAssist]})  	/declare mainAssist       string	outer 
     /if (!${Defined[mainTank]})  	/declare mainTank         string	outer 
     /if (!${Defined[assistPct]})  	/declare assistPct        int	    outer 100 
-    /if (!${Defined[Debug]})  		/declare Debug       				outer FALSE 
+    /if (!${Defined[Debug]})  		/declare Debug       	  bool  	outer FALSE 
     
     | Use main assist setting to check if ini file is created
     /if (${Ini[${iniFileName},${options},MainAssist].Length}) {
@@ -36,9 +33,9 @@ Sub InitGenralIni(string iniFileName)
 
 | ################################################################################
 | # Checks if NPC is inside camp given radius.
-| # Radius default: 60
+| # Radius default: 80
 | ################################################################################	
-Sub Is_NPC_In_Camp(int radiusCheck)
+Sub CheckNPCInRange(int radiusCheck)
 	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local 80
 	
 	/if (${SpawnCount[NPC los radius ${radiusCheck}]} < 1) {

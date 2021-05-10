@@ -38,7 +38,8 @@ Sub doMelee
 /return
 
 Sub doRogueStrike
-/if (${Debug}) /echo |- rogueStrike ==>	
+    /if (${Debug}) /echo |- doRogueStrike ==>	
+
 	/if (${Me.Endurance} > ${strikeDiscEndCost} && ${Me.PctEndurance} >= ${strikeDiscMinEnd} && ${Me.CombatAbilityReady[${strikeDisc}]} && ${Me.AbilityReady[Backstab]} && !${Me.ActiveDisc.ID} && ${Me.Invis} && ${Me.Sneaking}) {
 		| Use 'Assassin's Strike' type disc.
 		/delay 1
@@ -49,5 +50,6 @@ Sub doRogueStrike
 		/delay 1
 		/attack on
 	}
-/if (${Debug}) /echo <== rogueStrike -|
+
+    /if (${Debug}) /echo <== doRogueStrike -|
 /return

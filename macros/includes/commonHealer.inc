@@ -1,6 +1,3 @@
-| ################################################################################
-| # Create Healer Ini Section
-| ################################################################################	
 Sub InitHealIni(string iniFileName)
     /declare options            string  local "HealingOptions"
     /declare casterInitResult   int     local 1
@@ -29,14 +26,14 @@ Sub InitHealIni(string iniFileName)
     }
 
     /if (${Ini[${iniFileName},${options},HealingDist].Length}) {
-       /varset healDist ${Ini[${iniFileName},${options},HealingDist]}       
+       /varset healDist ${Ini[${iniFileName},${options},HealingDist]}
+
+        /if (${Spell[${mainHeal}].Range} < ${healDist}) {
+            /varset healDist ${Spell[${mainHeal}].Range}
+        }       
     } else {
         /ini "${iniFileName}" "${options}" "HealingDist" "${healDist}"  
         /varset casterInitResult 0
-    }
-
-    /if (${Spell[${mainHeal}].Range} < ${healDist}) {
-        /varset healDist ${Spell[${mainHeal}].Range}
     }
 
     /if (${Ini[${iniFileName},${options},DoHealGroup].Length}) {
@@ -54,7 +51,10 @@ Sub InitHealIni(string iniFileName)
 /return ${casterInitResult}
 
 Sub CheckHeals
+    /if (${Debug}) /echo |- CheckHeals ==>
+
     /if (${Me.Casting.ID}) {
+        /if (${Debug}) /echo <== CheckHeals -|
         /return
     }
 
@@ -64,6 +64,8 @@ Sub CheckHeals
 
     /call CheckHealGroup
     /call CheckHealNetBots
+    
+    /if (${Debug}) /echo <== CheckHeals -|
 /return
 
 Sub CheckHealGroup
@@ -149,7 +151,6 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 	}
 /return 1
 
-
 Sub iniHeal(string INIFile, string section, string key, array)
     /declare s int local
     /for s 1 to ${iniHealDimensions}
@@ -157,10 +158,6 @@ Sub iniHeal(string INIFile, string section, string key, array)
     /next s
 /return
 
-| #################################################
-| # Called during the cast of any spell and will
-| # interuppt it if any condition pops true.
-| #################################################
 Sub CancelHeal
 	/if (${Target.PctHPs} > ${mainHealPct}) /call Interrupt
 	/if (${Target.Distance} > ${healDist}) /call Interrupt

@@ -1,6 +1,5 @@
 #include includes\common.inc
-
-#turbo
+#turbo 40
 
 Sub Main
     /declare bardIniFileName        string  outer "ini/${MacroQuest.Server}/Bard_${Me.CleanName}.ini"

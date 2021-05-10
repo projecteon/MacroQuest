@@ -20,10 +20,10 @@ Sub Main
     :ClericLoop
         /call DoHeal
         /if (${Macro.Return} == 1) /goto :ClericLoop
-        /call Check_Mana_Status
-        /call Medidate
-        | /call doNuke
-        /call doBuffs
+        /call CheckManaStatus
+        /call TryMedidate
+        | /call DoNuke
+        /call DoBuffs
         /goto :ClericLoop
 /return
 
@@ -48,9 +48,6 @@ Sub DoHeal
 	
 /return
 
-| ######################################################################
-| # Casts the group heal if 3 or more group players are in need.
-| ######################################################################
 Sub GroupHeal
 	/if (${Me.CurrentMana} > ${Spell[${GroupHeal}].Mana}) {
 		/gsay <<< ${GroupHeal} >>>			
@@ -61,13 +58,10 @@ Sub GroupHeal
 	}
 /return
 
-| ################################################################################
-| # Create Cleric Ini Section
-| ################################################################################	
 Sub InitClericIni(string iniFileName)
-    /declare options             string  local "HealingOptions"
-    /declare healerInitResult  int     local 1
-    /if (!${Defined[groupHeal]}) /declare groupHeal       string  outer "GroupHeal" 
+    /declare options            string  local "HealingOptions"
+    /declare healerInitResult   int     local 1
+    /if (!${Defined[groupHeal]}) /declare groupHeal string  outer "GroupHeal" 
         
     /call InitHealIni "${iniFileName}"
     /varset healerInitResult ${Macro.Return}

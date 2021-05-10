@@ -1,6 +1,6 @@
 | ################################################################################
 | # Create Buffer Ini Section
-| https://www.mmobugs.com/forums/index.php?threads/searching-an-ini-file-without-knowing-section-names.9329/
+| # https://www.mmobugs.com/forums/index.php?threads/searching-an-ini-file-without-knowing-section-names.9329/
 | ################################################################################	
 Sub InitBufferIni(string iniFileName)
     /declare options            string  local "BuffOptions"
@@ -35,22 +35,35 @@ Sub InitBufferIni(string iniFileName)
 
 /return 1
 
-Sub doBuffs
+Sub DoBuffs
+    /if (${Debug}) /echo |- DoBuffs ==>
+
     /call CheckSelfBuffs
     /if (${doBuffGroup}) /call CheckGroupBuffs
     /if (${doBuffNetBots}) /call CheckNetBotBuffs
+
+    /if (${Debug}) /echo <== DoBuffs -|
 /return
 
 Sub CheckSelfBuffs
-    /if (!${Defined[SelfBuffs]}) /return
+    /if (${Debug}) /echo  |- CheckSelfBuffs ==>
+    
+    /if (!${Defined[SelfBuffs]}) {
+        /if (${Debug}) /echo No SelfBuffs defined.
+        /if (${Debug}) /echo <== CheckSelfBuffs -|
+        /return
+    }
+    
     /declare k  int local
     /for k 1 to ${Math.Calc[${SelfBuffs.Size}/${iniSelfBuffDimensions}]}
         /declare buffSpell string local ${SelfBuffs[${k},${buffNameDimension}]}
-        /call canCastBuff "${buffSpell}" ${SelfBuffs[${k},${minManaDimensions}]}         
+        /call CanCastBuff "${buffSpell}" ${SelfBuffs[${k},${minManaDimensions}]}         
         /if (${Macro.Return} == 1 && (!${Me.Buff[${buffSpell}].ID} || ${Me.Buff[${buffSpell}].Duration} < 10)) {
             /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
         }
     /next k 
+
+    /if (${Debug}) /echo <== CheckSelfBuffs -|
 /return
 
 Sub CheckGroupBuffs
@@ -73,7 +86,7 @@ Sub CheckGroupBuffs
     /declare k  int local
     /for k 1 to ${Math.Calc[${Buffs.Size}/${iniBuffDimensions}]} {
         /varset buffSpell ${Buffs[${k},${buffNameDimension}]}
-        /call canCastBuff "${buffSpell}" ${Buffs[${k},${minManaDimensions}]}     
+        /call CanCastBuff "${buffSpell}" ${Buffs[${k},${minManaDimensions}]}     
         /if (${Macro.Return} == 1 && ${Spell[${buffSpell}].TargetType.Equal[Single]}) {
             /varset classRestrictions ${Buffs[${k},${buffClassRestrictionsDimension}]}
             /if (!${Defined[x]}) /declare x int local
@@ -114,7 +127,7 @@ Sub CheckNetBotBuffs
     /declare k  int local
     /for k 1 to ${Math.Calc[${Buffs.Size}/${iniBuffDimensions}]} {
         /varset buffSpell ${Buffs[${k},${buffNameDimension}]}
-        /call canCastBuff "${buffSpell}" ${Buffs[${k},${minManaDimensions}]}   
+        /call CanCastBuff "${buffSpell}" ${Buffs[${k},${minManaDimensions}]}   
         /varset buffId ${Spell[${buffSpell}].ID}
         /if (${Macro.Return} == 1 && ${Spell[${buffSpell}].TargetType.Equal[Single]}) {
             /varset classRestrictions ${Buffs[${k},${buffClassRestrictionsDimension}]}
@@ -144,7 +157,7 @@ Sub CheckNetBotBuffs
     /if (${Debug}) /echo <== CheckNetBotBuffs -|
 /return
 
-Sub canCastBuff(string buffSpell, int minMana)
+Sub CanCastBuff(string buffSpell, int minMana)
     /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || !${Cast.Ready[${buffSpell}]} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
         /return 0
     }

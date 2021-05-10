@@ -20,16 +20,19 @@ Sub Main
         /endmacro
     }
 
+    /declare stayInMezzDebuffLoop bool local
+    
     /echo "Enchanter all mezzed up!"
     /bca "Enchanter all mezzed up!"
     :EnchanterLoop
         /call DoMezz
-        /call doDeBuffs
-        /if (${Macro.Return} == 1) /goto :EnchanterLoop
-        /call Check_Mana_Status
-        /call Medidate
-        /call doNuke
-        /call doBuffs
+        /call DoDeBuffs        
+        /varset stayInMezzDebuffLoop ${Bool[${Macro.Return}]}
+        /if (${stayInMezzDebuffLoop}) /goto :EnchanterLoop
+        /call CheckManaStatus
+        /call TryMedidate
+        /call DoNuke
+        /call DoBuffs
         /goto :EnchanterLoop
 /return
 
@@ -70,24 +73,21 @@ Sub CancelMezz
 	/if (${Target.ID} == ${NetBots[${mainAssist}].TargetID}) /call Interrupt
 /return
 
-| ################################################################################
-| # Create Enchanter Ini Section
-| ################################################################################
 Sub InitEnchanterIni(string iniFileName)
     /declare enchanterOptions   string  outer "EnchanterOptions"
     /declare casterInitResult   int     local 1
 
-    | /if (${Ini[${iniFileName},${enchanterOptions},AutoMezz].Length}) {
-    |    /varset autoMezz ${Ini[${iniFileName},${v},AutoMezz]}     
-    | } else {
-    |     /ini "${iniFileName}" "${enchanterOptions}" "AutoMezz" "${autoMezz}"
-    | }
+    /if (${Ini[${iniFileName},${enchanterOptions},AutoMezz].Length}) {
+       /varset autoMezz ${Ini[${iniFileName},${enchanterOptions},AutoMezz]}     
+    } else {
+        /ini "${iniFileName}" "${enchanterOptions}" "AutoMezz" "${autoMezz}"
+    }
 
-    | /if (${Ini[${iniFileName},${enchanterOptions},AutoMezzRadius].Length}) {
-    |    /varset mezzRadius ${Ini[${iniFileName},${v},AutoMezzRadius]}     
-    | } else {
-    |     /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzRadius" "${mezzRadius}"
-    | }
+    /if (${Ini[${iniFileName},${enchanterOptions},AutoMezzRadius].Length}) {
+       /varset mezzRadius ${Ini[${iniFileName},${enchanterOptions},AutoMezzRadius]}     
+    } else {
+        /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzRadius" "${mezzRadius}"
+    }
 
     /call InitCasterIni "${iniFileName}"
     /varset casterInitResult ${Macro.Return}
