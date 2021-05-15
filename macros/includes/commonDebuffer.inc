@@ -43,13 +43,13 @@ Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
     /if (${Debug}) /echo |- TryDoDebuff ==>
 
     /if (${Me.Casting.ID} || ${Me.Moving} || !${Me.Gem[${debuffSpell}]} || ${minMana} > ${Spell[${debuffSpell}].Mana}) {
-        /echo <== TryDoDebuff -|
+        /if (${Debug}) /echo <== TryDoDebuff -|
         /return 0
     }
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
-        /echo <== TryDoDebuff -|
+        /if (${Debug}) /echo <== TryDoDebuff -|
         /return 0
     }
     
@@ -59,19 +59,19 @@ Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
     /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${minPctHp} || !${hasLineOfSight} || ${SpellTimer[${targetId},any,${debuffSpell}]} > ${remainingTime}) {
-        /echo <== TryDoDebuff -|
+        /if (${Debug}) /echo <== TryDoDebuff -|
         /return 0
     }
 
     /target id ${targetId}
     /delay 2s ${Target.ID}==${targetId}
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
-        /echo <== TryDoDebuff -|
+        /if (${Debug}) /echo <== TryDoDebuff -|
         /return 0
     }
 
     /if (!${Cast.Ready[${debuffSpell}]} || ${Target.Distance} > ${Spell[${debuffSpell}].Range}) {
-        /echo <== TryDoDebuff -|
+        /if (${Debug}) /echo <== TryDoDebuff -|
         /return 0
     }
 
