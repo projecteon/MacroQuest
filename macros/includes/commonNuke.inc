@@ -34,7 +34,7 @@ Sub InitNukeIni(string fileName)
 Sub DoNuke
     /if (${Debug}) /echo |- DoNuke ==>
 
-    /if (${Me.Casting.ID} || ${Me.Moving} || ${Me.CurrentMana} <= ${minNukeMana}) {
+    /if (${Me.Casting.ID} || ${Me.Moving} || ${Me.PctMana} <= ${minNukeMana}) {
         /if (${Debug}) /echo <== DoNuke -|
         /return
     }
