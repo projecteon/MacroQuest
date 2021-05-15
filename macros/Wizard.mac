@@ -23,7 +23,7 @@ Sub Main
         /call CheckManaStatus
         /call TryMedidate
         /call DoBuffs
-        /call Nuke
+        /call DoNuke
         /goto :WizardLoop
 /return
 
