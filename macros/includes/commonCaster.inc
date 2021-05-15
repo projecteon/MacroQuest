@@ -54,8 +54,9 @@ Sub TryMedidate
 
     /call CheckManastone
     /call CheckNPCInRange
-    /if (!${Defined[hasNpcInCamp]})  /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
-    /if (${Math.Calc[${Me.CurrentMana} / ${Me.MaxMana} * 100]} < ${_meditateAt} && !${Me.Sitting} && ${hasNpcInCamp} && ${Stick.Status.Equal[OFF]}) {
+    /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
+    /if (${Debug}) /echo |- hasNpcInCamp ${hasNpcInCamp}
+    /if (${Math.Calc[${Me.CurrentMana} / ${Me.MaxMana} * 100]} < ${_meditateAt} && !${Me.Sitting} && !${hasNpcInCamp} && ${Stick.Status.Equal[OFF]}) {
         /sit
     } else /if (${Me.Sitting} && (${Me.CurrentMana} == ${Me.MaxMana} || ${hasNpcInCamp})) {
         /stand
