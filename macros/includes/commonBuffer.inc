@@ -54,9 +54,10 @@ Sub CheckSelfBuffs
         /return
     }
     
+    /declare buffSpell string local
     /declare k  int local
     /for k 1 to ${Math.Calc[${SelfBuffs.Size}/${iniSelfBuffDimensions}]}
-        /declare buffSpell string local ${SelfBuffs[${k},${buffNameDimension}]}
+        /varset buffSpell ${SelfBuffs[${k},${buffNameDimension}]}
         /call CanCastBuff "${buffSpell}" ${SelfBuffs[${k},${minManaDimensions}]}         
         /if (${Macro.Return} == 1 && (!${Me.Buff[${buffSpell}].ID} || ${Me.Buff[${buffSpell}].Duration} < 10)) {
             /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
@@ -84,14 +85,14 @@ Sub CheckGroupBuffs
     /declare buffSpell string local
     /declare classRestrictions string local
     /declare k  int local
+    /declare x int local
     /for k 1 to ${Math.Calc[${Buffs.Size}/${iniBuffDimensions}]} {
         /varset buffSpell ${Buffs[${k},${buffNameDimension}]}
         /call CanCastBuff "${buffSpell}" ${Buffs[${k},${minManaDimensions}]}     
         /if (${Macro.Return} == 1 && ${Spell[${buffSpell}].TargetType.Equal[Single]}) {
             /varset classRestrictions ${Buffs[${k},${buffClassRestrictionsDimension}]}
-            /if (!${Defined[x]}) /declare x int local
-            /for x 1 to ${Group.Members} {
-                /if (${Spawn[${Group.Member[${x}]}].ID} && ${NetBots[${Group.Member[${x}].Name}]} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
+            /for x 1 to ${Group.Members} {      
+                /if (${Spawn[${Group.Member[${x}]}].ID} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
                     /if (${SpellTimer[${Group.Member[${x}].ID},any,${buffSpell}]} < 5) {
                         /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
                     } 
@@ -125,13 +126,13 @@ Sub CheckNetBotBuffs
     /declare classRestrictions string local
     /declare netbotsClient string local
     /declare k  int local
+    /declare x int local
     /for k 1 to ${Math.Calc[${Buffs.Size}/${iniBuffDimensions}]} {
         /varset buffSpell ${Buffs[${k},${buffNameDimension}]}
         /call CanCastBuff "${buffSpell}" ${Buffs[${k},${minManaDimensions}]}   
         /varset buffId ${Spell[${buffSpell}].ID}
         /if (${Macro.Return} == 1 && ${Spell[${buffSpell}].TargetType.Equal[Single]}) {
             /varset classRestrictions ${Buffs[${k},${buffClassRestrictionsDimension}]}
-            /if (!${Defined[x]}) /declare x int local
             /for x 1 to ${NetBots.Counts} {
                 /varset netbotsClient "${NetBots.Client[${x}]}"
                 /if (${Spawn[${NetBots[${netbotsClient}].Name}].ID} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${NetBots[${netbotsClient}].Class.ShortName},${classRestrictions}]})) {
@@ -158,9 +159,14 @@ Sub CheckNetBotBuffs
 /return
 
 Sub CanCastBuff(string buffSpell, int minMana)
+    /if (${Debug}) /echo  |- CanCastBuff ==> ${buffSpell} ${minMana}
+    
     /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || !${Cast.Ready[${buffSpell}]} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
+        /if (${Debug}) /echo <== CanCastBuff 0 -|
         /return 0
     }
+
+    /if (${Debug}) /echo <== CanCastBuff 1 -|
 /return 1
 
 Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
