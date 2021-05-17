@@ -62,23 +62,23 @@ Sub CheckHeals
         /call CastHeal ${mainHeal} ${Me.ID} "${Me.Name}"
     }
 
-    /call CheckHealGroup
-    /call CheckHealNetBots
+    /if (${doHealGroup}) /call CheckHealGroup ${mainHeal} ${mainHealPct}
+    /if (${doHealNetBots}) /call CheckHealNetBots ${mainHeal} ${mainHealPct}
     
     /if (${Debug}) /echo <== CheckHeals -|
 /return
 
-Sub CheckHealGroup
+Sub CheckHealGroup(string healSpell, int healPct)
     /if (${Debug}) /echo |- CheckHealGroup ==>
 
-    /if (!${Group.Members} || !${doHealGroup}) {
+    /if (!${Group.Members}) {
         /return
     }
 
     /declare x int local
     /for x 1 to ${Group.Members} {
-        /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${mainHealPct} && ${Group.Member[${x}].Distance} <= ${healDist}) {
-            /call CastHeal ${mainHeal} ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
+        /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${healPct} && ${Group.Member[${x}].Distance} <= ${healDist}) {
+            /call CastHeal ${healSpell} ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
         }
         /next x
     }
@@ -86,9 +86,9 @@ Sub CheckHealGroup
     /if (${Debug}) /echo <== CheckHealGroup -|
 /return
 
-Sub CheckHealNetBots
+Sub CheckHealNetBots(string healSpell, int healPct)
     /if (${Debug}) /echo |- CheckHealNetBots ==>
-    /if (${NetBots.Counts} < 2 || !${doHealNetBots}) {
+    /if (${NetBots.Counts} < 2) {
         /if (${Debug} && ${NetBots.Counts} < 2) /echo Not enough Nebots clients, current: ${NetBots.Counts} 
         /if (${Debug}) /echo <== CheckHealNetBots -|
         /return
@@ -98,8 +98,8 @@ Sub CheckHealNetBots
     /declare x int local
     /for x 1 to ${NetBots.Counts} {
         /varset netbotsClient "${NetBots.Client[${x}]}"
-        /if (${NetBots[${netbotsClient}].InZone} && ${NetBots[${netbotsClient}].PctHPs} <= ${mainHealPct} && ${Spawn[${NetBots[${netbotsClient}].ID}].Distance} <= ${healDist}) {
-            /call CastHeal ${mainHeal} ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+        /if (${NetBots[${netbotsClient}].InZone} && ${NetBots[${netbotsClient}].PctHPs} <= ${healPct} && ${Spawn[${NetBots[${netbotsClient}].ID}].Distance} <= ${healDist}) {            
+            /call CastHeal ${healSpell} ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
         }
         /next x
     }
@@ -144,7 +144,7 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
                 }
 				/if (${Group.Members}) /gsay <<< ${healSpell} -> ${healTargetName} >>>			
 				/bca <<< ${healSpell} -> ${healTargetName} >>>
-				/call cast "${healSpell}" gem${Me.Gem[${healSpell}]} 0 CancelHeal
+				/call cast "${healSpell}" gem${Me.Gem[${healSpell}]} 0 CancelHeal 3
 				/bca MANA: ${Me.PctMana}
 			}
 		}
