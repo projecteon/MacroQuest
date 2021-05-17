@@ -60,6 +60,8 @@ sub DoMezz
                     /return
                 }
 
+                /if (!${Cast.Ready[${mezzSpell}]}) /delay 3s ${Cast.Ready[${mezzSpell}]}
+
                 /if (${SpellTimer[${mezTarg},any,${mezzSpell}]} < 8 && ${Cast.Ready[${mezzSpell}]} && ${Target.Distance} < ${Spell[${mezzSpell}].Range}) {
                     /call cast "${mezzSpell}" gem${Me.Gem[${mezzSpell}]} 0 CancelMezz 3
                     /bca ${Target.Name} " mezzed!"
