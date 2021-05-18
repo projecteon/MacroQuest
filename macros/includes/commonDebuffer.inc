@@ -80,7 +80,7 @@ Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
     }
 
     /call cast "${debuffSpell}" gem${Me.Gem[${debuffSpell}]} 0 CancelDebuff
-    /bca ${Target.Name} " debuffed with " ${debuffSpell}
+    /bca ${Target.Name} debuffed with ${debuffSpell}
     
     /if (${Debug}) /echo <== TryDoDebuff -|
 /return 1
