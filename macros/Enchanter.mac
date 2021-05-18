@@ -27,8 +27,8 @@ Sub Main
     :EnchanterLoop
         /call DoMezz
         /call DoDeBuffs        
-        /varset stayInMezzDebuffLoop ${Bool[${Macro.Return}]}
-        /if (${stayInMezzDebuffLoop}) /goto :EnchanterLoop
+        | /varset stayInMezzDebuffLoop ${Bool[${Macro.Return}]}
+        | /if (${stayInMezzDebuffLoop}) /goto :EnchanterLoop
         /call CheckManaStatus
         /call TryMedidate
         /call DoNuke
