@@ -62,8 +62,8 @@ Sub CheckHeals
         /call CastHeal ${mainHeal} ${Me.ID} "${Me.Name}"
     }
 
-    /if (${doHealGroup}) /call CheckHealGroup "${mainHeal}" ${mainHealPct}
-    /if (${doHealNetBots}) /call CheckHealNetBots "${mainHeal}" ${mainHealPct}
+    /if (${doHealGroup}) /call CheckHealGroup ${mainHeal} ${mainHealPct}
+    /if (${doHealNetBots}) /call CheckHealNetBots ${mainHeal} ${mainHealPct}
     
     /if (${Debug}) /echo <== CheckHeals -|
 /return
