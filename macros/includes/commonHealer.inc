@@ -98,7 +98,8 @@ Sub CheckHealNetBots(string healSpell, int healPct)
     /declare x int local
     /for x 1 to ${NetBots.Counts} {
         /varset netbotsClient "${NetBots.Client[${x}]}"
-        /if (${NetBots[${netbotsClient}].InZone} && ${NetBots[${netbotsClient}].PctHPs} <= ${healPct} && ${Spawn[${NetBots[${netbotsClient}].ID}].Distance} <= ${healDist}) {            
+        /if (${NetBots[${netbotsClient}].InZone} && ${NetBots[${netbotsClient}].PctHPs} <= ${healPct} && ${Spawn[${NetBots[${netbotsClient}].ID}].Distance} <= ${healDist} && (!${doHealGroup} || !${NetBots[${netbotsClient}].InGroup})) {            
+            /if (${Debug}) /echo |- CheckHealNetBots > ${NetBots[${netbotsClient}].Name} > ${NetBots[${netbotsClient}].PctHPs}
             /call CastHeal "${healSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
         }
         /next x
@@ -117,7 +118,9 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
     }
 
 	|- Is spell ready?
-	/if (${Me.SpellReady[${healSpell}]}) {
+    /if (!${Me.SpellReady[${healSpell}]}) /delay 3s ${Me.SpellReady[${healSpell}]}
+	
+    /if (${Me.SpellReady[${healSpell}]}) {
 		|- Do we have mana
 		/if (${Me.CurrentMana} < ${Spell[${healSpell}].Mana}) { 		
             /if (${hasNotifiedNoMana}) {
@@ -142,6 +145,7 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
                 /if (${Me.Sitting}) {
                     /stand
                 }
+
 				/if (${Group.Members}) /gsay <<< ${healSpell} -> ${healTargetName} >>>			
 				/bca <<< ${healSpell} -> ${healTargetName} >>>
 				/call cast "${healSpell}" gem${Me.Gem[${healSpell}]} 0 CancelHeal 3
@@ -159,7 +163,8 @@ Sub iniHeal(string INIFile, string section, string key, array)
 /return
 
 Sub CancelHeal
-	/if (${Target.PctHPs} > ${mainHealPct}) /call Interrupt
+    | Following line has issue with NetBots update report, cancels heals when it shouldnt
+	| /if (${Target.PctHPs} > ${mainHealPct}) /call Interrupt
 	/if (${Target.Distance} > ${healDist}) /call Interrupt
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
 	| /if (${Me.AltAbilityReady[Divine Arbitration]}) /call DivineArbitration
