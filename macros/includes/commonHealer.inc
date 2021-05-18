@@ -62,8 +62,8 @@ Sub CheckHeals
         /call CastHeal ${mainHeal} ${Me.ID} "${Me.Name}"
     }
 
-    /if (${doHealGroup}) /call CheckHealGroup ${mainHeal} ${mainHealPct}
-    /if (${doHealNetBots}) /call CheckHealNetBots ${mainHeal} ${mainHealPct}
+    /if (${doHealGroup}) /call CheckHealGroup "${mainHeal}" ${mainHealPct}
+    /if (${doHealNetBots}) /call CheckHealNetBots "${mainHeal}" ${mainHealPct}
     
     /if (${Debug}) /echo <== CheckHeals -|
 /return
@@ -78,7 +78,7 @@ Sub CheckHealGroup(string healSpell, int healPct)
     /declare x int local
     /for x 1 to ${Group.Members} {
         /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${healPct} && ${Group.Member[${x}].Distance} <= ${healDist}) {
-            /call CastHeal ${healSpell} ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
+            /call CastHeal "${healSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
         }
         /next x
     }
@@ -99,7 +99,7 @@ Sub CheckHealNetBots(string healSpell, int healPct)
     /for x 1 to ${NetBots.Counts} {
         /varset netbotsClient "${NetBots.Client[${x}]}"
         /if (${NetBots[${netbotsClient}].InZone} && ${NetBots[${netbotsClient}].PctHPs} <= ${healPct} && ${Spawn[${NetBots[${netbotsClient}].ID}].Distance} <= ${healDist}) {            
-            /call CastHeal ${healSpell} ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+            /call CastHeal "${healSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
         }
         /next x
     }
