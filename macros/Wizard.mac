@@ -20,16 +20,13 @@ Sub Main
     /echo "Wizard all fired up!"
     /bca "Wizard all fired up!"
     :WizardLoop
-        /call Check_Mana_Status
-        /call Medidate
-        /call doBuffs
-        /call Nuke
+        /call CheckManaStatus
+        /call TryMedidate
+        /call DoBuffs
+        /call DoNuke
         /goto :WizardLoop
 /return
 
-| ################################################################################
-| # Create Wizard Ini Section
-| ################################################################################	
 Sub InitWizardIni(string iniFileName)
     /declare wizardOptions   string  outer "WizardOptions"
     /declare casterInitResult   int     local 1

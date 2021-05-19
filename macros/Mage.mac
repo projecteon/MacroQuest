@@ -7,7 +7,7 @@
 #include includes\commonBuffer.inc
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
-#turbo
+#turbo 40
 
 Sub Main
     /declare mageIniFileName    string  local "ini/${MacroQuest.Server}/Mage_${Me.CleanName}.ini"
@@ -21,17 +21,14 @@ Sub Main
     /echo "Mage pettified!"
     /bca "Mage pettified!"
     :MageLoop
-        /call Check_Mana_Status
-        /call Medidate
-        /call doBuffs
-        /call doPet
-        /call doNuke
+        /call CheckManaStatus
+        /call TryMedidate
+        /call DoBuffs
+        /call DoPet
+        /call DoNuke
         /goto :MageLoop
 /return
 
-| ################################################################################
-| # Create Mage Ini Section
-| ################################################################################	
 Sub InitMageIni(string iniFileName)
     /declare mageOptions   string  outer "MageOptions"
     /declare casterInitResult   int     local 1

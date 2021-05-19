@@ -7,7 +7,7 @@
 #include includes\commonBuffer.inc
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
-#turbo
+#turbo 40
 
 Sub Main
     /declare rangerIniFileName        string  outer "ini/${MacroQuest.Server}/Ranger_${Me.CleanName}.ini"
@@ -20,9 +20,14 @@ Sub Main
 
     /echo "Ranger ready to roll!"
     /bca "Ranger ready to roll!"
+    :RangerLoop
+        /if (${Me.CombatState.Equal[Combat]}) /goto :RangerLoop
+        /call DoBuffs
+        /call DoNuke
+        /goto :RangerLoop
 /return
 
-Sub InitRangerIni(string fileName, string mainAssist)
+Sub InitRangerIni(string iniFileName)
     /declare enchanterOptions   string  outer "RangerOptions"
     /declare parentResult       int     local 1
 

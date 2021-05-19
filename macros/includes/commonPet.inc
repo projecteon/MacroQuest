@@ -25,8 +25,11 @@ Sub InitPetIni(string iniFileName)
     }
 /return 1
 
-Sub doPet
+Sub DoPet
+    /if (${Debug}) /echo |- DoPet ==>
+
     /if (!${Me.Pet.ID}) {
+        /if (${Debug}) /echo <== DoPet -|
         /return
     }
 
@@ -34,11 +37,13 @@ Sub doPet
         /pet back off
         /varset currentPetTargetId 0
     } else /if (${currentPetTargetId} > 0) {
+        /if (${Debug}) /echo <== DoPet -|
         /return
     }
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
+        /if (${Debug}) /echo <== DoPet -|
         /return
     }
 
@@ -48,6 +53,7 @@ Sub doPet
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
     /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight} || ${Spawn[${targetId}].Distance} > 100) {
+        /if (${Debug}) /echo <== DoPet -|
         /return
     }
 
@@ -57,15 +63,18 @@ Sub doPet
     }
 
     /if (!${Target.ID} || ${Target.ID}!=${targetId}) {
+        /if (${Debug}) /echo <== DoPet -|
         /return
     }
 
     /varset currentPetTargetId ${targetId}
-    | /pet back off
+    /pet back off
     /pet attack
+    
+    /if (${Debug}) /echo <== DoPet -|
 /return
 
-Sub summonPet
+Sub SummonPet
     /if (!${Me.Gem[${petSpell}]}) {
         /echo !!! SPELL NOT MEMORIZED ${petSpell} - SHUTDOWN !!!
         /bca !!! SPELL NOT MEMORIZED ${petSpell} - SHUTDOWN !!!
@@ -94,7 +103,7 @@ Sub summonPet
 
 
 
-Sub weaponizePet
+Sub WeaponizePet
     /if (!${Me.Gem[${petWeaponsSpell}]}) {
         /echo !!! SPELL NOT MEMORIZED ${petWeaponsSpell} - SHUTDOWN !!!
         /bca !!! SPELL NOT MEMORIZED ${petWeaponsSpell} - SHUTDOWN !!!

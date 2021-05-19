@@ -19,11 +19,11 @@ Sub Main
     /bca "Cleric all set!"
     :ClericLoop
         /call DoHeal
-        /if (${Macro.Return} == 1) /goto :ClericLoop
-        /call Check_Mana_Status
-        /call Medidate
-        | /call doNuke
-        /call doBuffs
+        | /if (${Macro.Return} == 1) /goto :ClericLoop
+        /call CheckManaStatus
+        /call TryMedidate
+        /call DoNuke
+        /call DoBuffs
         /goto :ClericLoop
 /return
 
@@ -37,37 +37,47 @@ Sub DoHeal
    	| /call CheckTank
 
 	|- Do we use a group heal?
-	| /if (${Me.Gem[${groupHeal}]} >= 0 && ${Heal.InjuredCount[65]} > 2) /call GroupHeal
+	/call GroupHeal
 	
-	|- Check our group for heals
-	| /if (${Heal.InjuredCount} > 0) /call CheckGroupHeals
+	|- Check for heals
     /call CheckHeals
 
-	|- Check for NetBots heals
-	| /if (${NetBots[${Heal.WorstNetBots.Name}].PctHPs} < 100) /call CheckNetBotsHeals
-	
 /return
 
-| ######################################################################
-| # Casts the group heal if 3 or more group players are in need.
-| ######################################################################
 Sub GroupHeal
-	/if (${Me.CurrentMana} > ${Spell[${GroupHeal}].Mana}) {
-		/gsay <<< ${GroupHeal} >>>			
-		/bca <<< ${GroupHeal} >>>			
-		/call cast "${GroupHeal}"
+    /if (!${Group.Members} || ${Me.Gem[${groupHealSpell}]} < 0) {
+        /return 0
+    }
+
+    /declare groupMembersWithLowHealthCount int local 0
+    /declare x int local
+    /for x 1 to ${Group.Members} {
+        /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${groupHealPct} && ${Group.Member[${x}].Distance} <= ${Spell[${groupHealSpell}].Range}) {
+            /varset groupMembersWithLowHealthCount ${Math.Calc[${groupMembersWithLowHealthCount}+1]}
+        }
+        /next x
+    }
+
+	/if (${Me.CurrentMana} > ${Spell[${groupHealSpell}].Mana} && ${groupMembersWithLowHealthCount} > 2) {
+		/gsay <<< ${groupHealSpell} >>>			
+		/bca <<< ${groupHealSpell} >>>			
+		/call cast "${groupHealSpell}"
+        /call cast "${groupHealSpell}" gem${Me.Gem[${groupHealSpell}]} 0 CancelGroupHeal 3
 		|- Delay to give everyones hp time to update
 		/delay 50
+        /return 1
 	}
+/return 0
+
+
+Sub CancelGroupHeal
 /return
 
-| ################################################################################
-| # Create Cleric Ini Section
-| ################################################################################	
 Sub InitClericIni(string iniFileName)
-    /declare options             string  local "HealingOptions"
-    /declare healerInitResult  int     local 1
-    /if (!${Defined[groupHeal]}) /declare groupHeal       string  outer "GroupHeal" 
+    /declare options            string  local "HealingOptions"
+    /declare healerInitResult   int     local 1
+    /declare groupHealSpell     string  outer "GroupHeal" 
+    /declare groupHealPct       int     outer 0
         
     /call InitHealIni "${iniFileName}"
     /varset healerInitResult ${Macro.Return}
@@ -83,10 +93,15 @@ Sub InitClericIni(string iniFileName)
     }
     
     /if (${Ini[${iniFileName},${options},GroupHeal].Length}) {
-        /varset groupHeal ${Ini[${iniFileName},${options},GroupHeal]} 
+        /varset groupHealSpell "${Ini[${iniFileName},${options},GroupHeal]}"
     } else {
-        /ini "${iniFileName}" "${options}" "GroupHeal" "${groupHeal}"
-        /return 0
+        /ini "${iniFileName}" "${options}" "GroupHeal" "${groupHealSpell}"
+    }
+    
+    /if (${Ini[${iniFileName},${options},GroupHealPct].Length}) {
+        /varset groupHealPct ${Ini[${iniFileName},${options},GroupHealPct]} 
+    } else {
+        /ini "${iniFileName}" "${options}" "GroupHealPct" "${groupHealPct}"
     }
 
 /return ${healerInitResult}

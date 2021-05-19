@@ -1,5 +1,4 @@
-
-#turbo
+#turbo 40
 
 Sub Main
     /declare rogueIniFileName        string  outer "ini/${MacroQuest.Server}/Rogue_${Me.CleanName}.ini"

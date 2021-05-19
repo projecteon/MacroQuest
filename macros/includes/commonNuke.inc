@@ -31,13 +31,17 @@ Sub InitNukeIni(string fileName)
     }
 /return ${casterInitResult}
 
-Sub doNuke
-    /if (${Me.Casting.ID} || ${Me.Moving} || ${Me.CurrentMana} <= ${minNukeMana}) {
+Sub DoNuke
+    /if (${Debug}) /echo |- DoNuke ==>
+
+    /if (${Me.Casting.ID} || ${Me.Moving} || ${Me.PctMana} <= ${minNukeMana}) {
+        /if (${Debug}) /echo <== DoNuke -|
         /return
     }
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
+        /if (${Debug}) /echo <== DoNuke -|
         /return
     }
     
@@ -47,12 +51,14 @@ Sub doNuke
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
     /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight}) {
+        /if (${Debug}) /echo <== DoNuke -|
         /return
     }
 
     /target id ${targetId}
     /delay 2s ${Target.ID}==${targetId}
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
+        /if (${Debug}) /echo <== DoNuke -|
         /return
     }
     
@@ -61,6 +67,8 @@ Sub doNuke
     } else {
         /call TryNukeTarget ${mainNuke}
     }
+    
+    /if (${Debug}) /echo <== DoNuke -|
 /return
 
 Sub TryNukeTarget(string nuke)
@@ -75,10 +83,6 @@ Sub TryNukeTarget(string nuke)
     /call cast "${nuke}" gem${Me.Gem[${nuke}]} 0 CancelNuke
 /return
 
-| #################################################
-| # Called during the cast of any spell and will
-| # interuppt it if any condition pops true.
-| #################################################
 Sub CancelNuke
     /if (!${Target.ID}) /call Interrupt
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
