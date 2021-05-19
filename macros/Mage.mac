@@ -21,6 +21,8 @@ Sub Main
     /echo "Mage pettified!"
     /bca "Mage pettified!"
     :MageLoop
+        /if (${Me.Invis}) /goto :MageLoop
+        
         /call CheckManaStatus
         /call TryMedidate
         /call DoBuffs

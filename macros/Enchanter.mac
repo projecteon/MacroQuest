@@ -25,6 +25,8 @@ Sub Main
     /echo "Enchanter all mezzed up!"
     /bca "Enchanter all mezzed up!"
     :EnchanterLoop
+        /if (${Me.Invis}) /goto :EnchanterLoop
+        
         /call DoMezz
         /call DoDeBuffs        
         | /varset stayInMezzDebuffLoop ${Bool[${Macro.Return}]}

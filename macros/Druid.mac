@@ -18,6 +18,8 @@ Sub Main
     /echo "Druid sow'ed up!"
     /bca "Druid sow'ed up!"
     :DruidLoop
+        /if (${Me.Invis}) /goto :DruidLoop
+        
         /call CheckHeals
         /if (${Macro.Return} == 1) /goto :DruidLoop
         /call CheckManaStatus

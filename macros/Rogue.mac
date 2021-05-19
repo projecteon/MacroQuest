@@ -13,6 +13,8 @@ Sub Main
     /bca "Rogue backstabbin!"
 
     :RogueLoop
+        /if (${Me.Invis}) /goto :RogueLoop
+        
         /call doKill
         /goto :RogueLoop
 /return

@@ -14,6 +14,8 @@ Sub Main
     /bca "Bard rock'n'rolling!"
 
     :BardLoop
+        /if (${Me.Invis}) /goto :BardLoop
+        
         /call doKill
         /goto :BardLoop
 /return

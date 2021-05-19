@@ -19,6 +19,8 @@ Sub Main
     /echo "Shaman in trance!"
     /bca "Shaman in trance!"
     :ShamanLoop
+        /if (${Me.Invis}) /goto :ShamanLoop
+        
         /call CheckHeals
         /if (${Macro.Return} == 1) /goto :ShamanLoop
         /call CheckManaStatus

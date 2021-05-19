@@ -18,6 +18,8 @@ Sub Main
     /echo "Cleric all set!"
     /bca "Cleric all set!"
     :ClericLoop
+        /if (${Me.Invis}) /goto :ClericLoop
+
         /call DoHeal
         | /if (${Macro.Return} == 1) /goto :ClericLoop
         /call CheckManaStatus
