@@ -37,6 +37,11 @@ Sub InitBufferIni(string iniFileName)
 
 Sub DoBuffs
     /if (${Debug}) /echo |- DoBuffs ==>
+    
+    /call CheckNPCInRange
+    /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
+    /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
+    /if (${hasNpcInCamp}) /return
 
     /call CheckSelfBuffs
     /if (${doBuffGroup}) /call CheckGroupBuffs
