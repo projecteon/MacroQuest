@@ -1,0 +1,2773 @@
+| autoenc.mac
+| By Rusty~
+| Last update Jan. 27 2008 by Nils
+| https://www.mmobugs.com/forums/index.php?threads/enchanter-mac.15329/
+
+#include spell_routines.inc
+#include QuickBeg.inc
+#include move.inc
+
+#turbo 40
+
+#chat tell
+
+#event AutoStun               "[MQ2] AutoStun #1#"
+#event Bewilderment           "#1# is bewildered by blinding light."
+#event Camp                   "It will take#*#seconds to prepare your camp#*#"
+#event CastSpell              "[#1#] cast #2#"
+#event CastSpell              "[#1#] cast #2# on #3#"
+#event CastSpell              "#1# tells you, 'cast #2#'"
+#event CastSpell              "#1# told you, 'cast #2#'"
+#event CastSpell              "#1# tells you, 'cast #2# on #3#'"
+#event CastSpell              "#1# told you, 'cast #2# on #3#'"
+#event ChatTell               "#1# told you, '#2#'"
+#event Command                "#*#'/#1# pass#*#:#2#'"
+#event Consider_Ally          "#1# regards you as an ally#*#" 
+#event Consider_Warmly        "#1# looks upon you warmly#*#" 
+#event Consider_Kindly        "#1# kindly considers you#*#" 
+#event Consider_Amiable       "#1# judges you amiably#*#" 
+#event Consider_Indifferent   "#1# regards you indifferently#*#" 
+#event Consider_Apprehensive  "#1# looks your way apprehensively#*#" 
+#event Consider_Dubious       "#1# glowers at you dubiously#*#" 
+#event Consider_Threatening   "#1# glares at you threateningly#*#" 
+#event Consider_ReadyToAttack "#1# scowls at you, ready to attack#*#"
+#event DamageMelee            "|${Me.Pet.DisplayName}| #*# for #1# points of damage#*#"
+#event DamageMelee            "You #*# for #1# points of damage#*#"
+#event DamageNonMelee         "|${Me.Name}| hit #*# for #1# points of non-melee damage#*#"
+#event Dead                   "Returning to home point, please wait..."
+#event Dead                   "#*#Returning to Bind Location#*#"
+#event Dispell                "[MQ2] Dispell"
+#event EQBC                   "<#1#> #2#"
+#event EQBC                   "[#1#(msg)] #2#"
+#event ExcludeMob             "#*# excludemob #1#"
+#event Exp                    "You gain #*#"
+#event Gate                   "|${Target.DisplayName}| begins to cast the gate spell#*#"
+#event Gate                   "|${Target.DisplayName}| begins to cast a spell. <Complete Heal>#*#"
+#event Hit                    "#*# YOU for #*#"
+#event Hit                    "#*# YOU, but #*#"
+#event Indoors                "You can only cast this spell in the outdoors#*#"
+#event Indoors                "You can not summon a mount#*#"
+#event Indoors                "You need to be in a more open area to summon a mount#*#"
+#event Invis                  "[MQ2] Invis"
+#event Invited                "#*#click on the 'FOLLOW' option, or 'DISBAND' to cancel#*#"
+#event Invited                "#*#invites you to join a group.#*#"
+#event LeviGroup              "#*# levigroup"
+#event ManaRobe               "[MQ2] Mana Robe #1#"
+#event Mez                    "[MQ2] mez"
+#event NukeType               "[MQ2] NukeType #1#"
+#event RageOff                "#*#is no longer enraged#*#"
+#event RageOn                 "#*#has become ENRAGED#*#"
+#event RaidBuff               "#*# raidbuff #1#"
+#event RaidSay                "#1# tells the raid,  '#2#'"
+#event SayZone                "#*# sayzone #1#"
+#event SetAnchor              "[MQ2] SetAnchor #1#"
+#event SetMA                  "[ma] [Down:/assist #1#] [Up:#*#"
+#event SetSA                  "[sa] [Down:/assist #1#] [Up:#*#"
+#event Summon                 "You have been summoned!"
+#event ToggleVar              "[MQ2] ToggleVar #1#,#2#,#3#,#4#,#5#"
+#event ToggleString           "[MQ2] ToggleString #1#,#2#,#3#,#4#,#5#"
+#event UquaAE                 "Your body is surrounded by a darkened aura."
+#event UquaKey                "The #1# Key must unlock the door to the next room."
+#event WornOff                "#*#Your #1# spell has worn off of #2#."
+#event Zone                   "You have entered #1#."
+#event Zone                   "LOADING, PLEASE WAIT..."
+
+Sub main
+  /declare Version string outer 1.0
+  /declare iniName string outer AutoEnc_${Me.Name}.ini
+  /call LoadIni "AutoEnc_${Me.Name}.ini" LOAD
+  /declare excludeIni string outer AutoEnc_${Me.Name}_Exclude.ini
+  /declare mezzImmuneIni string outer AutoEnc_${Me.Name}_MezzImmune.ini
+  /MemSpellSet ${spellSet}
+  /if (${Version.NotEqual[${Ini[AutoEnc_${Me.Name}.ini,Misc,Version]}]}) /call LoadAliases
+  /squelch /custombind add ma
+  /squelch /custombind add sa
+  /declare i int local
+  /declare j int local
+  /declare oldTarget int local
+  /declare tempTimer timer local 0
+  /declare tempStr string local
+  :check_params
+  /if (${Defined[Param${i}]}) {
+    /if (${Param${i}.Equal[ma]}) {
+      /varcalc i ${i}+1
+      /call SetIniVar mainAssist Settings "${Param${i}}"
+    } else /if (${Param${i}.Equal[sa]}) {
+      /varcalc i ${i}+1
+      /call SetIniVar secondAssist Settings "${Param${i}}"
+    } else /if (${Param${i}.Equal[radius]}) {
+      /varcalc i ${i}+1
+      /call SetIniVar minRadius Settings "${Param${i}}"
+    } else /if (${Param${i}.Equal[minhp]}) {
+      /varcalc i ${i}+1
+      /call SetIniVar minHP Settings "${Param${i}}"
+    } else /if (${Param${i}.Equal[buff]}) {
+      /call SetIniVar autoBuff Settings 1
+    } else /if (${Param${i}.Equal[nobuff]}) {
+      /call SetIniVar autoBuff Settings 0
+    } else /if (${Param${i}.Equal[nuke]}) {
+      /call SetIniVar nukeMode Settings 1
+    } else /if (${Param${i}.Equal[nonuke]}) {
+      /call SetIniVar nukeMode Settings 0
+    } else /if (${Param${i}.Equal[mez]}) {
+      /call SetIniVar useMez Settings TRUE
+    } else /if (${Param${i}.Equal[nomez]}) {
+      /call SetIniVar useMez Settings FALSE
+    } else /if (${Param${i}.Equal[debuff]}) {
+      /call SetIniVar useDebuff Settings TRUE
+    } else /if (${Param${i}.Equal[nodebuff]}) {
+      /call SetIniVar useDebuff Settings FALSE
+    }
+    /varcalc i ${i}+1
+    /goto :check_params
+  }
+  /if (!${Me.Gem[${mezSpell}]}) {
+    /if (${Me.Gem[bliss]}) {
+      /call SetIniVar mezSpell Spells Bliss
+    } else /if (${Me.Gem[sleep]}) {
+      /call SetIniVar mezSpell Spells Sleep
+    } else /if (${Me.Gem[apathy]}) {
+      /call SetIniVar mezSpell Spells Apathy
+    } else /if (${Me.Gem[glamour of kintaz]}) {
+      /call SetIniVar mezSpell Spells "Glamour of Kintaz"
+    } else /if (${Me.Gem[felicity]}) {
+      /call SetIniVar mezSpell Spells Felicity
+    } else /if (${Me.Gem[euphoria]}) {
+      /call SetIniVar mezSpell Spells Euphoria
+    } else /if (${Me.Gem[bewilderment]}) {
+      /call SetIniVar mezSpell Spells Bewilderment
+    } else /if (${Me.Gem[bewilderment Rk. II]}) {
+      /call SetIniVar mezSpell Spells "Bewilderment Rk. II"
+    } else /if (${Me.Gem[bewilderment Rk. III]}) {
+      /call SetIniVar mezSpell Spells "Bewilderment Rk. III"
+    } else /if (${Me.Gem[Mystify]}) {
+      /call SetIniVar mezSpell Spells Mystify
+    } else /if (${Me.Gem[Mystify Rk. II]}) {
+      /call SetIniVar mezSpell Spells "Mystify Rk. II"
+    } else /if (${Me.Gem[Mystify Rk. III]}) {
+      /call SetIniVar mezSpell Spells "Mystify Rk. III"            
+    }
+  }
+  /if (!${InvSlot[chest].Item.Name.Equal[mana robe]}) /call SetIniVar hpRobe Items "${InvSlot[chest].Item.Name}"
+  /call QuickBegDeclares
+  /call SwapStatFood 1
+  /squelch /alert clear 6
+  /if (${autoAnnounce}) /squelch /announce on
+  /echo Auto Enchanter Mode Activated v${Version}
+  /if (${nukeMode} || ${useDebuff} || ${useMez}) {
+    /echo Main Assist: ${mainAssist}
+    /if (${Bool[${secondAssist}]}) /echo Secondary Assist: ${secondAssist} (if ${mainAssist} dies)
+  }
+  /if (${nukeMode}) /echo Nuke Mode: ${nukeMode}
+  /if (${useDebuff}) /echo Auto Debuffs Enabled
+  /if (${useMez}) {
+    /echo Auto Mez adds within a radius of ${minRadius}
+    /if (!${Me.Gem[${mezSpell}]}) /memspell ${mezGem} "${mezSpell}"
+  }
+  /if (${autoBuff}) /echo AutoBuff Mode: ${autoBuff}
+  /if (${useMount}) /echo Mount is enabled.
+  /if (${manaRobeMode}) /echo ManaRobe Mode: ${manaRobeMode}
+  :wait_for_target
+  /if (${GameState.Equal[CHARSELECT]}) /end
+  /if (${nukeMode} || ${useDebuff} || ${useMez}) /echo Waiting for target...
+  /varset newAdds 0
+  /varset validTarget 0
+  /call medding
+  :invis_loop
+  /if (${Me.Invis}) {
+  	/delay 1
+  	/doevents
+  	/delay 1
+  	/doevents Chat
+  	/goto :invis_loop
+  }
+  :wait_for_target2
+  /if (${Spawn[pc ${secondAssist}].ID} && (!${Spawn[pc ${mainAssist}].ID} || ${Spawn[Corpse ${mainAssist} radius ${minRadius}].ID})) {
+    /varset mainTank ${secondAssist}
+  } else {
+    /varset mainTank ${mainAssist}
+  }
+  /if (!${Corpse.Open} && ${Spawn[${mainAssist}].NearestSpawn[npc radius ${Math.Calc[${minRadius}*2]}].ID} && (${nukeMode} || ${useDebuff} || ${useMez})) {
+    /if (${Me.Casting.ID}) /call WaitCast
+    /assist ${mainTank}
+    /if (${useManaRobe}) /call ManaRobe
+    /varset oldTarget ${Target.ID}
+    /varset tempTimer 5
+    /call CheckRune 100
+    :wait_for_assist1
+    /call CheckTarget
+    /if (${tempTimer} && !${validTarget}) /goto :wait_for_assist1
+  }
+  /call CheckTarget
+  /if (!${validTarget} || (!${nukeMode} && !${useDebuff} && !${useMez})) {  
+    /doevents
+    /if (!${qbTimer} && ${begForBuffs} && !${following}) {
+      /call MeBegBuff
+      /call MeBegItem
+      /call MeBegCure
+      /call PetBegBuff
+      /varset qbTimer 30s
+    }
+    /if (${Window[TradeWnd].Open}) /nomodkey /notify TradeWnd TRDW_Trade_Button leftmouseup
+    /if (${RaidQueueCount} && ${Me.PctMana}>${doBuffMana} && ${DoRaidBuffs}) /call RaidBuffEvents
+    /call CheckBuffs
+    /call CheckPet
+    /call CheckRune ${runeHP}
+    /if (${useAnchor}) /call CheckLoc
+    /if (${useManaRobe}) /call ManaRobe
+    /goto :wait_for_target2
+  }
+  /echo Target Aquired >> ${Target.DisplayName} <<
+  /varset petAttacking false
+  /varset engaged 0
+  /varset nukeWaitTimer 0
+  /varset mobID ${Target.ID}
+  /varset mobHPStart ${Target.PctHPs}
+  /call UpdateMobList
+  /call AddToList mobList ${mobID}
+  /if (${Defined[bewildermentTimer${mobID}]}) /deletevar bewildermentTimer${mobID}
+  /if (${Defined[mezTimer${mobID}]}) /deletevar mezTimer${mobID}
+  /declare mezTimer${mobID} int outer -1
+  /varset newAdds 0
+  /varset nukeWaitTimer 0
+  /varset fightStartTime 0
+  /varset totalNonMeleeDmg 0
+  /varset totalMeleeDmg 0
+  /if (${Defined[waitTimer${mobID}]}) /deletevar waitTimer${mobID}
+  /declare waitTimer${mobID} int outer -1
+  :check_add_loop
+  /if ((${Target.PctHPs}>${minHP} && ${waitTimer${mobID}}) || !${assistWaitTimer}) {
+    /if (${Spawn[pc ${secondAssist}].ID} && (!${Spawn[pc ${mainAssist}].ID} || ${Spawn[Corpse ${mainAssist} radius ${minRadius}].ID})) {
+      /varset mainTank ${secondAssist}
+    } else {
+      /varset mainTank ${mainAssist}
+    }
+    /if (${Me.Casting.ID}) /call WaitCast
+    /assist ${mainTank}
+    /if (${useManaRobe} && (${refreshTime} || ${nukeWaiTimer} || !${nukeMode})) /call ManaRobe
+    /varset tempTimer 8
+    :wait_for_assist
+    /call CheckForAdds
+    /doevents Timer
+    /if (${tempTimer} && ${Target.ID}==${mobID}) /goto :wait_for_assist
+    /if (${Target.ID} && ${Target.ID}!=${mobID}) {
+    	/if (${Defined[bewildermentTimer${mobID}]}) /deletevar bewildermentTimer${mobID}
+      /if (${Defined[mezTimer${mobID}]}) /deletevar mezTimer${mobID}
+      /call DeleteFromList mobList ${mobID}
+      /goto :wait_for_target
+    }
+    /varset assistWaitTimer 5s
+  }
+  /varset addIndex 1
+  :check_add_loop2
+  /call CheckForAdds
+  /if (${addIndex}>1) /goto :check_add_loop2
+  /if (${newAdds}) /call MezAdds
+  /call CheckPet
+  /if (!${Spawn[${mobID}].Type.Equal[NPC]} && !${Spawn[${mobID}].Type.Equal[pet]}) /goto :mob_dead
+  /if (!${nukeMode} && !${useDebuff} && !${useMez}) /goto :wait_for_target
+  /target id ${mobID}
+  /delay 1s ${Target.ID} == ${mobID}
+  /delay 1
+  /if ((${Target.PctHPs}<${mobHPStart}) && ${Spawn[pc ${mainTank}].NearestSpawn[radius ${Math.Calc[${Spawn[${mobID}].MaxRangeTo}+10]} id ${mobID}].ID} && ${waitTimer${mobID}}<0  && ${Spawn[${mobID}].Distance3D}<=${minRadius}) {
+    /deletevar waitTimer${mobID}
+    /declare waitTimer${mobID} timer outer ${engageDelay}
+  }
+  /doevents
+  /target id ${mobID}
+  /delay 1s ${Target.ID} == ${mobID}
+  /delay 1
+  /if (${Target.PctHPs}>${minHP} && ${waitTimer${mobID}}) /goto :check_add_loop
+  /if (${newAdds}) /call MezAdds
+  /if (!${engaged}) {
+    /varset engaged 1
+    /echo Engaging >> ${Target.DisplayName} <<
+  }
+  /if (${Me.Pet.ID} && !${petAttacking} && !${Me.PetBuff[word of worell]}) {
+    /pet attack
+    /varset petAttacking true
+  }
+  /call UpdateMobList
+  /doevents Timer
+  /if (${useDebuff} && !${newAdds}) /call DebuffMobs
+  /if (${Spawn[${mobID}].Type.Equal[NPC]} || (!${Spawn[${mobID}].Master.Type.Equal[PC]} && ${Spawn[${mobID}].Type.Equal[pet]})) {
+    /target id ${mobID}
+    /delay 1s ${Target.ID} == ${mobID}
+    /delay 1
+  } else {
+    /goto :mob_dead
+  }
+  /if (!${newAdds} && (${slowTimer${mobID}} != 0 || !${useDebuff} || (!${useSlow} && ${nukeMode}))) {
+    /call CheckRune 100
+    /call CheckBuffs
+    /target id ${mobID}
+    /delay 1s ${Target.ID} == ${mobID}
+    /delay 1
+    /if (${Target.Type.Equal[npc]} && (${Target.Class.CanCast} || ${Zone.ID}>=300 )) {
+      /if (${Me.SpellReady[Scryer's Trespass]}) /call Cast "Scryer's Trespass" spell 0 CheckForAdds
+      /if (${Me.SpellReady[Theft of Thought]}) /call Cast "Theft of Thought" spell 0 CheckForAdds
+    }
+    /target id ${mobID}
+    /delay 1s ${Target.ID} == ${mobID}
+    /delay 1
+    /if (${DoDots} && ${Target.Distance}<=220 && ${Target.PctHPs}>${DotMinHPs} && ${Target.PctHPs}<=${DotAt} && ${Target.LineOfSight}) /call Dot
+    /if (${refreshTime}<20 && (${Target.PctHPs}<${mobHPStart} || ${minHP}==100) && !${newAdds} && ${Target.LineOfSight} && !${Me.TargetOfTarget.Name.Equal[${Me.Name}]} && !${nukeWaitTimer} && ${nukeMode} && (${Me.PctMana}>=${nukeMana} || ${nukeMode}==2) && (${Target.Type.Equal[NPC]} || ${Target.Type.Equal[pet]})) {
+      /if (!${fightStartTime}) /varset fightStartTime ${MacroQuest.Running}
+      /delay 1
+      /if (${useManaFlare} && ${Me.SpellReady[${manaFlareSpell}]} && (${Me.Buff[${manaFlareSpell}].Duration} <=5)) {
+      	/target id ${Me}
+      	/delay 1s ${Target.ID} == ${Me.ID}
+      	/call Cast "${manaFlareSpell}" ${manaFlareGem} CheckForAdds
+        /delay 1
+        /target id ${mobID}
+        /delay 1s ${Target.ID} == ${mobID}
+      }
+      /if (${Target.Distance}<=${Spell[${nuke1}].MyRange} && ${Me.SpellReady[${nuke1}]} && ${Target.PctHPs}>10 && (!${Defined[bewildermentTimer${mobID}]} || (${Defined[bewildermentTimer${mobID}]} && ${Spawn[${mobID}].PctHPs}<75))) {
+        /if (${useMindShatter} && ${Me.SpellReady[${mindShatterSpell}]} && (${Me.Buff[Mind Shatter Recourse].Duration}<=0 || ${Me.Buff[Mind Oscillate Recourse].Duration}<=0)) /call cast "${mindShatterSpell}" ${mindShatterGem} 0 CheckForAdds
+        /if (${announce} && !${spamDelay}) /${chatChannel} ${nuke1} on ${Target.CleanName}
+        /varset spamDelay (${nukeDelay}-25)
+        /delay 1
+        /call Cast "${nuke1}" ${nuke1Gem} 0
+      }
+      /if (${Macro.Return.Equal[CAST_NOTREADY]}) {
+        /if (${Me.Gem[${nuke2}]}) {
+          /if (${announce} && !${spamDelay}) /${chatChannel} ${nuke2} on ${Target.CleanName}
+          /varset spamDelay (${nukeDelay}-25)
+          /delay 1
+          /call Cast "${nuke2}" ${nuke2Gem} 0
+        } else {
+          /if (${useManaRobe}) /call ManaRobe
+        }
+      }
+      /if (${Macro.Return.Equal[CAST_SUCCESS]} || ${Macro.Return.Equal[CAST_RESISTED]}) {
+        /if (${nukeMode}==1) {
+          /varcalc nukeWaitMod 5*(90 - ${Me.PctMana})
+        } else {
+          /varset nukeWaitMod 0
+        }
+        /if (${nukeDelay}>${nukeWaitMod}) {
+          /varset nukeWaitTimer ${nukeDelay}
+        } else {
+          /varset nukeWaitTimer ${nukeWaitMod}
+        }
+      }
+    } else {
+      /if (${useManaRobe}) /call ManaRobe
+    }
+  }
+  /goto :check_add_loop
+  :mob_dead
+  /call UpdateMobList
+  /echo Target Dead!
+  /if (${Me.Pet.ID} && ${Me.AltAbility[Pet Discipline]}) /pet hold
+  /if (${cleanUp}) /call CleanUp ${mobID}
+  /doevents
+  /if (${useDPS}) /call DisplayDPS
+  /goto :wait_for_target
+/return
+
+Sub CheckForAdds
+  /if (${Me.Feigning}) /stand
+  /if (${Me.Casting.ID}) {
+    /doevents gate
+    /doevents rageon
+    /doevents rageoff
+    /doevents uquakey
+    /if (${castEndTime}>5) /doevents EQBC chat
+  }
+  /if (${Target.ID}==${mobID} && ${Me.TargetOfTarget.Type.Equal[pc]} && ${Me.TargetOfTarget.Class.Name.Equal[cleric]} && ${Me.TargetOfTarget.PctHPs}<=50 && ${Me.AltAbilityReady[Soothing Words]}) {
+    /if (${Me.TargetOfTarget.ID}==${Group.Member[1].ID} || ${Me.TargetOfTarget.ID}==${Group.Member[2].ID} || ${Me.TargetOfTarget.ID}==${Group.Member[3].ID} || ${Me.TargetOfTarget.ID}==${Group.Member[4].ID} || ${Me.TargetOfTarget.ID}==${Group.Member[5].ID}) {
+      /if (${Me.Casting.ID} && !${Me.Casting.Name.Equal[${mezSpell}]} && !${Spawn[${petID}].Type.Equal[NPC]}) /call Interrupt
+      /call Cast "soothing words" alt
+    }
+  }
+  /if (${useCharm}) /call CheckPet2
+  :check_add_loop
+  /if (!${Spawn[${mobID}].Type.Equal[NPC]} && !${Spawn[${mobID}].Master.Type.Equal[NPC]} && !${petOff} || ${ExcludeList.Find[${Spawn[${mobID}]}].Name}) {
+    /varset addIndex 1
+    /varset newAdds 0
+    /return
+  }
+  /if (${petCheck}) {
+    /varset addID ${NearestSpawn[${addIndex},npc radius ${minRadius}].ID}
+  } else {
+    /varset addID ${NearestSpawn[${addIndex},pet radius ${minRadius}].ID}
+  }
+  /if (${addID}) {
+    /if ((${mezTimer${addID}}<=${Math.Calc[${mezDuration}-50]} || !${mezTimer${addID}}) && ${Spawn[${addID}].Distance3D}<=${minRadius} && ${addID}!=${petID} && ${Spawn[${addID}].LineOfSight} && ${aggroAnim.Find[|${Spawn[${addID}].Animation}|]} && ${mezTimer${addID}}!=-1 && ((!${Spawn[${addID}].Master.Type.Equal[PC]} && ${Spawn[${addID}].Type.Equal[pet]}) || (${Spawn[${addID}].Type.Equal[NPC]} && ${addID}!=${Spawn[${mobID}].Master.ID}))) {
+      /call AddToList addList ${addID}
+      /call AddToList mobList ${addID}
+      /if (${Macro.Return.Equal[1]}) {
+        /if (!${Defined[waitTimer${addID}]}) /declare waitTimer${addID} timer outer ${engageDelay}
+        /echo Add detected! >> ${Spawn[${addID}].DisplayName} <<
+        /if (${mezzImmuneList.Find[${Spawn[${addID}].DisplayName}]} && ${announce}) /${chatChannel} ${Spawn[${addID}].DisplayName} CANNOT BE MEZZED!  OFFTANK!
+      }
+      /varset newAdds 1
+    }
+    /varcalc addIndex ${addIndex}+1
+  } else {
+    /varcalc petCheck !${petCheck}
+    /varset addIndex 1
+  }
+/return
+
+Sub CheckPet2
+  /if (${Zone.ID}!=${currentZone}) /call Event_Zone
+  /if (${petOff} && ${Me.Pet.ID}) {
+    /varset petOff 0
+    /if (!${addList.Find[[]}) /varset newAdds 0
+  }
+  /if (${Spawn[${petID}].Type.Equal[NPC]} && !${petOff} && ${useCharm} && ${petID}) {
+    /echo Pet Off!
+    /varset petAttacking false
+    /varset newAdds 1
+    /varset petOff 1
+    /if (${useCharm} && ${Me.Casting.ID} && ${useMez} && ${newAdds} && !${Me.Casting.Name.Equal[${mezSpell}]} && !${Me.Casting.Name.Equal[${pbaeMezSpell}]} && !${Me.Casting.Name.Equal[${tashSpell}]} && !${Me.Casting.Name.Equal[${charmSpell}]}) /call Interrupt
+    /if (${useCharm}) {
+      /beep
+      /timed 7 /g PET OFF!! snare/malo pls!
+      /target id ${petID}
+    }
+  }
+/return
+
+Sub CheckPet
+  /if (!${FindItem[${normalOffhand}].ID} && ${InvSlot[offhand].Item.ID}) /varset normalOffhand ${InvSlot[offhand].Item.Name}
+  /doevents rageon rageoff
+  /declare i int local
+  /declare tempID int local
+  /call CheckPet2
+  /if (${petOff}) {
+    /if (${useCharm}) {
+      /call Charm ${petID}
+    }
+  }
+  /for i 1 to ${Group}
+    /varset tempID ${Group.Member[${i}].Pet.ID}
+    /if (${tempID}) {
+      /if (!(${slowTimer${tempID}}<0)) {
+        /if (${Defined[mezTimer${tempID}]}) /deletevar mezTimer${tempID}
+        /if (${Defined[slowTimer${tempID}]}) /deletevar slowTimer${tempID}
+        /if (${Defined[tashTimer${tempID}]}) /deletevar tashTimer${tempID}
+        /if (${Defined[crippleTimer${tempID}]}) /deletevar crippleTimer${tempID}
+        /if (${Defined[bewildermentTimer${tempID}]}) /deletevar bewildermentTimer${tempID}
+        /declare mezTimer${tempID} int outer -1
+        /declare tashTimer${tempID} int outer -1
+        /declare slowTimer${tempID} int outer -1
+        /declare crippleTimer${tempID} int outer -1
+        /declare bewildermentTimer${tempID} int outer -1
+      }
+    }
+  /next i
+/return
+
+Sub MezAdds
+  /if (!${useMez}) {
+    /varset newAdds 0
+    /return
+  }
+  /declare tempID string local
+  /declare AEmezzed int local 0
+  :mez_adds_loop
+  /if (${addList.Find[[]}) {
+    /if (${addList.Find[[]}>1) /varset addList ${addList.Right[-${Math.Calc[${addList.Find[[]}-1]}]}
+    /if (!${Spawn[${mobID}].Type.Equal[NPC]} && !${Spawn[${mobID}].Master.Type.Equal[NPC]}) /return
+    /varset tempID ${addList.Arg[1,[].Left[-1]}
+    /if (${mezzImmuneList.Find[${Spawn[${tempID}].DisplayName}]}) {
+  	  /call DeleteFromList addList ${tempID}
+  	  /goto :mez_adds_loop
+  	}
+    /if (!${Spawn[${tempID}].Type.Equal[NPC]} && !${Spawn[${tempID}].Master.Type.Equal[NPC]}) {
+      /if (${Defined[mezTimer${tempID}]}) /deletevar mezTimer${tempID}
+      /if (${Defined[slowTimer${tempID}]}) /deletevar slowTimer${tempID}
+      /if (${Defined[tashTimer${tempID}]}) /deletevar tashTimer${tempID}
+      /if (${Defined[crippleTimer${tempID}]}) /deletevar crippleTimer${tempID}
+      /if (${Defined[bewildermentTimer${tempID}]}) /deletevar bewildermentTimer${tempID}
+    } else {
+      /squelch /target id ${tempID}
+      /delay 5 ${Target.ID} == ${tempID}
+      /delay 1
+      /if (!${AEmezzed} && ${Spawn[${tempID}].NearestSpawn[2,npc radius 30].ID} && ${Spawn[${tempID}].Distance3D} < 30 && ${addList.Count[[]} > 2 && ${Me.SpellReady[${aeMezSpell]}]}) {
+        /if (${announce}) /${chatChannel} Casting ${aeMezSpell} on ${Target.CleanName}
+        /call Cast "${aeMezSpell}" ${aeMezGem}
+        /varset AEmezzed 1
+      }
+      /echo Calling Mez on ${Target.DisplayName} with ID: ${Target.ID} from mez adds
+      /call Mez
+    }
+    /call DeleteFromList addList ${tempID}
+    /goto :mez_adds_loop
+  }
+  /varset newAdds 0
+/return
+
+Sub DebuffMobs
+  /declare i int local
+  /declare tempID string local
+  /if (${mobList.Find[[]}) {
+    /if (${mobList.Find[[]}>1) /varset mobList ${mobList.Right[-${Math.Calc[${mobList.Find[[]}-1]}]}
+    /for i 1 to ${mobList.Count[[]}
+      /varset tempID ${mobList.Arg[${i},[].Left[-1]}
+      /if (!${Defined[slowTimer${tempID}]}) {
+        /if (!${Spawn[${tempID}].Type.Equal[npc]}) {
+          /declare slowTimer${tempID} int outer 0
+        } else /if (((!${waitTimer${tempID}} || ${mezTimer${tempID}}>0) && (${slowTimer${mobID}} || ${waitTimer${mobID}})) || ${tempID}==${mobID}) {
+          /call UpdateMobList
+          /doevents Timer
+          /target id ${tempID}
+          /delay 1s ${Target.ID}==${tempID}
+          /delay 1
+          /if (!${tashTimer${tempID}} && ${useTash}) /call Tash
+          /if (${newAdds}) /return
+          /if (${useSlow}) /call Slow
+          /if (!${useSlow}) {
+          	/if (!${Defined[slowTimer${tempID}]}) /declare slowTimer${tempID} timer outer
+          	/varset slowTimer${tempID} ${slowDuration}
+          	/call CheckForAdds
+          }
+          /if (${newAdds} && ${useCripple}) /return
+          /if (${useCripple}) /call Synapsis
+          /if (${addList.Find[[]}) /varset newAdds 1
+          /if (${newAdds}) /return
+          /if (${Macro.Return.Equal[CAST_CANCELLED]}) /return
+          /if (${newAdds}) /return
+        }
+      }
+      /if (!${Spawn[${mobID}].Type.Equal[NPC]} && !${Spawn[${mobID}].Master.Type.Equal[NPC]}) /return
+    /next i
+  }
+/return
+
+Sub Charm(int tempID)
+  /target id ${tempID}
+  /if (${Spawn[${tempID}].Distance} > 80 && ${Me.SpellReady["${mezSpell}"]} && ${Me.CurrentMana} >= ${Spell["${mezSpell}"].Mana} && ${Spawn[${tempID}].LineOfSight}) {
+    /fast fast nolook
+    /if (${announce}) /${chatChannel} Mezzing  ${Target.CleanName}
+    /call cast "${mezSpell}" ${mezGem} 6s CheckForAdds
+  } else /if (${Spawn[${tempID}].Distance} > 60 && ${Me.Gem["${rootSpell}"]} && ${Me.SpellReady["${rootSpell}"]} && ${Me.CurrentMana} >= ${Spell["${rootSpell}"].Mana} && ${Spawn[${tempID}].LineOfSight}) {
+    /fast fast nolook
+    /if (${announce}) /${chatChannel} ${rootSpell} on ${Target.CleanName}
+    /call cast "${rootSpell}" ${rootSpellGem} 6s CheckForAdds
+  } else /if (${Me.Gem[${pbaeMezSpell}]} && ${Spawn[${tempID}].Level} <= ${maxPBAEMezLevel}) {
+    :MoveLoop
+    /if (${Target.Distance} > 45) {
+      /face fast nolook
+      /keypress forward hold
+      /delay 1
+      /goto :MoveLoop
+    }
+    /keypress forward
+    /keypress back
+    /delay 1
+    :WaitLoop
+    /if (${Target.Distance3D}<=35) {
+      /if (${announce}) /${chatChannel} Casting ${pbaeMezSpell} on ${Target.CleanName}
+      /call Cast "${pbaeMezSpell}" ${pbaeMezGem} 6s CheckForAdds
+    } else {
+      /delay 1
+      /goto :WaitLoop
+    }
+  } else {
+    /if (${announce}) /${chatChannel} Mezzing  ${Target.CleanName}
+    /call cast "${mezSpell}" ${mezGem} 6s CheckForAdds
+  }
+  /target id ${tempID}
+  /delay 1
+  /if (${tashTimer${tempID}}<5500) /call Tash
+  /if (${announce}) /${chatChannel} Charming  ${Target.CleanName}
+  /call Cast "${charmSpell}" ${charmGem}
+  /if (${Me.Pet.ID}) /target id ${Me.Pet.ID}
+/return
+
+Sub Tash
+  :spell_loop
+  /if (!${Me.SpellReady[${Me.Gem[1]}]} && !${Me.SpellReady[${Me.Gem[2]}]} && !${Me.SpellReady[${Me.Gem[3]}]} && !${Me.SpellReady[${Me.Gem[4]}]}) {
+    /delay 2
+    /goto :spell_loop
+  }
+  /declare tempID int local ${Target.ID}
+  /if (${ExcludeList.Find[${Target.DisplayName}]}) {
+  	/if (!${Defined[tashTimer${tempID}]}) /declare tashTimer${tempID} int outer -1
+  	/return
+  }
+  /if (${useTashFocus}) /call SwapItem "${tashFocusItem}" ${FindItem[${tashFocusItem}].WornSlot[1]}
+  /if (${Target.Distance}<=${Spell[${tashSpell}].MyRange} && ${Me.CurrentMana}>${Spell[${tashSpell}].Mana} && ${Target.LineOfSight}) {
+    /if (${announce}) /${chatChannel} ${tashSpell} on ${Target.CleanName}
+    /call Cast "${tashSpell}" ${tashGem} 1s CheckForAdds
+    /if (!${Defined[tashTimer${tempID}]}) /declare tashTimer${tempID} timer outer
+    /if (${Macro.Return.Equal[CAST_SUCCESS]}) {
+      /varset tashTimer${tempID} ${tashDuration}
+    } else /if (${newAdds} || ${Select[${castReturn},CAST_OUTOFMANA,CAST_OUTOFRANGE,CAST_CANNOTSEE]}) {
+      /varset tashTimer${tempID} 50
+    } else {
+      /varset tashTimer${tempID} 1
+    }
+  }
+  /if (${useTashFocus}) /call SwapItem "${normalMainhand}" mainhand
+  /delay 2
+/return ${Macro.Return}
+
+Sub Slow
+  /declare slowResistCounter int local
+  /declare tempID int local ${Target.ID}
+  /if (${ExcludeList.Find[${Target.DisplayName}]}) {
+  	/if (!${Defined[slowTimer${tempID}]}) /declare slowTimer${tempID} int outer -1
+  	/return
+  }
+  :recastslow
+  /doevents Hit
+  /if (${Me.TargetOfTarget.ID}==${Me.ID} && ${useMitigate}) /call cast "${mitigateSpell}" ${mitigateSpellGem}
+  /if (${Target.ID} && ${Target.LineOfSight} && ((${Spawn[${tempID}].Distance}<=${Spell[${slowSpell}].MyRange} && ${Me.CurrentMana}>${Spell[${slowSpell}].Mana}) || (${Select[${slowType},item,alt]} && ${Spawn[${tempID}].Distance}<=200))) {
+    /if (${announce}) /${chatChannel} ${slowSpell} on ${Target.CleanName}
+    /call Cast "${slowSpell}" ${slowType} 6s CheckForAdds
+    /if (!${Defined[slowTimer${tempID}]}) /declare slowTimer${tempID} timer outer
+    /if (${Macro.Return.Equal[CAST_IMMUNE]} || ${spellNotHold}) {
+      /deletevar slowTimer${tempID}
+      /declare slowTimer${tempID} int outer -1
+    } else /if (${Macro.Return.Equal[CAST_SUCCESS]}) {
+      /varset slowTimer${tempID} ${slowDuration}
+    } else /if (${castReturn.Equal[CAST_RESISTED]}) {
+      /varcalc slowResistCounter ${slowResistCounter}+1
+      /if (${slowResistCounter}>=4) {
+      	/if (${announce}) /${chatChannel} ${Target.CleanName} resisted ${slowSpell} ${slowResistCounter} times, giving up!
+      	/varset slowTimer${tempID} 10000s
+      	/goto :slowdone
+      } else {
+      	/delay 5
+      	/goto :recastslow
+      }
+    } else /if (${newAdds} || ${Select[${castReturn},CAST_OUTOFMANA,CAST_OUTOFRANGE,CAST_CANNOTSEE]}) {
+      /varset slowTimer${tempID} 50
+    } else {
+      /varset slowTimer${tempID} 1
+    }
+  }
+  :slowdone
+  /delay 2
+/return ${Macro.Return}
+
+Sub Synapsis
+  /declare crippleResistCounter int local
+  /declare tempID int local ${Target.ID}
+  /if (${ExcludeList.Find[${Target.DisplayName}]}) {
+  	/if (!${Defined[crippleTimer${tempID}]}) /declare crippleTimer${tempID} int outer -1
+  	/return
+  }
+  :recastcripple
+  /if (${Me.TargetOfTarget.ID}==${Me.ID} && ${useMitigate}) /call cast "${mitigateSpell}" ${mitigateSpellGem}
+  /if (${Target.Distance}<=${Spell[${crippleSpell}].MyRange} && ${Me.CurrentMana}>${Spell[${crippleSpell}].Mana} && ${Target.LineOfSight}) {
+    /if (${announce}) /${chatChannel} ${crippleSpell} on ${Target.CleanName}
+    /call Cast "${crippleSpell}" ${crippleGem} 6s CheckForAdds
+    /if (!${Defined[crippleTimer${tempID}]}) /declare crippleTimer${tempID} timer outer
+    /if (${Macro.Return.Equal[CAST_IMMUNE]} || ${spellNotHold}) {
+      /deletevar crippleTimer${tempID}
+      /declare crippleTimer${tempID} int outer -1
+    } else /if (${Macro.Return.Equal[CAST_SUCCESS]}) {
+      /varset crippleTimer${tempID} ${crippleDuration}
+    } else /if (${castReturn.Equal[CAST_RESISTED]}) {
+      /varcalc crippleResistCounter ${crippleResistCounter}+1
+      /if (${crippleResistCounter}>=3) {
+      	/if (${announce}) /${chatChannel} ${Target.CleanName} resisted ${crippleSpell} ${crippleResistCounter} times, giving up!
+      	/varset crippleTimer${tempID} 10000s
+      	/goto :crippledone
+      } else {
+      	/delay 5
+      	/goto :recastcripple
+      }
+    } else /if (${newAdds} || ${Select[${castReturn},CAST_OUTOFMANA,CAST_OUTOFRANGE,CAST_CANNOTSEE]}) {
+      /varset crippleTimer${tempID} 50
+    } else {
+      /varset crippleTimer${tempID} 1
+    }
+  }
+  :crippledone
+  /delay 2
+/return ${Macro.Return}
+
+Sub Mez
+  /declare tempID int local ${Target.ID}
+  /declare resistCount int local 0
+  /if (${Defined[mezTimer${tempID}]} && ${mezTimer${tempID}} > ${Math.Calc[${mezDuration}-20]}) /return
+  :mez_loop
+  /if (!${Me.SpellReady[${Me.Gem[1]}]} && !${Me.SpellReady[${Me.Gem[2]}]} && !${Me.SpellReady[${Me.Gem[3]}]} && !${Me.SpellReady[${Me.Gem[4]}]}) {
+    /delay 2
+    /goto :mez_loop
+  }
+  /if (${Spawn[${tempID}].Type.Equal[PC]}) {
+    /call UpdateMobList
+    /squelch /target clear
+    /return
+  }
+  /if (${Target.PctHPs} < 85 && ${mezTimer${tempID}} != -1) {
+    /if (${Defined[mezTimer${tempID}]}) {
+      /varset mezTimer${tempID} int outer -1
+    } else {
+      /declare mezTimer${tempID} int outer -1
+    }
+    /if (${announce}) /${chatChannel} ${Target.CleanName} is being killed, no mezz 4 u!
+    /return
+  }
+  /if (!${Defined[mezTimer${tempID}]}) {
+    /declare mezTimer${tempID} timer outer
+  }
+  /doevents Hit
+  /if (${mezzImmuneList.Find[${Target.DisplayName}]}) {
+    /varset mezTimer${tempID} -1
+    /if (${announce}) /${chatChannel} ${Target.CleanName} CANNOT BE MEZZED!  OFFTANK!
+    /return
+  }
+  /if (${Target.Distance}<=${Spell[${mezSpell}].MyRange} && ${Me.CurrentMana}>${Spell[${mezSpell}].Mana} && ${Spawn[${tempID}].Level}<=${maxMezLevel} && !${mezzImmuneList.Find[${Target.DisplayName}]} && ${Target.LineOfSight}) {
+    /delay 5 (${Target.ID}==${tempID})
+    /if (${announce}) /${chatChannel} Mezzing  ${Target.CleanName}
+    /call Cast "${mezSpell}" ${mezGem} 3s CheckForAdds
+    /if (${Macro.Return.Equal[CAST_IMMUNE]}) {
+      /varset mezTimer${tempID} int outer 10000
+      /if (${announce}) /${chatChannel} ${Target.CleanName} Is IMMUNE TO MEZZ!  OFFTANK!
+      /if (${Spawn[${tempID}].Level}<=${maxMezLevel} && !${mezzImmuneList.Find[${Target.DisplayName}]}) {
+      	/ini "${mezzImmuneIni}" "Excludes.${Zone.ShortName}" "MezzImmune" "${mezzImmuneList}${Target.CleanName}|"
+        /varset mezzImmuneList ${Ini[${mezzImmuneIni},"Excludes.${Zone.ShortName}","MezzImmune"]}
+        /echo MezzImmuneList: ${mezzImmuneList}
+      }
+    } else /if (${Macro.Return.Equal[CAST_CANCELLED]}) {
+    	/varset mezTimer${tempID} int outer 10000
+    	/if (${announce}) /${chatChannel} ${mezSpell} was cancelled on ${Target.CleanName}!
+    } else /if (${Macro.Return.Equal[CAST_SUCCESS]}) {
+      /varset mezTimer${tempID} ${mezDuration}
+    } else /if (${Macro.Return.Equal[CAST_OUTOFMANA]} || ${Macro.Return.Equal[CAST_OUTOFRANGE]} || ${Macro.Return.Equal[CAST_CANNOTSEE]}) {
+      /varset mezTimer${tempID} 50
+    } else {
+      /if (${Macro.Return.Equal[CAST_INTERRUPTED]}) {
+        /if (${Me.SpellReady[${stunSpell}]}) {
+          /if (${announce}) /${chatChannel} Stunning  ${Target.CleanName}
+          /call Cast "${stunSpell}" gem6 2s
+        } else /if (${Me.SpellReady[${pbaeMezSpell}]} && ${Spawn[${tempID}].Level} <= ${maxPBAEMezLevel}) {
+          /if (${announce}) /${chatChannel} Casting ${pbaeMezSpell} on ${Target.CleanName}
+          /call Cast "${pbaeMezSpell}" gem4 3s
+        }
+      }
+      /if (${Macro.Return.Equal[CAST_RESISTED]}) {
+        /varcalc resistCount ${resistCount}+1
+        /if (${resistCount}==2 && !${tashTimer${addID}}) /call Tash
+      }
+      /if (!${Spawn[${mobID}].Type.Equal[NPC]} && !${Spawn[${mobID}].Master.Type.Equal[NPC]} && ${useMez}) /return
+      /goto :mez_loop
+    }
+  }
+/return ${Macro.Return}
+
+Sub ClickOffIllusion
+  /declare i int local
+  /for i 1 to 20
+    /if (${Me.Buff[${i}].Name.Find[illusion:]}) /nomodkey /notify BuffWindow buff${Math.Calc[${i}-1].Int} leftmouseup
+  /next i
+/return
+
+Sub CheckBuffs
+  /if (${Zone.ID}!=${currentZone}) /call Event_Zone
+  /varset deathFlag ${Math.Calc[!(${InvSlot[chest].Item.ID}>0)]}
+  /if (${deathFlag} || ${Me.State.Equal[Hover]} || ${Me.State.Equal[Dead]} || ${Window[RespawnWnd].Open}) /goto :dead
+  /if (${Me.Invis} || ${following}) /return
+  /declare a int local
+  /declare i int local
+  /declare oldTarget int local ${Target.ID}
+  /declare oldItemName string local
+  /declare foodName string local
+  /declare oldSlotID int local
+  /declare spellName string local
+  /declare buffText string local
+  /declare targetName string local
+  /declare spellName2 string local
+  /declare spellType string local
+  /declare spellRange int local 118
+  /declare tempID int local
+  /declare focusList string local Wunshi's Focusing,Focus of Alladnu,Focus of Soul,Talisman of Kragg,Focus of the Seventh,Talisman of Wunshi,Dire Focusing,Dire Focusing Rk. II,Dire Focusing Rk. III,Talisman of the Dire,Talisman of the Dire Rk. II,Talisman of the Dire Rk. III
+  /declare shaman bool local false
+  /declare targetType string local
+  /doevents Indoors
+  /if (!${Me.Pet.ID} && ${usePet} && !${petOff} && ${Me.CurrentMana}>=900) /call SumPet
+  /if (${Me.Pet.ID} && ${petID}!=${Me.Pet.ID}) {
+    /varset petID ${Me.Pet.ID}
+    /if (${Defined[mezTimer${petID}]}) /deletvar mezTimer${petID}
+    /if (${Defined[slowTimer${petID}]}) /deletvar slowTimer${petID}
+    /if (${Defined[crippleTimer${petID}]}) /deletvar crippleTimer${petID}
+    /if (${Defined[bewildermentTimer${petID}]}) /deletvar bewildermentTimer${petID}
+    /declare mezTimer${petID} int outer -1
+    /declare slowTimer${petID} int outer -1
+    /declare crippleTimer${petID} int outer -1
+    /declare bewildermentTimer${petID} int outer -1
+  }
+  /if (!${Me.Casting.ID}) {
+    /if (${Me.Combat}) {
+      /call SwapItem "${meleeWep}" mainhand
+    } else {
+      /call SwapItem "${normalMainhand}" mainhand
+    }
+  }
+  /if (${Cursor.Name.Equal[Wand of Elemental Transvergance]} || ${Cursor.Name.Equal[Rod of Prime Transvergence]} || ${Cursor.Name.Equal[Summoned: Modulating Rod]}) /autoinventory
+  /if ((!${FindItem[Rod of Prime Transvergence].ID} || !${FindItem[Rod of Prime Transvergence].ID} || !${FindItem[Summoned: Modulating Rod].ID}) && ${Spawn[pc ${rodBitch} radius 200].ID} && !${askedForRodTimer}) {
+    /tell ${rodBitch} rod pls!
+    /varset askedForRodTimer 5m
+  }
+  /if (!${modRodTimer} && ${Me.PctHPs}>50 && ${Me.PctMana}<=85 && (${FindItem[Rod of Prime Transvergence].ID} || ${FindItem[Rod of Prime Transvergence].ID} || ${FindItem[Summoned: Modulating Rod].ID})) {
+  	/if (${FindItem[Rod of Prime Transvergence].InvSlot}) {
+      /call Cast "Rod of Prime Transvergence" item
+  	} else /if (${FindItem[Rod of Prime Transvergence].InvSlot}) {
+      /call Cast "Rod of Prime Transvergence" item
+  	} else /if (${FindItem[Summoned: Modulating Rod].InvSlot}) {
+      /call Cast "Summoned: Modulating Rod" item
+    }
+    /varset modRodTimer 3100
+  }
+  /if (${checkNamed}) /call CheckNamed
+  /if (${Me.Hunger}<5000 && ${useFood}) {
+    /call GetFoodName
+    /varset foodName ${Macro.Return}
+    /if (${Bool[${foodName}]}) {
+      /varset oldSlotID ${FindItem[${foodName}].InvSlot.ID}
+      /call SwapItem "${foodName}" "${foodPack}"
+      /nomodkey /itemnotify ${foodPack} rightmouseup
+      /call SwapItem "${foodName}" "${oldSlotID}"
+    }
+  }
+  /if (!${autoBuff}) /goto :skip_buffs
+  /if ((${autoBuff}==2 || ${autoBuff}==4) && ${Target.ID}) /return
+  /if (!${selfBuffTimer}) /call CheckIniBuffs
+  /if (${autoC7} && (${Me.Buff[${singleC7}].Duration}<=5 || ${Me.Buff[${groupC7}].Duration}<=5)) {
+    /if (!${Me.Buff[${singleC7}].ID} && !${Me.Buff[${groupC7}].ID} && !${Me.Buff[Tranquility].ID}) {
+      /if (${Me.PctMana}<20 && ${FindItem[Silken Augmenter's Pantaloons].ID} && !${Me.Buff[${singleC7}].ID} && !${Me.Buff[${groupC7}].ID} && ${Spell[Tranquility].Stacks[0]}) {
+        /call AddToQueue "c4,${Me.Name}"
+      } else {
+        /call AddToQueue "mindCandy,${Me.Name}"
+      }
+    } else /if (${Me.PctMana}>=80 && ((${Spell[${singleC7}].Stacks[0]} || ${Spell[${groupC7}].Stacks[0]}) && (${Me.Book[${singleC7}]} || ${Me.Book[${groupC7}]}))) {
+      /call AddToQueue "mindCandy,${Me.Name}"
+    }
+  }
+  /if (${Me.Buff[Tranquility].ID} && ${Me.PctMana}>=80 && ${Me.Level}>=65) {
+  	/call AddToQueue "mindCandy,${Me.Name}"
+  }
+  /if (${hasteGroup}) {
+    /for i 1 to ${Group}
+      /varset tempID ${Group.Member[${i}].ID}
+      /if (${tempID}) {
+        /if (!${Defined[hasteTimer${tempID}]}) /declare hasteTimer${tempID} timer outer
+        /if (${Spawn[${tempID}].Type.Equal[pc]}) {
+          /if (!${hasteTimer${tempID}}) {
+            /if (${Group.Member[${i}].Class.PureCaster}) {
+              /deletevar hasteTimer${tempID}
+              /declare hasteTimer${tempID} int outer -1
+            } else {
+              /call AddToQueue "sos,${Group.Member[${i}].Name}"
+              /varset hasteTimer${tempID} 62m
+            }
+          }
+        } else /if (${Spawn[${tempID}].Type.Equal[Corpse]}) {
+          /varset hasteTimer${tempID} 0
+        }
+      } else /if (${Defined[hasteTimer${tempID}]}) {
+        /deletevar hasteTimer${tempID}
+      }
+    /next i
+  }
+  /if (${Spawn[pc class shaman].ID}) {
+    /if (${Raid.Members}) {
+      /if (${Spawn[pc guild "${Me.Guild}" shm].ID}) /varset shaman true
+    } else {
+      /for i 1 to ${Group}
+        /if (${Group.Member[${i}].Class.Name.Equal[shaman]}) /varset shaman true
+      /next i
+    }
+  }
+  /if (${shaman}) {
+    /if (${Me.Buff[${shielding}].ID}) /call ClickOffBuff "${shielding}"
+  } else {
+    /for i 1 to ${focusList.Length}
+      /if (${Me.Buff[${focusList.Arg[${i},,]}].ID}) /goto :skip_buffs
+    /next i
+    /if (!${Me.Buff[${shielding}].ID} && ${Spell[${shielding}].Stacks[10]}) /call AddToQueue "${shielding},${Me.Name}"
+  }
+  :skip_buffs
+  /if (!${Me.Mount.ID} && ${useMount}) /call Cast "${InvSlot[ammo].Item.Name}" item 2s
+  /if (!${useMount} && ${Me.Mount.ID}) /dismount
+  /if (${buffQueue.Find[[]}) {
+    /if (${useExtEnhanceFocus}) {
+    	/varset focusSlotName ${FindItem[${extEnhanceItem}].WornSlot[1].Name}
+    	/call EquipItem "${extEnhanceItem}" ${FindItem[${extEnhanceItem}].WornSlot[1].Name}
+    	/varset oldItem ${Macro.Return}
+    }
+    /if (${buffQueue.Find[[]}>1) /varset buffQueue ${buffQueue.Right[-${Math.Calc[${buffQueue.Find[[]}-1]}]}
+    /for i 1 to ${buffQueue.Count[[]}
+      /varset buffText [${buffQueue.Arg[${i},[]}
+      /varset spellName ${buffText.Arg[1,,].Right[-1]}
+      /if (${spellName.Right[1].Equal["]"]}) /varset spellName ${spellName.Left[-1]}
+      /varset targetName ${buffText.Arg[2,,].Left[-1]}
+      /call GetBuffName "${spellName}"
+      /varset spellName ${Macro.Return.Arg[1,,]}
+      /varset spellType ${Macro.Return.Arg[2,,]}
+      /if (${spellType.Equal[item]}) {
+        /varset spellName2 ${FindItem[${spellName}].Spell.Name}
+      } else {
+        /varset spellName2 ${spellName}
+      }
+      /if (${Spell[${spellName2}].TargetType.Equal[Group v2]}) {
+        /varcalc spellRange 1.18*${Spell[${spellName2}].AERange}
+      } else {
+        /varcalc spellRange 1.18*${Spell[${spellName2}].Range}
+      }
+      /if (${Bool[${spellName}]} && ${Spawn[${targetName}].Type.Equal[NPC]}) {
+      	/if (${announce}) /${chatChannel} Casting ${spellName} on ${targetName}
+        /call Cast "${spellName}" ${spellType} 4s
+        /if (${Spawn[${oldTarget}].ID}) {
+          /if (${Target.Name.Equal[${targetName}]}) /target id ${oldTarget}
+        } else {
+          /squelch /target clear
+        }
+        /call DeleteFromQueue "${buffText}"
+        /varcalc i ${i}-1
+        /return
+      }
+      /varset targetType pc
+      /if (!${Spawn[pc ${targetName}].ID}) /varset targetType pet
+      /if (${Bool[${spellName}]}) {
+        /if (${spellName.Find[Illusion]} && ${Me.AltAbilityReady[Project Illusion]}) /call cast "Project Illusion" alt 1s
+        /if (${Me.CurrentMana}>=${Math.Calc[${Spell[${spellName}].Mana}+${Me.ManaRegen}]} || ${spellType.Equal[item]} || ${spellType.Equal[alt]}) {
+          /if (!${Bool[${targetName}]} && ${Target.Distance}<=${Spell[${spellName}].MyRange}) {
+            /if (${announce}) /${chatChannel} Casting ${spellName} on ${Target.CleanName}
+            /call Cast "${spellName}" ${spellType} 4s
+          } else /if (${Spawn[${targetType} ${targetName}].ID} && (${Spawn[pc ${targetName}].Distance3D}<=${Spell[${spellName}].MyRange} || !${spellRange})) {
+            /target ${targetType} ${targetName}
+            /delay 1s (${Target.ID}==${Spawn[pc ${targetName}].ID})
+            /if (${announce}) /${chatChannel} Casting ${spellName} on ${Target.CleanName}
+            /call Cast "${spellName}" ${spellType} 4s CheckForAdds
+          }
+          /if (${Macro.Return.Equal[CAST_SUCCESS]} || ${spellNotHold} || ${Macro.Return.Equal[CAST_UNKNOWNSPELL]} || ${Macro.Return.Equal[CAST_NOTARGET]} || (${Macro.Return.Equal[CAST_CANCELLED]} && (!${newAdds} || !${useMez}))) {
+            /call DeleteFromQueue "${buffText}"
+            /varcalc i ${i}-1
+          }
+        } else {
+          /call DeleteFromQueue "${buffText}"
+          /varcalc i ${i}-1
+        }
+      }
+    /next i
+    /if (${Spawn[${oldTarget}].ID}) {
+      /if (${Target.Name.Equal[${targetName}]}) /target id ${oldTarget}
+    } else {
+      /squelch /target clear
+    }
+    /if (${useExtEnhanceFocus}) /call EquipItem ${oldItem}
+  /return
+  }
+  /if (${QueueCount} && ${Me.PctMana}>${doBuffMana} && ${doBuffs}) {
+    /for a 1 to 25
+    	/if (!${PreviousSpell} || (${PreviousSpell}!=${Spell[${doBuffID[${doBuffQueue[${a},2]}]}].ID})) /goto :SetCheck
+    	/if (${PreviousSpell}==${Spell[${doBuffID[${doBuffQueue[${a},2]}]}].ID}) {
+    		/call RemoveFromQueue ${doBuffQueue[${a},1]} ${doBuffQueue[${a},2]}
+    		/timed 300 /varset PreviousSpell 0
+    		/goto :NextdoBuff
+    	}
+    	:SetCheck
+      /if ((${Spawn[${doBuffQueue[${a},1]}].Distance}>${Spell[${doBuffID[${doBuffQueue[${a},2]}]}].MyRange} && ${Spawn[${doBuffQueue[${a},1]}].Distance}>${Spell[${doBuffID[${doBuffQueue[${a},2]}]}].AERange}) || !${Spawn[${doBuffQueue[${a},1]}].ID} || ((!${Me.SpellReady[${doBuff${doBuffQueue[${a},2]}}]} && ${Me.Gem[${doBuff${doBuffQueue[${a},2]}}]}) && ${doBuffGem${doBuffQueue[${a},2]}.NotEqual[item]} && ${doBuffGem${doBuffQueue[${a},2]}.NotEqual[alt]})) /goto :NextdoBuff
+      /squelch /target id ${doBuffQueue[${a},1]}
+      /delay 1s ${Target.ID}==${doBuffQueue[${a},1]}
+      /if (${Target.ID}==${doBuffQueue[${a},1]}) {
+        /varset spellName ${doBuffIcon${doBuffQueue[${a},2]}}
+        /if (${doBuffTells} && !${SpamTimer}) /tt ${doBuffIcon${doBuffQueue[${a},2]}} inc
+        /if (${useExtEnhanceFocus}) {
+        	/varset focusSlotName ${FindItem[${extEnhanceItem}].WornSlot[1].Name}
+        	/call EquipItem "${extEnhanceItem}" ${FindItem[${extEnhanceItem}].WornSlot[1].Name}
+        	/varset oldItem ${Macro.Return}
+        }
+        /if (${Target.ID} && ${Target.Distance}<=${Spell[${doBuffID[${doBuffQueue[${a},2]}]}].MyRange}) /call Cast "${doBuff${doBuffQueue[${a},2]}}" ${doBuffGem${doBuffQueue[${a},2]}} 10s
+        /if (${Select[${Spell[${doBuffID[${doBuffQueue[${a},2]}]}].TargetType},"Group v2","AE PC v2","Group v1","AE PC v1"]}) /varset PreviousSpell ${Spell[${doBuffID[${doBuffQueue[${a},2]}]}].ID}
+        /if (${castReturn.Equal[CAST_SUCCESS]} || ${spellNotHold}) /call RemoveFromQueue ${doBuffQueue[${a},1]} ${doBuffQueue[${a},2]}
+          /if (${Spawn[${oldTarget}].ID}) {
+            /if (${Target.ID}==${doBuffQueue[${a},1]}) /target id ${oldTarget}
+          } else {
+            /squelch /target clear
+          }
+          /if (${useExtEnhanceFocus}) /call EquipItem ${oldItem}
+        /return
+      }
+      :NextdoBuff
+    /next a
+  }
+  /if (${autoSit} && ${Me.PctMana}<=85 && !${Me.Mount.ID} && !${Me.Casting.ID}) {
+    /if (${Me.State.Equal[STAND]} && ${NearestSpawn[NPC].Distance3D}>=${distanceToSit} && ${Me.PctHPs}>90 && !${following}) /sit
+  }
+  /if (${autoSit} && ${Me.State.Equal[SIT]}) {
+    /if (${Me.PctMana}>95 && !${Window[SpellBookWnd].Open}) /stand
+    /if (!${Window[SpellBookWnd].Open} && ${NearestSpawn[NPC].Distance3D}<=${distanceToSit}) /stand
+    /if (${following}) /stand
+  }
+  /return
+  :dead
+  /varset mobList
+  /varset addList
+  /varset buffQueue
+  /varset mobID 0
+  /varset petID 0
+  /varset useAnchor 0
+  /squelch /alert clear 6
+  /call ClearMobList
+  /delay 2s
+  :wait_for_loot
+  /varset deathFlag ${Math.Calc[!(${InvSlot[chest].Item.ID}>0)]}
+  /if (${Spawn[Corpse radius 100 ${Me.Name}].ID} && ${deathFlag}) {
+    /target mycorpse
+    /call LootCorpse
+    /delay 5
+    /goto :wait_for_loot
+  }
+  /if (${deathFlag}) {
+    /memspellset ${spellSet}
+    /delay 30s
+    /echo You're dead! Consenting and waiting for rez...
+    /consent guild
+    /delay 25
+    /consent raid
+    /delay 25
+    /consent group
+    :wait_for_rez
+    /if (${Window[TradeWnd].Open}) /nomodkey /notify TradeWnd TRDW_Trade_Button leftmouseup
+    /doevents
+    /delay 1s
+    /if (!${Window[ConfirmationDialogBox].Open}) /goto :wait_for_rez
+    /delay 18s !${Window[SpellBookWnd].Open}
+    /echo Yay a rez!
+    /call TakeRez
+    /delay 5s ${Spawn[Corpse radius 100 ${Me.Name}].ID}
+    /goto :wait_for_loot
+  }
+/return
+
+Sub TakeRez
+  :wait_for_it
+  /if (${Window[ConfirmationDialogBox].Open}) {
+    /delay 1
+    /notify ConfirmationDialogBox Yes_Button leftmouseup
+    /goto :wait_for_it
+  }
+/return
+
+Sub GetBuffName(string spellName)
+  /declare i int local
+  /declare buffText string local
+  /declare spellType string local
+  /varset spellType ${buffGem}
+  /if (${spellName.Equal[c4]}) {
+    /if (${FindItem[Silken Augmenter's Pantaloons].ID}) {
+      /varset spellName Silken Augmenter's Pantaloons
+      /varset spellType item
+    } else {
+      /varset spellName Tranquility
+    }
+  }
+  /if (${spellName.Equal[mindCandy]}) {
+    /if (${Group} && ${Me.Book[${groupC7}]} && (${Me.Buff[${singleC7}].Duration}<=5 || ${Me.Buff[${groupC7}].Duration}<=5)) {
+      /varset spellName ${groupC7}
+    } else {
+      /varset spellName ${singleC7}
+    }
+  }
+  /if (${Me.Book[illusion: ${spellName}]}) /varset spellName illusion: ${spellName}
+  /if (${spellName.Equal[sos]}) {
+    /varset spellName ${singleHasteSpell}
+    /varset spellType ${hasteSpellGem}
+  }
+  /if (${spellName.Equal[pacifytarget]}) {
+  	/varset spellName ${pacifySpell}
+  	/varset spellType ${pacifyGem}
+  }
+  /if (${spellName.Equal[tashtarget]}) {
+    /varset spellName ${tashSpell}
+    /varset spellType ${tashGem}
+  }
+  /if (${spellName.Equal[slowtarget]}) {
+    /varset spellName ${slowSpell}
+    /varset spellType ${slowType}
+  }
+  /if (${spellName.Equal[mezztarget]}) {
+    /varset spellName ${mezSpell}
+    /varset spellType ${mezGem}
+  }
+  /if (${spellName.Equal[dispelltarget]}) {
+    /varset spellName ${dispellSpell}
+    /varset spellType ${dispellGem}
+  }
+  /if (${spellName.Equal[roottarget]}) {
+    /varset spellName ${rootSpell}
+    /varset spellType ${rootSpellGem}
+  }
+  /if ((${spellType.Find[gem]} || ${spellType.Equal[spell]}) && !${Me.Book[${spellName}]}) {
+    /if (${FindItem[${spellName}].ID}) {
+      /varset spellType item
+    } else /if (${Me.AltAbility[${spellName}]} || ${spellName.Equal[${spellName}]}) {
+      /varset spellType alt
+    } else {
+      /return
+    }
+  }
+/return ${spellName},${spellType}
+
+Sub CheckRune(int tempHP)
+  /if (!${Me.Buff[${selfRune}].ID} && !${selfRuneTimer} && !${Me.Buff[${selfAARune}].ID} && ${autoBuff} && (${Me.PctHPs}<=${tempHP} || ${Me.PctMana}==100)) {
+    /if (${Spell[${selfRune}].Stacks[20]} && (${Debuff.HPDrain}<50)) {
+    	/call AddToQueue "${selfRune},${Me.Name}"
+    	/varset selfRuneTimer 20s
+    }
+  }
+  /if (${useEpic} && !${epicTimer}) {
+    /if (${FindItem[Staff of Eternal Eloquence].ID} && !${Me.Buff[Aegis of Abstraction].ID}) {
+    	/call cast "Staff of Eternal Eloquence" item
+      /varset epicTimer 3m
+    } else /if (${FindItem[Oculus of Persuasion].ID} && !${Me.Buff[Protection of the Eye].ID}) {
+    	/call cast "Oculus of Persuasion" item
+      /varset epicTimer 10m
+    }
+  }
+  /doevents
+/return
+
+Sub SumPet
+  /declare i int local
+  /if (${Me.AltAbilityReady[Suspended Minion]}) /alt activate 176
+  /delay 10s !${Me.Casting.ID}
+  /delay 5s ${Me.Pet.ID}
+  /if (!${Me.Pet.ID}) {
+    /call cast "${petSpell}" ${petSpellGem} 5s
+  }
+/return
+
+Sub Medding
+  /if (${autoSit} && ${Me.PctMana}<=85 && !${Me.Mount.ID} && !${Me.Casting.ID}) {
+    /if (${Me.State.Equal[STAND]} && ${NearestSpawn[NPC].Distance3D}>=${distanceToSit} && ${Me.PctHPs}>90 && !${following}) /sit
+    /if (${announce} && !${spamDelay}) /${chatChannel} Medding, ${Me.PctMana}m
+    /varset spamDelay 200
+  }
+  /if (${autoSit} && ${Me.State.Equal[SIT]}) {
+    /if (${Me.PctMana}>95 && !${Window[SpellBookWnd].Open}) /stand
+    /if (!${Window[SpellBookWnd].Open} && ${NearestSpawn[NPC].Distance3D}<=${distanceToSit}) /stand
+    /if (${following}) /stand
+  }
+  /if ((${Me.PctMana}<=5) && ${Me.AltAbility[Gather Mana]} && ${Me.AltAbilityReady[Gather Mana]}) /call Cast "gather mana" alt
+/return
+
+Sub ClickOffBuff(string buffName)
+  /declare i int local
+  /for i 1 to 20
+    /if (${Me.Buff[${i}].Name.Equal[${buffName}]}) /notify BuffWindow buff${Math.Calc[${i}-1].Int} leftmouseup
+  /next i
+/return
+
+Sub CheckTarget
+  /declare tempID int local ${Target.ID}
+  /if (${UseConsider} && ${Target.ID} && ${Target.Type.Equal[NPC]} && ${Target.Type.NotEqual[Corpse]} && !${ConsiderTarget${tempID}}) /call Consider ${Target.CleanName}
+  /if (${ExcludeList.Find[${Spawn[${tempID}].CleanName}]} || (${UseConsider} && !${Select[${ConsiderReturn},8,9]})) /return
+  /if ((${Spawn[${tempID}].Type.Equal[npc]} || (${Spawn[${tempID}].Type.Equal[pet]} && !${Spawn[${tempID}].Master.Type.Equal[pc]})) && ((${Spawn[pc ${mainTank}].NearestSpawn[radius ${Math.Calc[${minRadius}*2]} id ${tempID}].ID} && ${Spawn[pc ${mainTank}].Distance3D}<=${minRadius}) || !${Spawn[pc ${mainTank}].ID} || ${Spawn[pc ${mainTank}].Distance3D}>200) && ${tempID}!=${petID} && (${aggroAnim.Find[|${Spawn[${tempID}].Animation}|]} || ${Spawn[${tempID}].PctHPs}<100 || ${Me.TargetOfTarget.Type.Equal[pc]} || ${Me.TargetOfTarget.Master.Type.Equal[pc]})) {
+    /varset validTarget 1
+  } else {
+    /varset validTarget 0
+  }
+/return
+
+Sub CheckNamed
+  /if (${checkNamed}) {
+  /declare tempID int local
+  /declare beeped bool local false
+  :check_named
+    /varset tempID ${Spawn[npc named noalert 6].ID}
+    /if (${tempID}) {
+      /squelch /alert add 6 id ${tempID}
+      /if (!${Spawn[${tempID}].CleanName.Find[eye of]} && ${SpawnCount[npc "${Spawn[${tempID}].CleanName}"]}==1 && !${Spawn[${tempID}].Race.Find[/high elf/wood elf/ogre/troll/human/gnome/halfling/dark elf/half elf/barbarian/vah shir/iksar/erudite/dwarf/]}) {
+        /echo Named Detected: ${Spawn[${tempID}].DisplayName}
+        /if (${autoAnnounce}) /${chatChannel} ${Spawn[${tempID}].DisplayName} popped, ${Spawn[${tempID}].Distance3D} feet ${Spawn[${tempID}].HeadingTo} of here.
+        /if (!${beeped}) /beep
+        /varset beeped true
+      }
+      /goto :check_named
+    }
+  }
+/return
+
+Sub CheckLoc
+  /if (!${useAnchor}) /return
+  /declare myDistance float local ${Math.Distance[${Me.Y},${Me.X}:${anchorY},${anchorX}]}
+  /if (${myDistance}>${leashLength}) {
+    /if (${myDistance}>300) {
+      /varset useAnchor 0
+      /return
+    }
+    /if (${Me.Mount.ID}) /dismount
+    /call MoveToLoc ${anchorY} ${anchorX}
+    /squelch /face fast nolook heading ${anchorHeading}
+  }
+/return
+
+Sub CleanUp(int tempID)
+  /if (!${Spawn[${tempID}].Type.Equal[Corpse]}) /return
+  /declare tempX ${Me.X}
+  /declare tempY ${Me.Y}
+  /declare tempHeading ${Me.Heading.DegreesCCW}
+  /if (${Me.Mount.ID}) /dismount
+  /tar id ${tempID}
+  /call MoveToSpawn ${tempID} 10
+  /call LootCorpse
+| 0 nodrop
+  /call MoveToLoc ${tempY} ${tempX}
+  /face fast heading ${tempHeading}
+  /delay 15 !${Me.Moving}
+/return
+
+Sub AddToQueue(string buffText)
+  /varset buffText [${buffText}]
+  /if (!${buffQueue.Find[${buffText}]}) /varset buffQueue ${buffQueue}${buffText}
+/return
+
+Sub DeleteFromQueue(string buffText)
+  /declare a int local
+  /declare b int local
+  /declare strLeft string local
+  /declare strRight string local
+  /varcalc a ${buffQueue.Find[${buffText}]}-1
+  /varcalc b ${buffQueue.Length}-${buffText.Length}-${a}
+  /if (${a}>0) /varset strLeft ${buffQueue.Left[${a}]}
+  /if (${b}>0) /varset strRight ${buffQueue.Right[${b}]}
+  /varset buffQueue ${strLeft}${strRight}
+/return
+
+Sub AddToList(string listName,string tempID)
+  /varset tempID [${tempID}]
+  /if (!${${listName}.Find[${tempID}]}) {
+    /varset ${listName} ${${listName}}${tempID}
+    /return 1
+  }
+/return 0
+
+Sub DeleteFromList(string listName,string tempID)
+  /varset tempID [${tempID}]
+  /declare a int local
+  /declare b int local
+  /declare strLeft string local
+  /declare strRight string local
+  /varcalc a ${${listName}.Find[${tempID}]}-1
+  /varcalc b ${${listName}.Length}-${tempID.Length}-${a}
+  /if (${a}>0) /varset strLeft ${${listName}.Left[${a}]}
+  /if (${b}>0) /varset strRight ${${listName}.Right[${b}]}
+  /varset ${listName} ${strLeft}${strRight}
+/return
+
+Sub UpdateMobList
+  /declare i int local
+  /declare mobListID string local
+  /if (${mobList.Find[[]}) {
+    /if (${mobList.Find[[]}>1) /varset mobList ${mobList.Right[-${Math.Calc[${mobList.Find[[]}-1]}]}
+    /for i 1 to ${mobList.Count[[]}
+      /varset mobListID ${mobList.Arg[${i},[].Left[-1]}
+      /if ((!${Spawn[${mobListID}].Type.Equal[NPC]} && !${Spawn[${mobListID}].Master.Type.Equal[NPC]}) || ${Spawn[${mobListID}].Type.Equal[Corpse]}) {
+        /if (${Defined[mezTimer${mobListID}]}) /deletevar mezTimer${mobListID}
+        /if (${Defined[slowTimer${mobListID}]}) /deletevar slowTimer${mobListID}
+        /if (${Defined[tashTimer${mobListID}]}) /deletevar tashTimer${mobListID}
+        /if (${Defined[crippleTimer${mobListID}]}) /deletevar crippleTimer${mobListID}
+        /if (${Defined[bewildermentTimer${mobListID}]}) /deletevar bewildermentTimer${mobListID}
+|        /if (${Defined[waitTimer${mobListID}]}) /echo deleting timer for mob ID waitTimer${mobListID} from update mob List
+        /if (${Defined[waitTimer${mobListID}]}) /deletevar waitTimer${mobListID}
+        /call DeleteFromList mobList ${mobListID}
+        /call DeleteFromList addList ${mobListID}
+      }
+    /next i
+  }
+/return
+
+Sub ClearMobList
+  /declare i int local
+  /declare mobListID string local
+  /if (${mobList.Find[[]}) {
+    /if (${mobList.Find[[]}>1) /varset mobList ${mobList.Right[-${Math.Calc[${mobList.Find[[]}-1]}]}
+    /for i 1 to ${mobList.Count[[]}
+      /varset mobListID ${mobList.Arg[${i},[].Left[-1]}
+      /if (${Defined[mezTimer${mobListID}]}) /deletevar mezTimer${mobListID}
+      /if (${Defined[slowTimer${mobListID}]}) /deletevar slowTimer${mobListID}
+      /if (${Defined[tashTimer${mobListID}]}) /deletevar tashTimer${mobListID}
+      /if (${Defined[crippleTimer${mobListID}]}) /deletevar crippleTimer${mobListID}
+      /if (${Defined[bewildermentTimer${mobListID}]}) /deletevar bewildermentTimer${mobListID}
+|      /if (${Defined[waitTimer${mobListID}]}) /echo deleting timer for mob ID waitTimer${mobListID} from clear mob List
+      /if (${Defined[waitTimer${mobListID}]}) /deletevar waitTimer${mobListID}
+      /call DeleteFromList mobList ${mobListID}
+      /call DeleteFromList addList ${mobListID}
+    /next i
+  }
+/return
+
+Sub SwapStatFood(int toggle)
+  /declare foodSlot1 int local
+  /declare foodSlot2 int local
+  /declare tempSlot1 float local
+  /declare tempSlot2 float local
+  /declare foodName string local
+  /call GetFoodName
+  /varset foodName ${Macro.Return}
+  /varset foodSlot1 ${FindItem[${statFood}].InvSlot.ID}
+  /varset foodSlot2 ${FindItem[${foodName}].InvSlot.ID}
+  /varcalc tempSlot1 ${foodSlot1}${If[${foodSlot1}>29,/10-3,]}
+  /varcalc tempSlot2 ${foodSlot2}${If[${foodSlot2}>29,/10-3,]}
+  /if (${toggle}) {
+    /if (${tempSlot1}>${tempSlot2}) /call SwapItem "${statFood}" ${foodSlot2}
+  } else {
+    /if (${tempSlot1}<${tempSlot2}) /call SwapItem "${statFood}" ${foodSlot2}
+  }
+/return
+
+Sub GetFoodName
+  /declare foodName string local
+  /declare i int local 1
+  :check_food
+  /if (${FindItem[${food${i}}].ID}) {
+    /varset foodName ${food${i}}
+  } else /if (${i}<=5) {
+    /varcalc i ${i}+1
+    /goto :check_food
+  }
+/return ${foodName}
+
+Sub ManaRobe
+  /if (${useManaStone} && ${useManaRobe}) {
+    /call ManaStone ${manaRobeMaxMana}
+    /return
+  }
+  /if (!${FindItem[mana robe].ID}) /return
+  /declare pctMana int local ${Me.PctMana}
+  /if (${manaRobeMode}==1 || (${manaRobeMode}==2 && ${pctMana}<${manaRobeMinMana})) /varset useManaRobe TRUE
+  /if (((${manaRobeMode}==2 && ${pctMana}>=${manaRobeMaxMana}) || !${manaRobeMode})&& ${useManaRobe}) /varset useManaRobe FALSE
+  /if (${Me.Inventory[chest].Name.Equal[mana robe]}) /varcalc pctMana ${pctMana}-3
+  /if (${pctMana}<${manaRobeMaxMana} && ${useManaRobe}) {
+    /if (!${InvSlot[chest].Item.Name.Equal[mana robe]}) /call SwapItem "Mana Robe" "chest"
+    /if (!${Me.Invis} && !${Me.Speed} ) /cast item "mana robe"
+  } else {
+    /if (!${Me.Inventory[chest].Name.Equal[${hpRobe}]}) /call SwapItem "${hpRobe}" chest
+  }
+/return
+
+Sub ManaStone(int manaStart)
+  /if (!${Defined[manaStart]}) /declare manaStart int local 90
+  /if (${Me.PctMana} < ${manaStart}) {
+    /call Cast "manastone" item
+  }
+/return
+
+Sub LoadVar(IniSection,IniVar,IniValue,MacroVar,iniName,Function,VarType)
+  /declare IniString string local
+  /if (!${Defined[${MacroVar}]} && ${Defined[VarType]}) /declare ${MacroVar} ${VarType} outer
+  /if (${Function.Equal[LOAD]}) {
+    /varset IniString ${Ini[${iniName},${IniSection},${IniVar},NOTFOUND]}
+    /varset ${MacroVar} ${IniString}
+  }
+  /if (${IniString.Equal["NOTFOUND"]} || ${Function.Equal[SAVE]}) {
+    /if (${IniString.Equal["NOTFOUND"]} && ${Function.Equal[LOAD]}) /varset ${MacroVar} ${IniValue}
+    /ini ${iniName} ${IniSection} ${IniVar} "${${MacroVar}}"
+  }
+/return
+
+Sub SetIniVar(string name,string section,string value)
+  /varset ${name} ${value}
+  /ini "${iniName}" "${section}" "${name.Left[1].Upper}${name.Right[-1]}" "${${name}}"
+/return
+
+Sub LootCorpse(int leaveLast,string noDrop)
+  :auto_inv
+  /if (${Cursor.ID}) {
+    /autoinventory
+    /delay 5 ${Cursor.ID}
+    /goto :auto_inv
+  }
+  /if (!${Defined[leaveLast]}) {
+    /declare leaveLast int local
+    /varset leaveLast 0
+  }
+  /if (!${Defined[noDrop]}) {
+    /declare noDrop string local
+    /varset noDrop no
+  }
+  /declare lootNoDrop bool local
+  /if (${Target.Name.Find[${Me.Name}]} || ${noDrop.Equal[nodrop]}) {
+    /varset lootNoDrop true
+  } else {
+    /varset lootNoDrop false
+  }
+  /if (${leaveLast}!=0) /varset leaveLast 1
+  /declare i int local
+  /loot
+  /delay 10s ${Corpse.Open}
+  /if (${Corpse.Open}) {
+    /varset i 0
+    /delay 3s ${Corpse.Item[1].ID}
+    :wait_for_loot
+    /varcalc i ${i}+1
+    /if (!${Corpse.Item[${Math.Calc[${i}+${leaveLast}]}].ID}) /goto :wait_for_done
+    :wait_for_loot2
+    /nomodkey /shift /itemnotify loot${i} rightmouseup
+    /delay 1
+    /if (${Window[ConfirmationDialogBox].Open}) {
+      /if (${lootNoDrop}) {
+        /notify ConfirmationDialogBox Yes_Button leftmouseup
+      } else {
+        /notify ConfirmationDialogBox No_Button leftmouseup
+        /varcalc i ${i}+1
+      }
+    }
+    /if (${Corpse.Item[${Math.Calc[${i}+${leaveLast}]}].ID}) /goto :wait_for_loot2
+    /goto :wait_for_loot
+  }
+  :wait_for_done
+  /if (${Corpse.Items}>0) {
+    /echo Nodrop items on Corpse, linking to default channel.
+    /notify LootWND LW_BroadcastButton leftmouseup
+    /keypress enter chat
+  }
+  /keypress esc
+  /delay 1s !${Corpse.Open}
+  /if (${Corpse.Open}) /goto :wait_for_done
+/return
+
+Sub DisplayDPS
+  /varcalc fightTotalTime (${MacroQuest.Running}-${fightStartTime})/1000
+  /varcalc totalMeleeDmg ${totalMeleeDmg}
+  /varcalc totalNonMeleeDmg ${totalNonMeleeDmg}/2
+  /echo Fight Duration: ${fightTotalTime} seconds
+  /echo Melee Damage: ${totalMeleeDmg}
+  /echo NonMelee Damage: ${totalNonMeleeDmg}
+  /echo --------------------------------------------
+  /echo Total Damage: ${Math.Calc[${totalMeleeDmg}+${totalNonMeleeDmg}]}
+  /echo DPS: ${Math.Calc[(${totalMeleeDmg}+${totalNonMeleeDmg})/${fightTotalTime}]}
+  /echo --------------------------------------------
+/return
+
+Sub CheckIniBuffs
+  /declare i int local
+  /declare a int local
+  /declare oldTarget int local ${Target.ID}
+  /if (!${usePet} && ${Me.Pet.ID} && ${Me.AltAbility[Suspended Minion]} && ${Me.AltAbilityReady[Suspended Minion]}) /call Cast "Suspended Minion" alt
+  /for i 1 to ${selfBuffTotal}
+    /if (${Me.State.NotEqual[FEIGN]} && ${Spell[${selfBuffID[${i}]}].Stacks[25]} && ${Me.CountBuffs}<=${selfBuffCount${i}} && (!${SitTimer} || ${Me.Gem[${selfBuff${i}}]} || ${Me.Mount.ID} || ${selfBuffGem${i}.Equal[item]} || (${selfBuffGem${i}.Equal[alt]} && ${Me.AltAbilityReady[${selfBuff${i}}]})) && (${outdoors} || ${selfBuffIndoors${i}})) {
+      /if (${Me.CurrentMana}<${Spell[${selfBuff${i}}].Mana} && !${Select[${selfBuffGem${i}},alt,item]}) /return
+      /if (${Select[${Spell[${selfBuffID[${i}]}].TargetType},pc,Single]}) {
+        /squelch /target id ${Me.ID}
+        /delay 1s ${Target.ID}==${Me.ID}
+      }
+      /if (${useExtEnhanceFocus}) {
+      	/varset focusSlotName ${FindItem[${extEnhanceItem}].WornSlot[1].Name}
+      	/call EquipItem "${extEnhanceItem}" ${FindItem[${extEnhanceItem}].WornSlot[1].Name}
+      	/varset oldItem ${Macro.Return}
+      }
+      /call Cast "${selfBuff${i}}" ${selfBuffGem${i}} 5s
+      /if (${Spawn[${oldTarget}].ID}) {
+        /if (${Target.ID}==${Me.ID}) /target id ${oldTarget}
+      } else {
+        /squelch /target clear
+      }
+      /if (${useExtEnhanceFocus}) /call EquipItem ${oldItem}
+    /return
+    }
+  /next i
+  /varset selfBuffTimer ${selfBuffRecheck}
+  /if (${doPetBuffs} && ${Me.Pet.ID} && !${petBuffTimer}) {
+    /for i 1 to ${petBuffTotal}
+      /if (${Spell[${petBuffID[${i}]}].StacksPet[20]} && ((!${SitTimer} || ${Me.Gem[${petBuff${i}}]} || ${Me.Mount.ID}) && (!${Me.Gem[${petBuff${i}}]} || ${Me.SpellReady[${petBuff${i}}]}) || ${petBuffGem${i}.Equal[item]} || (${petBuffGem${i}.Equal[alt]} && ${Me.AltAbilityReady[${petBuff${i}}]})) && (${outdoors} || ${petBuffIndoors${i}})) {
+        /if (${Me.PctMana}<${doBuffMana} && !${Select[${petBuffGem${i}},alt,item]}) /return
+        /squelch /target id ${Me.Pet.ID}
+        /delay 1s ${Target.ID}==${Me.Pet.ID}
+        /if (${useExtEnhanceFocus}) {
+        	/varset focusSlotName ${FindItem[${extEnhanceItem}].WornSlot[1].Name}
+        	/call EquipItem "${extEnhanceItem}" ${FindItem[${extEnhanceItem}].WornSlot[1].Name}
+        	/varset oldItem ${Macro.Return}
+        }        
+        /call Cast "${petBuff${i}}" ${petBuffGem${i}} 5s
+        /if (${Spawn[${oldTarget}].ID}) {
+          /if (${Target.ID}==${Me.Pet.ID}) /target id ${oldTarget}
+        } else {
+          /squelch /target clear
+        }
+        /if (${useExtEnhanceFocus}) /call EquipItem ${oldItem}
+      /return
+      }
+    /next i
+    /varset petBuffTimer ${petBuffRecheck}
+  }
+  /if (${useAura} && ${Me.Aura.ID}==NULL && ${Spell[${auraBuff}].Stacks[20]}) {
+    /if ((!${SitTimer} || ${Me.Gem[${auraBuff}]} || ${Me.Mount.ID}) && ${Me.State.NotEqual[FEIGN]})  {
+      /squelch /target id ${Me.ID}
+      /delay 1s ${Target.ID}==${Me.ID}
+      /if (${Me.CurrentMana}>${Spell[${auraBuff}].Mana}) {
+        /call Cast "${auraBuff}" ${auraBuffGem} 10s
+      }
+    }
+    /if (${Spawn[${oldTarget}].ID}) {
+      /if (${Target.ID}==${Me.ID}) /target id ${oldTarget}
+    } else {
+      /squelch /target clear
+    }
+  }
+  /if (${ShrinkPet} && !${useCharm} && ${Me.Pet.ID} && (${Me.Pet.Height}-.25>1)) {
+	  /if (${Target.ID}!=${Me.Pet.ID}) /target id ${Me.Pet.ID}
+	  /delay 1s ${Target.ID}==${Me.Pet.ID}
+	  /call Cast "${ShrinkPetSpell}" ${ShrinkPetSpellGem} 3s
+    /if (${Spawn[${OldTarget}].ID}) {
+      /if (${Target.ID}!=${Spawn[${OldTarget}].ID}) /target id ${OldTarget}
+    } else {
+      /squelch /target clear
+    }
+	}
+/return
+
+Sub Dot
+  /if ((${Target.ID} && ${ExcludeList.Find[${Target.DisplayName}]}) || (${Target.ID}==${mobID} && ${bewildermentTimer[${mobID}]})) /return
+  /declare DotResistCounter int local
+  /declare i int local
+  /if (${DotTotal}) {
+    /for i 1 to ${DotTotal}
+      /if ((${Me.PctMana}>${DotMinMana} || ${Select[${DotGem${i}},item,alt]}) && !${Me.Moving} && !${Me.Casting.ID}) {
+        /if ((${WhichDot}==${DotSpellSet${i}} || !${DotSpellSet${i}}) && !${DotTimer${i}}) {
+          /varset DotResistCounter 0
+          :RecastDot
+          /call CheckForAdds
+          /if (${newAdds}) /return
+          /doevents
+          /target id ${mobID}
+          /delay 5 ${Target.ID}==${mobID}
+          /if (!${Me.Gem[${Dot${i}}]} && ${Select[${DotGem${i}},item,alt]}) /goto :RecastDot
+          /if (${Target.Type.Equal[NPC]} && ${Target.ID}==${mobID} && ${Target.LineOfSight} && ${Target.Distance}<${Spell[${DotID[${i}]}].MyRange}) {
+            /call Cast "${Dot${i}}" ${DotGem${i}} 10s
+          } else {
+            /return
+          }
+          /if (${castReturn.Equal[CAST_RESISTED]}) {
+            /varcalc DotResistCounter ${DotResistCounter}+1
+            /if (${DotResistCounter}>=${DotRecasts}) {
+              /if (${announce}) /${chatChannel} ${Target.CleanName} resisted ${Dot${i}} ${DotRecasts} times, giving up
+              /varset DotTimer${i} 10000s
+              /goto :NextDot
+            } else {
+              /goto :RecastDot
+            }
+          } else /if (${castReturn.Equal[CAST_INTERRUPTED]} || ${castReturn.Equal[CAST_CANCELLED]}) {
+            /goto :RecastDot
+          } else /if (${castReturn.Equal[CAST_SUCCESS]}) {
+            /if (${announce}) /${chatChannel} ${Target.CleanName} Dotted with ${Dot${i}}
+            /varset DotTimer${i} ${Math.Calc[${Spell[${DotID[${i}]}].Duration.TotalSeconds}-6]}s
+          } else /if (${castReturn.Equal[CAST_IMMUNE]} || ${spellNotHold}) {
+            /varset DotTimer${i} 1000s
+            /goto :NextDot
+          }
+        }
+      }
+    :NextDot
+    /next i
+  }
+/return
+
+
+Sub AddToRaidQueue(int Buffee,int BuffNumber)
+  /declare a int local
+  /declare Compare int local
+  /if (${RaidQueueCount}<72&&${Spawn[${Buffee}].Type.NotEqual[Corpse]}&&${Spawn[${Buffee}].ID}) {
+    /varset Compare 0
+    /for a 1 to 72
+      /if ((${Buffee}==${RaidBuffQueue[${a},1]}||(${Select[${Spell[${RaidBuffID[${RaidBuffQueue[${a},2]}]}].TargetType},"Group v2","AE PC v2","Group v1","AE PC v1"]}&&${Group.Member[${Spawn[${Buffee}].CleanName}]}&&${Group.Member[${Spawn[${RaidBuffQueue[${a},1]}].CleanName}]}))&&${BuffNumber}==${RaidBuffQueue[${a},2]}) /varset Compare 1
+    /next a
+    /if (!${Compare}) {
+      /for a 1 to 72
+        /if (!${RaidBuffQueue[${a},1]}) {
+          /varset RaidBuffQueue[${a},1] ${Buffee}
+          /varset RaidBuffQueue[${a},2] ${BuffNumber}
+          /varcalc RaidQueueCount ${RaidQueueCount}+1
+          /return
+        }
+      /next a
+    }
+  }
+/return
+
+Sub RemoveFromRaidQueue(int Buffee,int BuffNumber)
+  /declare a int local
+  /for a 1 to 72
+    /if (((${Spawn[${RaidBuffQueue[${a},1]}].State.Equal["DEAD"]}||!${Spawn[${RaidBuffQueue[${a},1]}].ID})||(${RaidBuffQueue[${a},1]}==${Buffee}&&${RaidBuffQueue[${a},2]}==${BuffNumber}))&&${RaidBuffQueue[${a},1]}) {
+      /varset RaidBuffQueue[${a},1] 0
+      /varset RaidBuffQueue[${a},2] 0
+      /varcalc RaidQueueCount ${RaidQueueCount}-1
+      /return
+    }
+  /next a
+/return
+
+Sub RaidBuffEvents
+  /declare a int local
+  /if (${Target.ID}) /declare OldTarget int local ${Target.ID}
+  /for a 1 to 72
+    /if ((${Spawn[${RaidBuffQueue[${a},1]}].Distance}>${Spell[${RaidBuffID[${RaidBuffQueue[${a},2]}]}].MyRange}&&${Spawn[${RaidBuffQueue[${a},1]}].Distance}>${Spell[${RaidBuffID[${RaidBuffQueue[${a},2]}]}].AERange})||!${Spawn[${RaidBuffQueue[${a},1]}].ID}||((!${Me.SpellReady[${RaidBuff${RaidBuffQueue[${a},2]}}]}&&${Me.Gem[${RaidBuff${RaidBuffQueue[${a},2]}}]})&&${RaidBuffGem${RaidBuffQueue[${a},2]}.NotEqual[item]}&&${RaidBuffGem${RaidBuffQueue[${a},2]}.NotEqual[alt]})) /goto :NextRaidBuff
+    /squelch /target id ${RaidBuffQueue[${a},1]}
+    /delay 1s ${Target.ID}==${RaidBuffQueue[${a},1]}
+    /if (${Target.ID}==${RaidBuffQueue[${a},1]}&&${Target.Distance}<=${Spell[${RaidBuffID[${RaidBuffQueue[${a},2]}]}].MyRange}) {
+      /if (${DoBuffTells}&&!${SpamTimer}&&${Target.ID}!=${Me.ID}) /tt ${RaidBuffIcon${RaidBuffQueue[${a},2]}} inc
+      /call Cast "${RaidBuff${RaidBuffQueue[${a},2]}}" ${RaidBuffGem${RaidBuffQueue[${a},2]}} 3s
+      /if (${castReturn.Equal[CAST_SUCCESS]} || ${spellNotHold}) /call RemoveFromRaidQueue ${RaidBuffQueue[${a},1]} ${RaidBuffQueue[${a},2]}
+      /if (${Spawn[${OldTarget}].ID}) {
+        /if (${Target.ID}!=${Spawn[${OldTarget}].ID}) /target id ${OldTarget}
+      } else {
+        /squelch /target clear
+      }
+      /return
+    }
+  :NextRaidBuff
+  /next a
+/return
+
+Sub Consider
+  /declare tempID int local
+  /if (!${Defined[ConsiderReturn]}) /declare ConsiderReturn int outer
+  /varset ConsiderReturn 0
+  /if (${Target.ID}) {
+  	/varset tempID ${Target.ID}
+  	/if (!${Defined[ConsiderTarget${tempID}]}) /declare ConsiderTarget${tempID} int outer 1
+  	/consider
+    /delay 2
+    /doevents
+  }
+  /if (${ConsiderReturn}) /return ${ConsiderReturn}
+/return
+
+Sub LoadIni(iniName,Function)
+  /declare i int local
+  /if (!${Defined[homeX]}) /declare homeX int outer ${Me.X}
+  /if (!${Defined[homeY]}) /declare homeY int outer ${Me.Y}
+  /if (!${Defined[tetheredToHome]}) /declare tetheredToHome outer TRUE
+  /if (!${Defined[ExcludeList]}) /declare ExcludeList string outer
+  /if (!${Defined[followName]}) /declare followName string outer null
+  /if (!${Defined[totalKills]}) /declare totalKills int outer 0
+  /if (!${Defined[mezzImmuneList]}) /declare mezzImmuneList string outer
+  /if (!${Defined[currentZone]}) /declare currentZone int outer
+  /if (!${Defined[normalOffhand]}) /declare normalOffhand string outer ${InvSlot[offhand].Item.Name}
+  /if (!${Defined[totalMeleeDmg]}) /declare totalMeleeDmg int outer
+  /if (!${Defined[totalNonMeleeDmg]}) /declare totalNonMeleeDmg int outer
+  /if (!${Defined[fightStartTime]}) /declare fightStartTime float outer
+  /if (!${Defined[fightTotalTime]}) /declare fightTotalTime float outer
+  /if (!${Defined[deathFlag]}) /declare deathFlag bool outer ${Math.Calc[!(${InvSlot[chest].Item.ID}>0)]}
+  /if (!${Defined[mobID]}) /declare mobID int outer 0
+  /if (!${Defined[addID]}) /declare addID int outer 0
+  /if (!${Defined[petAttacking]}) /declare petAttacking bool outer false
+  /if (!${Defined[addIndex]}) /declare addIndex int outer
+  /if (!${Defined[mobList]}) /declare mobList string outer
+  /if (!${Defined[addList]}) /declare addList string outer
+  /if (!${Defined[newAdds]}) /declare newAdds int outer 0
+  /if (!${Defined[assistWaitTimer]}) /declare assistWaitTimer timer outer 0
+  /if (!${Defined[aggroAnim]}) /declare aggroAnim string outer |5|8|12|17|18|42|44|80|106|129|144|
+  /if (!${Defined[petCheck]}) /declare petCheck bool outer false
+  /if (!${Defined[petID]}) /declare petID int outer 0
+  /if (!${Defined[petOff]}) /declare petOff int outer 0
+  /if (!${Defined[useAnchor]}) /declare useAnchor int outer
+  /if (!${Defined[anchorX]}) /declare anchorX float outer
+  /if (!${Defined[anchorY]}) /declare anchorY float outer
+  /if (!${Defined[anchorHeading]}) /declare anchorHeading float outer
+  /if (!${Defined[leashLength]}) /declare leashLength int outer
+  /if (!${Defined[modRodTimer]}) /declare modRodTimer timer outer
+  /if (!${Defined[nukeWaitTimer]}) /declare nukeWaitTimer timer outer 0
+  /if (!${Defined[nukeWaitMod]}) /declare nukeWaitMod int outer 0
+  /if (!${Defined[mainTank]}) /declare mainTank string outer
+  /if (!${Defined[validTarget]}) /declare validTarget int outer
+  /if (!${Defined[engaged]}) /declare engaged int outer
+  /if (!${Defined[mobHPStart]}) /declare mobHPStart int outer
+  /if (!${Defined[askedForRodTimer]}) /declare askedForRodTimer timer outer 0
+  /if (!${Defined[spamDelay]}) /declare spamDelay timer outer 0
+  /if (!${Defined[qbTimer]}) /declare qbTimer timer outer 0
+  /if (!${Defined[epicTimer]}) /declare epicTimer timer outer 0
+  /if (!${Defined[following]}) /declare following bool outer false
+  /if (!${Defined[outdoors]}) /declare outdoors bool outer true
+  /if (!${Defined[PreviousSpell]}) /declare PreviousSpell int outer 0
+  /if (!${Defined[buffQueue]}) /declare buffQueue string outer
+  /if (!${Defined[selfRuneTimer]}) /declare selfRuneTimer timer outer
+  /if (!${Defined[oldItem]}) /declare oldItem string outer
+  /if (!${Defined[focusSlotName]}) /declare focusSlotName string outer
+  /call LoadVar Misc LoadDate "${MacroQuest.BuildDate}" LoadDate "${iniName}" ${Function} string
+  /call LoadVar Settings mainAssist "Put your main assist here" mainAssist "${iniName}" ${Function} string
+  /call LoadVar Settings secondAssist "Put your second assist here" secondAssist "${iniName}" ${Function} string
+  /call LoadVar Settings chatChannel "Put your chat channel here" chatChannel "${iniName}" ${Function} string
+  /call LoadVar Settings ignoreList "Put your ignoreList here" ignoreList "${iniName}" ${Function} string
+  /call LoadVar Settings maxMezLevel 78 maxMezLevel "${iniName}" ${Function} int
+  /call LoadVar Settings maxAEMezLevel 75 maxAEMezLevel "${iniName}" ${Function} int
+  /call LoadVar Settings maxPBAEMezLevel 75 maxPBAEMezLevel "${iniName}" ${Function} int
+  /call LoadVar Settings minRadius 150 minRadius "${iniName}" ${Function} int
+  /call LoadVar Settings engageDelay 55 engageDelay "${iniName}" ${Function} int
+  /call LoadVar Settings minHP 85 minHP "${iniName}" ${Function} int
+  /call LoadVar Settings autoAnchor FALSE autoAnchor "${iniName}" ${Function} bool
+  /call LoadVar Settings autoBuff 1 autoBuff "${iniName}" ${Function} int
+  /call LoadVar Settings autoC7 TRUE autoC7 "${iniName}" ${Function} bool
+  /call LoadVar Settings begForBuffs TRUE begForBuffs "${iniName}" ${Function} bool
+  /call LoadVar Settings autoSit TRUE autoSit "${iniName}" ${Function} bool
+  /call LoadVar Settings distanceToSit 40 distanceToSit "${iniName}" ${Function} int
+  /call LoadVar Settings useMount FALSE useMount "${iniName}" ${Function} bool
+  /call LoadVar Settings useMez TRUE useMez "${iniName}" ${Function} bool
+  /call LoadVar Settings useDebuff TRUE useDebuff "${iniName}" ${Function} bool
+  /call LoadVar Settings useTash TRUE useTash "${iniName}" ${Function} bool
+  /call LoadVar Settings useSlow TRUE useSlow "${iniName}" ${Function} bool
+  /call LoadVar Settings useCripple FALSE useCripple "${iniName}" ${Function} bool
+  /call LoadVar Settings useMitigate FALSE useMitigate "${iniName}" ${Function} bool
+  /call LoadVar Settings useCharm FALSE useCharm "${iniName}" ${Function} bool
+  /call LoadVar Settings useTashFocus FALSE useTashFocus "${iniName}" ${Function} bool
+  /call LoadVar Settings useDPS FALSE useDPS "${iniName}" ${Function} bool
+  /call LoadVar Settings hasteGroup TRUE hasteGroup "${iniName}" ${Function} bool
+  /call LoadVar Settings useManaStone FALSE useManaStone "${iniName}" ${Function} bool
+  /call LoadVar Settings checkNamed FALSE checkNamed "${iniName}" ${Function} bool
+  /call LoadVar Settings noInvis 1 noInvis "${iniName}" ${Function} int
+  /call LoadVar Settings useManaRobe FALSE useManaRobe "${iniName}" ${Function} bool
+  /call LoadVar Settings manaRobeMode 1 manaRobeMode "${iniName}" ${Function} int
+  /call LoadVar Settings manaRobeMinMana 70 manaRobeMinMana "${iniName}" ${Function} int
+  /call LoadVar Settings manaRobeMaxMana 90 manaRobeMaxMana "${iniName}" ${Function} int
+  /call LoadVar Settings nukeMode 1 nukeMode "${iniName}" ${Function} int
+  /call LoadVar Settings nukeMana 50 nukeMana "${iniName}" ${Function} int
+  /call LoadVar Settings nukeDelay 0 nukeDelay "${iniName}" ${Function} int
+  /call LoadVar Settings runeHP 70 runeHP "${iniName}" ${Function} int
+  /call LoadVar Settings cleanUp FALSE cleanUp "${iniName}" ${Function} bool
+  /call LoadVar Settings announce TRUE announce "${iniName}" ${Function} bool
+  /call LoadVar Settings autoAnnounce FALSE autoAnnounce "${iniName}" ${Function} bool
+  /call LoadVar Settings announceTells FALSE announceTells "${iniName}" ${Function} bool
+  /call LoadVar Settings spellSet "Put your spell set here" spellSet "${iniName}" ${Function} string
+  /call LoadVar Settings rodBitch "Put the name of your rod bitch here" rodBitch "${iniName}" ${Function} string
+  /call LoadVar Settings UseConsider FALSE UseConsider "${iniName}" ${Function} bool
+  /call LoadVar Settings useEpic FALSE useEpic "${iniName}" ${Function} bool
+  /call LoadVar Settings useManaFlare FALSE useManaFlare "${iniName}" ${Function} bool
+  /call LoadVar Settings useMindShatter FALSE useMindShatter "${iniName}" ${Function} bool
+  /call LoadVar Settings ZoneDelay 10 ZoneDelay "${iniName}" ${Function} int
+  /call LoadVar Spells rootSpell "Greater Fetter" rootSpell "${iniName}" ${Function} string
+  /call LoadVar Spells rootSpellGem "gem6" rootSpellGem "${iniName}" ${Function} string
+  /call LoadVar Spells stunSpell "Color Collapse" stunSpell "${iniName}" ${Function} string
+  /call LoadVar Spells stunSpellGem "gem7" stunSpellGem "${iniName}" ${Function} string
+  /call LoadVar Spells nuke1 "Polychromatic Assault" nuke1 "${iniName}" ${Function} string
+  /call LoadVar Spells nuke1Gem "gem1" nuke1Gem "${iniName}" ${Function} string
+  /call LoadVar Spells nuke2 "Psychosis" nuke2 "${iniName}" ${Function} string
+  /call LoadVar Spells nuke2Gem "gem9" nuke2Gem "${iniName}" ${Function} string
+  /call LoadVar Spells mezSpell "Bewilderment" mezSpell "${iniName}" ${Function} string
+  /call LoadVar Spells mezGem "gem8" mezGem "${iniName}" ${Function} string
+  /call LoadVar Spells mezDuration 500 mezDuration "${iniName}" ${Function} string
+  /call LoadVar Spells tashSpell "Echo of Tashan" tashSpell "${iniName}" ${Function} string
+  /call LoadVar Spells tashGem "gem2" tashGem "${iniName}" ${Function} string
+  /call LoadVar Spells tashDuration 14m tashDuration "${iniName}" ${Function} string
+  /call LoadVar Spells slowSpell "Forlorn Deeds" slowSpell "${iniName}" ${Function} string
+  /call LoadVar Spells slowType "gem5" slowType "${iniName}" ${Function} string
+  /call LoadVar Spells slowDuration 2100 slowDuration "${iniName}" ${Function} string
+  /call LoadVar Spells crippleSpell "Fractured Conciousness" crippleSpell "${iniName}" ${Function} string
+  /call LoadVar Spells crippleGem "gem6" crippleGem "${iniName}" ${Function} string
+  /call LoadVar Spells crippleDuration 2100 crippleDuration "${iniName}" ${Function} string
+  /call LoadVar Spells charmSpell "Coax" charmSpell "${iniName}" ${Function} string
+  /call LoadVar Spells charmGem "gem6" charmGem "${iniName}" ${Function} string
+  /call LoadVar Spells aeMezSpell "Wake of Subdual" aeMezSpell "${iniName}" ${Function} string
+  /call LoadVar Spells aeMezGem "gem4" aeMezGem "${iniName}" ${Function} string
+  /call LoadVar Spells pbaeMezSpell "Dreams of Veldyn" pbaeMezSpell "${iniName}" ${Function} string
+  /call LoadVar Spells pbaeMezGem "gem4" pbaeMezGem "${iniName}" ${Function} string
+  /call LoadVar Spells shielding "Sorcerous Shield" shielding "${iniName}" ${Function} string
+  /call LoadVar Spells mitigateSpell "Boggle" mitigateSpell "${iniName}" ${Function} string
+  /call LoadVar Spells mitigateSpellGem "gem4" mitigateSpellGem "${iniName}" ${Function} string
+  /call LoadVar Spells singleHasteSpell "Speed of Ellowind" singleHasteSpell "${iniName}" ${Function} string
+  /call LoadVar Spells groupHasteSpell "Hastening of Ellowind" groupHasteSpell "${iniName}" ${Function} string
+  /call LoadVar Spells hasteSpellGem "gem2" hasteSpellGem "${iniName}" ${Function} string
+  /call LoadVar Spells selfRune "Draconic Rune" selfRune "${iniName}" ${Function} string
+  /call LoadVar Spells selfAARune "Eldritch Rune" selfAARune "${iniName}" ${Function} string
+  /call LoadVar Spells runeSpell "Rune of Ellowind" runeSpell "${iniName}" ${Function} string
+  /call LoadVar Spells runeSpellGem "gem4" runeSpellGem "${iniName}" ${Function} string
+  /call LoadVar Spells singleC7 "Seer's Intuition" singleC7 "${iniName}" ${Function} string
+  /call LoadVar Spells groupC7 "Voice of Intuition" groupC7 "${iniName}" ${Function} string
+  /call LoadVar Spells manaFlareSpell "Mana Flare" manaFlareSpell "${iniName}" ${Function} string
+  /call LoadVar Spells manaFlareGem "gem2" manaFlareGem "${iniName}" ${Function} string
+  /call LoadVar Spells mindShatterSpell "Mind Shatter" mindShatterSpell "${iniName}" ${Function} string
+  /call LoadVar Spells mindShatterGem "gem2" mindShatterGem "${iniName}" ${Function} string
+  /call LoadVar Spells pacifySpell "Quiet Mind" pacifySpell "${iniName}" ${Function} string
+  /call LoadVar Spells pacifyGem "gem4" pacifyGem "${iniName}" ${Function} string
+  /call LoadVar Spells dispellSpell "Recant Magic" dispellSpell "${iniName}" ${Function} string
+  /call LoadVar Spells dispellGem "gem4" dispellGem "${iniName}" ${Function} string
+  /call LoadVar Spells invisSpell "Cloud of Indifference" invisSpell "${iniName}" ${Function} string
+  /call LoadVar Spells invisSpellGem "gem4" invisSpellGem "${iniName}" ${Function} string
+  /call LoadVar Items hpRobe "${InvSlot[chest].Item.Name}" hpRobe "${iniName}" ${Function} string
+  /call LoadVar Items useFood FALSE useFood "${iniName}" ${Function} bool
+  /call LoadVar Items foodPack "pack8" foodPack "${iniName}" ${Function} string
+  /call LoadVar Items statFood "Misty Thicket Picnic" statFood "${iniName}" ${Function} string
+  /call LoadVar Items food1 " " food1 "${iniName}" ${Function} string
+  /call LoadVar Items food2 " " food2 "${iniName}" ${Function} string
+  /call LoadVar Items food3 " " food3 "${iniName}" ${Function} string
+  /call LoadVar Items food4 " " food4 "${iniName}" ${Function} string
+  /call LoadVar Items food5 " " food5 "${iniName}" ${Function} string
+  /call LoadVar Items meleeWep " " meleeWep "${iniName}" ${Function} string
+  /call LoadVar Items tashFocusItem " " tashFocusItem "${iniName}" ${Function} string
+  /call LoadVar Items normalMainhand "${InvSlot[mainhand].Item.Name}" normalMainhand "${iniName}" ${Function} string
+  /call LoadVar Items extEnhanceItem "Put the name of your extended enhancement item here" extEnhanceItem "${iniName}" ${Function} string
+  /call LoadVar Items useExtEnhanceFocus FALSE useExtEnhanceFocus "${iniName}" ${Function} bool
+  /call LoadVar SelfBuffStuff selfBuffTotal 1 selfBuffTotal "${iniName}" ${Function} int
+  /if (${selfBuffTotal}) {
+    /if (!${Defined[selfBuffID]}) /declare selfBuffID[${selfBuffTotal}] int outer
+    /if (!${Defined[selfBuffTimer]}) /declare selfBuffTimer timer outer
+    /call LoadVar SelfBuffStuff selfBuffs TRUE selfBuffs "${iniName}" ${Function} bool
+    /call LoadVar SelfBuffStuff selfBuffRecheck 10s selfBuffRecheck "${iniName}" ${Function} string
+    /call LoadVar SelfBuffStuff useAura FALSE useAura "${iniName}" ${Function} bool
+    /call LoadVar SelfBuffStuff auraBuff "Self Aura Spell or Combat Ability full name" auraBuff "${iniName}" ${Function} string
+    /call LoadVar SelfBuffStuff auraBuffGem "gem# for spell, comb for combat ability" auraBuffGem "${iniName}" ${Function} string
+    /call LoadVar SelfBuffStuff auraEndurance 200 auraEndurance "${iniName}" ${Function} int
+    /for i 1 to ${selfBuffTotal}
+      /call LoadVar SelfBuffStuff selfBuff${i} "Self Buff item/Spell #${i}" selfBuff${i} "${iniName}" ${Function} string
+      /call LoadVar SelfBuffStuff selfBuffIcon${i} "Self Buff #${i} Buff Icon" selfBuffIcon${i} "${iniName}" ${Function} string
+      /call LoadVar SelfBuffStuff selfBuffGem${i} "Self Buff #${i} Gem or put item if an item" selfBuffGem${i} "${iniName}" ${Function} string
+      /call LoadVar SelfBuffStuff selfBuffCount${i} 15 selfBuffCount${i} "${iniName}" ${Function} int
+      /call LoadVar SelfBuffStuff selfBuffIndoors${i} 0 selfBuffIndoors${i} "${iniName}" ${Function} int
+      /if (${Select[${selfBuffGem${i}},item,alt]}) {
+        /varset selfBuffID[${i}] ${Spell[${selfBuffIcon${i}}].ID}
+      } else {
+        /varset selfBuffID[${i}] ${Me.Book[${Me.Book[${selfBuffIcon${i}}]}].ID}
+      }
+    /next i
+  }
+  /call LoadVar DoBuffStuff doBuffTotal 1 doBuffTotal "${iniName}" ${Function} int
+  /if (${doBuffTotal}) {
+    /if (!${Defined[doBuffID]}) /declare doBuffID[${doBuffTotal}] int outer
+    /if (!${Defined[doBuffQueue]}) /declare doBuffQueue[25,2] int outer
+    /if (!${Defined[QueueCount]}) /declare QueueCount int outer
+    /call LoadVar DoBuffStuff doBuffs TRUE doBuffs "${iniName}" ${Function} bool
+    /call LoadVar DoBuffStuff doBuffTells TRUE doBuffTells "${iniName}" ${Function} bool
+    /call LoadVar DoBuffStuff refreshBuffs FALSE refreshBuffs "${iniName}" ${Function} bool
+    /call LoadVar DoBuffStuff doBuffMana 0 doBuffMana "${iniName}" ${Function} int
+    /call LoadVar DoBuffStuff buffGem "gem4" buffGem "${iniName}" ${Function} string
+    /for i 1 to ${doBuffTotal}
+      /call LoadVar DoBuffStuff doBuff${i} "Do Buff item/Spell #${i}" doBuff${i} "${iniName}" ${Function} string
+      /call LoadVar DoBuffStuff doBuffIcon${i} "Do Buff #${i} Buff Icon" doBuffIcon${i} "${iniName}" ${Function} string
+      /call LoadVar DoBuffStuff doBuffGem${i} "Do Buff #${i} Gem or put item if an item" doBuffGem${i} "${iniName}" ${Function} string
+      /call LoadVar DoBuffStuff doBuffAliases${i} "Put the keywords you want to respond to for this buff" doBuffAliases${i} "${iniName}" ${Function} string
+      /call LoadVar DoBuffStuff doBuffIndoors${i} 0 doBuffIndoors${i} "${iniName}" ${Function} int
+      /call LoadVar DoBuffStuff doBuffRefresh${i} 0 doBuffRefresh${i} "${iniName}" ${Function} int
+      /if (${Select[${doBuffGem${i}},item,alt]}) {
+        /varset doBuffID[${i}] ${Spell[${doBuffIcon${i}}].ID}
+      } else {
+        /varset doBuffID[${i}] ${Me.Book[${Me.Book[${doBuffIcon${i}}]}].ID}
+      }
+    /next i
+  }
+  /call LoadVar RaidBuffs RaidBuffTotal 1 RaidBuffTotal "${iniName}" ${Function} int
+  /if (${RaidBuffTotal}) {
+    /if (!${Defined[RaidBuffQueue]}) /declare RaidBuffQueue[72,2] int outer
+    /if (!${Defined[RaidQueueCount]}) /declare RaidQueueCount int outer
+    /if (!${Defined[RaidBuffID]}) /declare RaidBuffID[${RaidBuffTotal}] int outer
+    /call LoadVar RaidBuffs DoRaidBuffs TRUE DoRaidBuffs "${iniName}" ${Function} bool
+    /for i 1 to ${RaidBuffTotal}
+      /call LoadVar RaidBuffs RaidBuff${i} "Raid Buff item/Spell #${i}" RaidBuff${i} ${iniName} ${Function} string
+      /call LoadVar RaidBuffs RaidBuffIcon${i} "Raid Buff #${i} Buff Icon" RaidBuffIcon${i} ${iniName} ${Function} string
+      /call LoadVar RaidBuffs RaidBuffGem${i} "Raid Buff #${i} Gem or put item if an item" RaidBuffGem${i} ${iniName} ${Function} string
+      /call LoadVar RaidBuffs RaidBuffIndoors${i} 0 RaidBuffIndoors${i} ${iniName} ${Function} int
+      /if (${Select[${RaidBuffGem${i}},item,alt]}) {
+        /varset RaidBuffID[${i}] ${Spell[${RaidBuffIcon${i}}].ID}
+      } else {
+        /varset RaidBuffID[${i}] ${Me.Book[${Me.Book[${RaidBuffIcon${i}}]}].ID}
+      }
+    /next i
+  }
+  /call LoadVar DotStuff DotTotal 1 DotTotal "${IniFile}" ${Function} int
+  /if (${DotTotal}) {
+    /if (!${Defined[DotID]}) /declare DotID[${DotTotal}] int outer
+    /if (!${Defined[DotTimer1]}) /declare DotTimer1 timer outer
+    /if (!${Defined[DotTimer2]}) /declare DotTimer2 timer outer
+    /if (!${Defined[DotTimer3]}) /declare DotTimer3 timer outer
+    /if (!${Defined[DotTimer4]}) /declare DotTimer4 timer outer
+    /if (!${Defined[DotTimer5]}) /declare DotTimer5 timer outer
+    /call LoadVar DotStuff DoDots FALSE DoDots "${IniFile}" ${Function} bool
+    /call LoadVar DotStuff DotAt 90 DotAt "${IniFile}" ${Function} int
+    /call LoadVar DotStuff DotMinHPs 40 DotMinHPs "${IniFile}" ${Function} int
+    /call LoadVar DotStuff DotMinMana 60 DotMinMana "${IniFile}" ${Function} int
+    /call LoadVar DotStuff DotRecasts 2 DotRecasts ${IniFile} ${Function} int
+    /call LoadVar DotStuff WhichDot 1 WhichDot "${IniFile}" ${Function} int
+    /for i 1 to ${DotTotal}
+      /call LoadVar DotStuff Dot${i} "Put the name of Dot #${i} here" Dot${i} "${IniFile}" ${Function} string
+      /call LoadVar DotStuff DotGem${i} "Put the spell gem you want to cast Dot #${i} from here" DotGem${i} "${IniFile}" ${Function} string
+      /call LoadVar DotStuff DotSpellSet${i} 1 DotSpellSet${i} "${IniFile}" ${Function} int
+      /if (${Select[${DotGem${i}},item,alt]}) {
+        /varset DotID[${i}] ${Spell[${Dot${i}}].ID}
+      } else {
+        /varset DotID[${i}] ${Me.Book[${Me.Book[${Dot${i}}]}].ID}
+      }
+    /next i
+  }
+  /call LoadVar PetStuff petBuffTotal 1 petBuffTotal "${iniName}" ${Function} int
+  /if (${petBuffTotal}) {
+    /if (!${Defined[petBuffID]}) /declare petBuffID[${petBuffTotal}] int outer
+    /if (!${Defined[petBuffTimer]}) /declare petBuffTimer timer outer
+    /call LoadVar PetStuff usePet TRUE usePet "${iniName}" ${Function} bool
+    /call LoadVar PetStuff petSpell "Ellowind's Animation" petSpell "${iniName}" ${Function} string
+    /call LoadVar PetStuff petSpellGem "gem4" petSpellGem "${iniName}" ${Function} string
+    /call LoadVar PetStuff doPetBuffs TRUE doPetBuffs "${iniName}" ${Function} bool
+    /call LoadVar PetStuff petBuffRecheck 10s petBuffRecheck ${iniName} ${Function} string
+    /call LoadVar PetStuff ShrinkPet TRUE ShrinkPet "${iniName}" ${Function} bool
+    /call LoadVar PetStuff ShrinkPetSpell "Tiny Companion" ShrinkPetSpell "${iniName}" ${Function} string
+    /call LoadVar PetStuff ShrinkPetSpellGem "gem4" ShrinkPetSpellGem "${iniName}" ${Function} string
+    /for i 1 to ${petBuffTotal}
+      /call LoadVar PetStuff petBuff${i} "pet Buff item/Spell #${i}" petBuff${i} ${iniName} ${Function} string
+      /call LoadVar PetStuff petBuffIcon${i} "pet Buff #${i} Buff Icon" petBuffIcon${i} ${iniName} ${Function} string
+      /call LoadVar PetStuff petBuffGem${i} "pet Buff #${i} Gem or put item if an item" petBuffGem${i} ${iniName} ${Function} string
+      /call LoadVar PetStuff petBuffIndoors${i} 0 petBuffIndoors${i} ${iniName} ${Function} int
+      /if (${Select[${petBuffGem${i}},item,alt]}) {
+        /varset petBuffID[${i}] ${Spell[${petBuffIcon${i}}].ID}
+      } else {
+        /varset petBuffID[${i}] ${Me.Book[${Me.Book[${petBuffIcon${i}}]}].ID}
+      }
+    /next i
+  }
+  /call LoadVar AutoStun autoStunTotal 1 autoStunTotal "${iniName}" ${Function} int
+  /call LoadVar AutoStun autoStunDelay 2s autoStunDelay "${iniName}" ${Function} int
+  /if (${autoStunTotal}) {
+  	/for i 1 to ${autoStunTotal}
+  		/call LoadVar AutoStun autoStunSpell${i} "Stun item/spell/alt #${i}" autoStunSpell${i} "${iniName}" ${Function} string
+  		/call LoadVar AutoStun autoStunGem${i} "Stun #${i} Gem number item or alt" autoStunGem${i} "${iniName}" ${Function} string
+  	/next i
+  }
+/return
+
+Sub LoadAliases
+  /ini AutoEnc_${Me.Name}.ini Misc LoadDate ${MacroQuest.BuildDate}
+  /ini AutoEnc_${Me.Name}.ini Misc Version ${Version}
+  /echo Version Mismatch Detected, Loading Aliases
+  /squelch /alias /loadini /echo LoadIni
+  /squelch /alias /saveini /echo SaveIni
+  /squelch /alias /anchor /echo SetAnchor
+  /squelch /alias /manarobe /echo Mana Robe
+  /squelch /alias /setma /custombind set ma /assist
+  /squelch /alias /setsa /custombind set sa /assist
+  /squelch /alias /announce /echo ToggleVar Setting announcements to,announce,Settings,announce,
+  /squelch /alias /announcetells /echo ToggleVar Setting announce tells to,announceTells,Settings,announceTells,
+  /squelch /alias /autoAnnounce /echo ToggleVar Setting auto annouce for EQ chat channels to,autoAnnounce,Settings,autoAnnounce,
+  /squelch /alias /autoc7 /echo ToggleVar Setting auto mind candy to,autoC7,Settings,autoC7,
+  /squelch /alias /autoloot /echo ToggleVar Setting auto looting to,cleanUp,Settings,cleanUp,
+  /squelch /alias /autosit /echo ToggleVar Setting auto medding to,autoSit,Settings,autoSit,
+  /squelch /alias /begForBuffs /echo ToggleVar Setting buff begging to,begForBuffs,Settings,begForBuffs,
+  /squelch /alias /chatChannel /echo ToggleString Setting chat channel to,chatChannel,Settings,chatChannel,
+  /squelch /alias /checknamed /echo ToggleVar Setting checking for named to,checkNamed,Settings,checkNamed,
+  /squelch /alias /distancetosit /echo ToggleString Setting distance to sit at,distanceToSit,Settings,distanceToSit,
+  /squelch /alias /dobuffmana /echo ToggleString Setting do buff mana to,doBuffMana,DoBuffStuff,doBuffMana,
+  /squelch /alias /dobuff /echo ToggleVar Setting do buffs to,doBuffs,DoBuffStuff,doBuffs,
+  /squelch /alias /dobufftells /echo ToggleVar Setting do buff tells to,doBuffTells,DoBuffStuff,doBuffTells,
+  /squelch /alias /dodots /echo ToggleVar Using Dots,DoDots,DotStuff,DoDots,
+  /squelch /alias /dopetbuffs /echo ToggleVar Setting pet buffing to,doPetBuffs,PetStuff,doPetBuffs,
+  /squelch /alias /doraidbuffs /echo ToggleVar Setting Raid Buffing,DoRaidBuffs,RaidBuffs,DoRaidBuffs,
+  /squelch /alias /dotat /echo ToggleString Setting Dot At,DotAt,DotStuff,DotAt,
+  /squelch /alias /engagedelay /echo ToggleString Setting engage delay to,engageDelay,Settings,engageDelay,
+  /squelch /alias /hastegroup /echo ToggleVar Setting auto haste to,hasteGroup,Settings,hasteGroup,
+  /squelch /alias /minhps /echo ToggleString Setting minimum HPs to,minHP,Settings,minHP,
+  /squelch /alias /mount /echo ToggleVar Setting use mount to,useMount,Settings,useMount,
+  /squelch /alias /nukedelay /echo ToggleString Setting nuke delay to,nukeDelay,Settings,nukeDelay,
+  /squelch /alias /nukemana /echo ToggleString Setting nuke mana to,nukeMana,Settings,nukeMana,
+  /squelch /alias /nukemode /echo ToggleString Setting nuke mode to,nukeMode,Settings,nukeMode,
+  /squelch /alias /useaura /echo ToggleVar Setting use aura to,useAura,SelfBuffStuff,useAura,
+  /squelch /alias /usecharm /echo ToggleVar Setting use charm to,useCharm,Settings,useCharm,
+  /squelch /alias /useconsider /echo ToggleVar Using Consider,UseConsider,Settings,UseConsider,
+  /squelch /alias /usecripple /echo ToggleVar Setting use cripple to,useCripple,Settings,useCripple,
+  /squelch /alias /usedebuff /echo ToggleVar Setting use debuffs to,useDebuff,Settings,useDebuff,
+  /squelch /alias /usedps /echo ToggleVar Setting use Dps to,useDPS,Settings,useDPS,
+  /squelch /alias /useepic /echo ToggleVar Setting use epic to,useEpic,Settings,useEpic,
+  /squelch /alias /usefood /echo ToggleVar Setting use food to,useFood,Items,useFood,
+  /squelch /alias /usemanaflare /echo ToggleVar Setting use mana flare to,useManaFlare,Settings,useManaFlare,
+  /squelch /alias /usemanarobe /echo ToggleVar Setting use mana robe to,useManaRobe,Settings,useManaRobe,
+  /squelch /alias /usemanastone /echo ToggleVar Setting use mana stone to,useManaStone,Settings,useManaStone,
+  /squelch /alias /usemez /echo ToggleVar Setting use mez to,useMez,Settings,useMez,
+  /squelch /alias /usemindshatter /echo ToggleVar Setting use mind shatter to,useMindShatter,Settings,useMindShatter,
+  /squelch /alias /usemitigate /echo ToggleVar Setting use mitigate to,useMitigate,Settings,useMitigate,
+  /squelch /alias /usepet /echo ToggleVar Setting summon pet to,usePet,PetStuff,usePet,
+  /squelch /alias /useslow /echo ToggleVar Setting use slow to,useSlow,Settings,useSlow,
+  /squelch /alias /usetash /echo ToggleVar Setting use tash to,useTash,Settings,useTash,
+  /squelch /alias /usetashfocus /echo ToggleVar Setting use tash focus to,useTashFocus,Settings,useTashFocus,
+  /squelch /alias /radius /echo ToggleString Setting minimum radius,minRadius,Settings,minRadius,
+  /squelch /alias /refreshbuffs /echo ToggleVar Setting refresh buffs to,refreshBuffs,DoBuffStuff,refreshBuffs,
+  /squelch /alias /runehps /echo ToggleString Setting rune HPs to,runeHP,Settings,runeHP,
+  /squelch /alias /rodbitch /echo ToggleString Setting rod bitch to,rodBitch,Settings,rodBitch,
+  /squelch /alias /selfbuff /echo ToggleVar Setting self buffing to,selfBuffs,SelfBuffStuff,selfBuffs,
+  /squelch /alias /shrinkpet /echo ToggleVar Setting shrink pet to,ShrinkPet,PetStuff,ShrinkPet,
+  /squelch /alias /spellset /echo ToggleString Setting spell set to,spellSet,Settings,spellSet,
+  /squelch /alias /whichdot /echo ToggleString Setting Dot Spell Set,WhichDot,DotStuff,WhichDot,
+/return
+
+Sub AddToQueue2(int Buffee,int BuffNumber)
+  /declare a int local
+  /declare Compare int local
+  /if (${QueueCount}<25 && ${Spawn[${Buffee}].Type.NotEqual[Corpse]} && ${Spawn[${Buffee}].ID}) {
+    /varset Compare 0
+    /for a 1 to 25
+      /if ((${Buffee}==${doBuffQueue[${a},1]} || (${Select[${Spell[${doBuffID[${doBuffQueue[${a},2]}]}].TargetType},"Group v2","AE PC v2","Group v1","AE PC v1"]} && ${Group.Member[${Spawn[${Buffee}].CleanName}]} && ${Group.Member[${Spawn[${doBuffQueue[${a},1]}].CleanName}]})) && ${BuffNumber}==${doBuffQueue[${a},2]}) /varset Compare 1
+    /next a
+    /if (!${Compare}) {
+      /for a 1 to 25
+        /if (!${doBuffQueue[${a},1]}) {
+          /varset doBuffQueue[${a},1] ${Buffee}
+          /varset doBuffQueue[${a},2] ${BuffNumber}
+          /varcalc QueueCount ${QueueCount}+1
+          /return
+        }
+      /next a
+    }
+  }
+  :DoneQueueing
+/return
+
+Sub RemoveFromQueue(int Buffee,int BuffNumber)
+  /declare a int local
+  /for a 1 to 25
+    /if (((${Spawn[${doBuffQueue[${a},1]}].State.Equal["DEAD"]} || !${Spawn[${doBuffQueue[${a},1]}].ID}) || (${doBuffQueue[${a},1]}==${Buffee} && ${doBuffQueue[${a},2]}==${BuffNumber})) && ${doBuffQueue[${a},1]}) {
+      /varset doBuffQueue[${a},1] 0
+      /varset doBuffQueue[${a},2] 0
+      /varcalc QueueCount ${QueueCount}-1
+      /return
+    }
+  /next a
+/return
+
+Sub CheckAttacking(int mob)
+  /declare animation int local
+  /varset animation ${Spawn[${mob}].Animation}
+|  /echo Animation #${animation}, by mob ID: ${mob} (${Spawn[${mob}].Name}).
+  /if (${animation} == 5) /return 1
+  /if (${animation} == 7) /return 1
+  /if (${animation} == 8) /return 1
+  /if (${animation} == 12) /return 1
+  /if (${animation} == 13) /return 1
+  /if (${animation} == 16) /return 0
+  /if (${animation} == 17) /return 0
+  /if (${animation} == 18) /return 2
+  /if (${animation} == 26) /return 0
+  /if (${animation} == 32) /return 0
+  /if (${animation} == 33) /return 0
+  /if (${animation} == 34) /return 0
+  /if (${animation} == 37) /return 0
+  /if (${animation} == 38) /return 0
+  /if (${animation} == 42) /return 1
+  /if (${animation} == 43) /return 0
+  /if (${animation} == 44) /return 1
+  /if (${animation} == 71) /return 0
+  /if (${animation} == 72) /return 0
+  /if (${animation} == 73) /return 0
+  /if (${animation} == 80) /return 1
+  /if (${animation} == 106) /return 1
+  /if (${animation} == 110) /return 1
+  /if (${animation} == 111) /return 0
+  /if (${animation} == 129) /return 1
+  /if (${animation} == 144) /return 1
+  /if (${animation} == 146) /return 0
+  /echo Unknown Animation #${animation}, by mob ID: ${mob} (${Spawn[${mob}].Name}).
+/return 0
+
+| ======================== EVENTS ========================
+
+Sub Event_Timer(string timerName,int timerValue)
+  /if (!${Defined[${timerName}]}) /return
+  /declare tempID int local 0
+  /declare oldTargetID int local ${Target.ID}
+  /if (${timerName.Left[9].Equal[tashTimer]}) {
+    /varset tempID ${timerName.Right[-9]}
+    /if (${Spawn[${tempID}].Type.Equal[NPC]} || ${Spawn[${tempID}].Master.Type.Equal[NPC]}) {
+      /target id ${tempID}
+      /call Tash
+    } else {
+      /deletevar ${timerName}
+    }
+  } else /if (${timerName.Left[9].Equal[slowTimer]}) {
+    /varset tempID ${timerName.Right[-9]}
+    /if (${Spawn[${tempID}].Type.Equal[NPC]} || ${Spawn[${tempID}].Master.Type.Equal[NPC]}) {
+      /target id ${tempID}
+      /if (${useSlow}) /call Slow
+    } else {
+      /deletevar ${timerName}
+    }
+  } else /if (${timerName.Left[12].Equal[crippleTimer]}) {
+    /varset tempID ${timerName.Right[-12]}
+    /if (${Spawn[${tempID}].Type.Equal[NPC]} || ${Spawn[${tempID}].Master.Type.Equal[NPC]}) {
+      /target id ${tempID}
+      /call Synapsis
+    } else {
+      /deletevar ${timerName}
+    }
+  } else /if (${timerName.Left[8].Equal[mezTimer]}) {
+    /varset tempID ${timerName.Right[-8]}
+    /if (${Spawn[${tempID}].Type.Equal[NPC]} || ${Spawn[${tempID}].Master.Type.Equal[NPC]}) {
+      /target id ${tempID}
+      /delay 1s ${Target.ID}==${tempID}
+      /delay 1
+      /call Mez
+    } else {
+      /deletevar ${timerName}
+    }
+  } else /if (${timerName.Left[17].Equal[bewildermentTimer]}) {
+  	/varset tempID ${timerName.Right[-17]}
+  	/if (${timerValue}<20 || ${Spawn[${tempID}].PctHPs}<75) /deletevar ${timerName}  	
+  } else {
+    /return ${Macro.Return}
+  }
+  /if (${Target.ID}==${tempID}) {
+    /if (${Spawn[${oldTargetID}].ID}) {
+      /target id ${oldTargetID}
+    } else {
+      /squelch /target clear
+    }
+  }
+/return ${Macro.Return}
+
+Sub Event_AutoStun(string line,string toggle)
+  /if (!${Defined[useStun]}) /declare useStun int outer 0
+  /if (${toggle.Equal[on]}) {
+    /varset useStun 1
+  } else {
+    /varset useStun 0
+  }
+  :stun_loop
+  /if (${useStun}) {
+  	/for i 1 to ${autoStunTotal}
+  		/if (${SpawnCount[npc radius 30 zradius 30]}>2) {
+        /if (${refreshTime} && ${useManaRobe}) /call ManaRobe
+        /if (${useStun}) /call Cast "${autoStunSpell${i}}" ${autoStunGem${i}} 2s
+        /call CheckRune 90
+        /doevents chat
+        /doevents EQBC
+        /doevents AutoStun
+        /delay ${autoStunDelay}
+      }
+    /next i
+    /if (${useStun}) /goto :stun_loop
+  }
+/return
+
+Sub Event_RageOn(string line)
+  /if ((${line.Find[${Spawn[${mobID}].DisplayName}]} || ${line.Find[${Target.DisplayName}]}) && ${Me.Pet.ID}) {
+    /echo calling off pet...
+    /pet back off
+    /if (${Me.AltAbility[Pet Discipline]}) /pet hold
+  }
+/return
+
+Sub Event_RageOff(string line)
+  /if ((${line.Find[${Spawn[${mobID}].DisplayName}]} || ${line.Find[${Target.DisplayName}]}) && ${Me.Pet.ID}) {
+    /target id ${mobID}
+    /pet attack
+  }
+/return
+
+Sub Event_Mez
+  /if (${Defined[mezTimer${Target.ID}]}) /deletevar mezTimer${Target.ID}
+  /if (${useMez}) /call Mez
+/return
+
+Sub Event_Gate(string line,string mobName)
+  /if (${Target.ID} && ${Target.ID}==${mobID} && ${Spawn[${mobID}].Level}<=${maxMezLevel} && !${mezzImmuneList.Find[${Target.DisplayName}]}) {
+    /if (!${Me.Casting.Name.Equal[${mezSpell}]}) /call Interrupt
+    /if (${announce}) /${chatChannel} Interrupting  ${Target.CleanName}
+    /call Cast "${mezSpell}" ${mezGem} 3s
+  }
+/return
+
+Sub Event_DamageMelee(string line,int damage)
+  /varcalc totalMeleeDmg ${totalMeleeDmg}+${damage}
+  /if (!${fightStartTime}) /varset fightStartTime ${MacroQuest.Running}
+/return
+
+Sub Event_DamageNonMelee(string line,int damage)
+  /if (${useDPS}) /varcalc totalNonMeleeDmg ${totalNonMeleeDmg}+${damage}
+  /if (!${fightStartTime}) /varset fightStartTime ${MacroQuest.Running}
+/return
+
+Sub Event_SetAnchor(string line,string leash)
+  /if (${leash.Find[clear]}) {
+    /varset useAnchor 0
+  } else {
+    /varset useAnchor 1
+    /varset anchorX ${Me.X}
+    /varset anchorY ${Me.Y}
+    /varset anchorHeading ${Me.Heading.DegreesCCW}
+    /varset leashLength ${leash}
+    /echo New anchor: ${Me.Y} ${Me.X}
+  }
+/return
+
+Sub Event_Camp
+  /call SwapStatFood 0
+  /if (${Me.Pet.ID}) {
+    /stand
+    /call Cast "suspended minion" alt 3s
+    /camp desktop
+  }
+  /endmacro
+/return
+
+Sub Event_Command(string line,string command,string password)
+  /if (${line.Left[3].Equal[you]}) /return
+  /varset password ${password.Arg[1]}
+  /if (${password.Equal[pass]}) /docommand /${command}
+/return
+
+Sub Event_RaidSay(string line,string chatSender,string chatText)
+  /if (${Bool[${chatSender}]}) /call Event_Chat "raid" "${chatSender}" "${chatText}"
+/return
+
+Sub Event_ChatTell(string line,string chatSender,string chatText)
+  /if (${Bool[${chatSender}]}) /call Event_Chat "tell" "${chatSender}" "${chatText}"
+/return
+
+Sub Event_EQBC(EQBCSay,EQBCSender,EQBCCommand)
+  /if (${EQBCCommand.Left[1].Equal[/]}) {
+    /docommand ${EQBCCommand}
+  } else {
+    /call Event_Chat "EQBC" "${EQBCSender}" "${EQBCCommand}"
+  }
+/return
+
+Sub Event_Summon
+  /call Event_Hit
+/return
+
+Sub Event_SpellDamage(string line,string damage)
+  /if (${Int[${damage}]}>60) /call Event_Hit
+/return
+
+Sub Event_Hit
+  /doevents Dead
+  /if (${deathFlag}) /return
+  /declare q int local 0
+  /declare r int local 0
+  /declare tempID int local
+  /varset r ${SpawnCount[npc radius 15]}
+  /if (${r}) {
+  	/for q 1 to ${r}
+      /varset tempID ${NearestSpawn[${q},npc radius 15].ID}
+      /if (!${NearestSpawn[${q},npc radius 15].ID}) /next q
+      /squelch /target id ${tempID}
+      /delay 5 ${Target.ID}==${tempID}
+      /delay 1
+      /if (${Me.TargetOfTarget.ID}==${Me.ID} && ${Target.ID} && ${Target.ID}!=${Me.ID} && (!${mezzImmuneList.Find[${Target.CleanName}]} || ${mezTimer${Target.ID}} > 0)) {
+        /call CheckAttacking ${NearestSpawn[${q},npc radius 15].ID}
+        /if (${Macro.Return}) {
+        	/if (${Me.SpellReady[${stunSpell}]}) /call Cast "${stunSpell}" ${stunSpellGem} 2s
+          /if (${Me.PctHPs}<=80 && ${Me.AltAbilityReady[Color Shock]}) /call Cast "Color Shock" alt
+          /if (${Me.PctHPs}<=80 && ${Me.SpellReady[${runeSpell}]} && ${Spell[${runeSpell}].Stacks[0]}) /call AddToQueue "${runeSpell},${Me.Name}"
+          /if (${Me.PctHPs}<=75 && ${Me.AltAbility[Veil of Mindshadow]} && ${Me.AltAbilityReady[Veil of Mindshadow]}) /call Cast "Veil of Mindshadow" alt
+          /if (${Me.PctHPs}<=70 && !${Me.Buff[${selfRune}].ID} && !${Me.Buff[${selfAARune}].ID} && ${Me.AltAbilityReady[${selfAARune}]}) /call Cast "${selfAARune}" alt
+          /if (${Me.PctHPs}<=60 && ${Me.AltAbilityReady[Doppelganger]}) /call Cast "Doppelganger" alt
+          /if (${Me.PctHPs}<=50 && ${Me.AltAbilityReady[Beguiler's Banishment]} && ${SpawnCount[npc radius 20 zradius 20]}>2) /call Cast "Beguiler's Banishment" alt
+          /if (${Me.PctHPs}<=40 && ${Me.AltAbilityReady[Mind Over Matter]}) /call Cast "Mind Over Matter" alt
+          /if (${Me.PctHPs}<=30 && ${Me.AltAbilityReady[Beguiler's Directed Banishment]}) /call Cast "Beguiler's Directed Banishment" alt
+          /if (${Me.PctHPs}<=20 && ${Me.AltAbilityReady[Nightmare Stasis]} && ${Target.Level}<76) /call Cast "Nightmare Stasis" alt
+          /if (${Me.PctHPs}<=10 && ${Me.AltAbilityReady[Dimensional Instability]}) /call Cast "Dimensional Instability" alt
+          /if (${Defined[mezTimer${Target.ID}]} && ${mezTimer${Target.ID}} != -1) {
+          	/varset mezTimer${Target.ID} 20
+          } else /if (!${Defined[mezTimer${Target.ID}]}) {
+          	/declare mezTimer${Target.ID} 20
+          }
+        }
+      }
+    /next q
+  }
+  /doevents flush
+/return
+
+Sub Event_Dead
+  /if (!${Defined[deathFlag]}) /declare deathFlag bool outer
+  /varset deathFlag true
+/return
+
+Sub Event_Zone
+  /varset currentZone ${Zone.ID}
+  /varset outdoors TRUE
+  /varset ExcludeList ${Ini[${excludeIni},"ExcludeMobs.${Zone.ShortName}","Exclude"]}
+  /if (${ExcludeList.Equal[NULL]}) {
+    /ini "${excludeIni}" "ExcludeMobs.${Zone.ShortName}" "Exclude" "|"
+    /varset ExcludeList ${Ini[${excludeIni},"ExcludeMobs.${Zone.ShortName}","Exclude"]}
+    /echo ExcludeList: ${ExcludeList}
+  } else {
+    /varset ExcludeList ${Ini[${excludeIni},"ExcludeMobs.${Zone.ShortName}","Exclude"]}
+    /echo ExcludeList: ${ExcludeList}
+  }
+  /varset mezzImmuneList ${Ini[${mezzImmuneIni},"Excludes.${Zone.ShortName}","MezzImmune"]}
+  /nomodkey /keypress home
+  /if (${mezzImmuneList.Equal[NULL]}) {
+  	/ini "${mezzImmuneIni}" "Excludes.${Zone.ShortName}" "MezzImmune" "|"
+    /varset mezzImmuneList ${Ini[${mezzImmuneIni},"Excludes.${Zone.ShortName}","MezzImmune"]}
+    /echo MezzImmuneList: ${mezzImmuneList}
+  } else {
+  	/varset mezzImmuneList ${Ini[${mezzImmuneIni},"Excludes.${Zone.ShortName}","MezzImmune"]}
+  	/echo MezzImmuneList: ${mezzImmuneList}
+  }
+  /if (${Defined[mobList]}) /call ClearMobList
+  /if (${Defined[addList]}) /varset addList
+  /if (${Defined[buffQueue]}) /varset buffQueue
+  /if (${Defined[mobID]}) /varset mobID 0
+  /if (${Defined[petID]}) /varset petID 0
+  /if (${Defined[petID2]}) /varset petID2 0
+  /if (${Defined[useAnchor]}) /varset useAnchor 0
+  /if (${following}) {
+  	:WaitForFollowGuy
+  	/delay 10
+  	/doevents
+  	/squelch /target pc ${followName}
+  	/if (!${Target.ID} || ${Target.ID}!=${Spawn[pc ${followName}].ID}) /goto :WaitForFollowGuy
+    /if (${Me.Underwater} || ${Me.Levitating}) {
+      /squelch /stick hold 10 uw
+    } else {
+      /squelch /stick hold 10
+    }
+  	/if (${announce}) /${chatChannel} following ${followName} GTG!
+  }
+/return
+
+Sub Event_CastSpell(string line,string chatSender,string spellName,string targetName)
+  /if (${Defined[targetName]}) {
+    /call AddToQueue "${spellName},${targetName}"
+  } else /if (!${line.Find[ on ]}) {
+    /call AddToQueue "${spellName}"
+  }
+/return
+
+Sub Event_Indoors
+  /varset useMount FALSE
+  /varset outdoors FALSE
+/return
+
+Sub Event_Invited
+  /delay 5
+  /if (!${Me.Grouped}) /keypress invite_follow
+/return
+
+
+Sub Event_ManaRobe(string line,string settings)
+  /declare i int local 1
+  :set_robe_loop
+  /if (${settings.Arg[${i}].Equal[min]}) {
+    /varcalc i ${i}+1
+    /varset manaRobeMinMana ${settings.Arg[${i}]}
+  } else /if (${settings.Arg[${i}].Equal[max]}) {
+    /varcalc i ${i}+1
+    /varset manaRobeMaxMana ${settings.Arg[${i}]}
+  } else /if (${settings.Arg[${i}].Equal[mode]}) {
+    /varcalc i ${i}+1
+    /varset manaRobeMode ${settings.Arg[${i}]}
+  } else /if (${settings.Arg[${i}].Equal[on]}) {
+    /varset manaRobeMode 1
+  } else /if (${settings.Arg[${i}].Equal[off]}) {
+    /varset manaRobeMode 0
+  }
+  /varcalc i ${i}+1
+  /if (${settings.Arg[${i}].Length}) /goto :set_robe_loop
+  /if (${manaRobeMode}==2 && ${Me.PctMana}>${manaRobeMinMana}) /varset useManaRobe FALSE
+  /if (${manaRobeMode}==1) /varset useManaRobe TRUE
+  /ini "${iniName}" Settings ManaRobeMode ${manaRobeMode}
+  /ini "${iniName}" Settings ManaRobeMinMana ${manaRobeMinMana}
+  /ini "${iniName}" Settings ManaRobeMaxMana ${manaRobeMaxMana}
+/return
+
+Sub Event_WornOff(Line,SpellName,ToonName)
+  /declare i int local
+  /if (${doBuffTotal}&&${refreshBuffs}) {
+    /for i 1 to ${doBuffTotal}
+      /if (${SpellName.Equal[${doBuffIcon${i}}]} && ${doBuffRefresh${i}}) {
+        /call AddToQueue2 ${Spawn[pc ${ToonName}].ID} ${i}
+      }
+    /next i
+  }
+/return
+
+Sub Event_SetMA(string line,string name)
+  /if (!${Defined[mainAssist]}) /declare mainAssist string outer
+  /varset mainAssist ${name}
+  /ini "${iniName}" Settings mainAssist ${name}
+/return
+
+Sub Event_SetSA(string line,string name)
+  /if (!${Defined[secondAssist]}) /declare secondAssist string outer
+  /varset secondAssist ${name}
+  /ini "${iniName}" Settings secondAssist ${name}
+/return
+
+Sub Event_Invis
+  /if (${Me.Book[${invisSpell}]} || ${invisSpellGem.Equal[alt]} && ${Me.AltAbilityReady[${invisSpell}]} || ${invisSpellGem.Equal[item]} && !${FindItem[${invisSpell}].Timer}) {
+  	/squelch /target myself
+  	/delay 3s ${Target.ID}==${Me.ID}
+  	/if (${Target.ID}==${Me.ID}) {
+  	  /call Cast "${invisSpell}" ${invisSpellGem} 5s
+  	  /delay 5
+  	}
+  }
+/return
+
+Sub Event_Dispell
+  /if (${Me.Book[${dispellSpell}]} || ${dispellGem.Equal[alt]} && ${Me.AltAbilityReady[${dispellSpell}]} || ${dispellGem.Equal[item]} && !${FindItem[${dispellSpell}].Timer}) /call Cast "${dispellSpell}" ${dispellGem} 5s
+/return
+
+Sub Event_UquaAE
+  /if (!${Me.Class.PureCaster}) {
+    /call EquipItem "${normalOffhand}|offhand"
+  } else {
+    /call EquipItem "${normalRanged}|ranged"
+  }
+/return
+
+Sub Event_UquaKey(string line,string key)
+  /rs ${key}
+/return
+
+Sub Event_NukeType(string line,string nukeName)
+  /declare nukeType string local ${nukeName.Arg[1]}
+  /if (!${Defined[${nukeType}Nuke]}) /return
+  /varset nukeName ${nukeName.Right[-${Math.Calc[${nukeType.Length}+1]}]}
+  /if (${Me.Book[${nukeName}]}) {
+    /varset ${nukeType}Nuke ${nukeName}
+    /ini "${iniName}" Spells "${nukeType.Left[1].Upper}${nukeType.Right[-1]}Nuke" "${nukeName}"
+  }
+  /varset nuke1 ${${nukeType}Nuke}
+  /ini "${iniName}" Spells Nuke1 "${nuke1}"
+/return
+
+Sub Event_Exp
+  /varcalc totalKills ${totalKills}+1
+|  /echo ${totalKills} mobs dead
+/return
+
+Sub Event_Chat(string chatType,string chatSender,string chatText)
+  /declare spellName string local
+|  /if (${chatType.Equal[tell]} && ${announceTells}) /beep
+  /if (${chatText.Equal[slowcamp]} && (${chatType.Equal[tell]} || ${chatType.Equal[chatChannel]} || ${chatType.Equal[EQBC]})) {
+    /if (${Me.Mount.ID}) /dismount
+    /if (${Stick.Status.Length}) /stick off
+    /camp desktop
+  }
+  /if (${chatText.Equal[invisoff]}) {
+  	/if (${Me.Buff[Shared Camouflage].ID}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[Shared Camouflage].ID}-1].Int} leftmouseup
+    /if (${Me.Buff[Sun Cloak].ID}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[Sun Cloak].ID}-1].Int} leftmouseup
+    /if (${Me.Buff[Sunskin].ID}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[Sunskin].ID}-1].Int} leftmouseup
+    /if (${Me.Buff[Fool the Fallen].ID}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[Fool the Fallen].ID}-1].Int} leftmouseup
+    /if (${Me.Buff[Cloud of Indifference].ID}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[Cloud of Indifference].ID}-1].Int} leftmouseup
+    /if (${Me.Buff[Perfected Invisibility].ID}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[Perfected Invisibility].ID}-1].Int} leftmouseup
+  }
+  /if (${chatText.Equal[levoff]}) {
+  	/if (${Me.Buff[Flight of Eagles].ID}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[Flight of Eagles].ID}-1].Int} leftmouseup
+  	/if (${Me.Buff[Spirit of Eagle].ID}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[Spirit of Eagle].ID}-1].Int} leftmouseup
+  	/if (${Me.Buff[Levitation].ID}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[Levitation].ID}-1].Int} leftmouseup
+  	/if (${Me.Buff[Dead Man Floating].ID}) /nomodkey /notify BuffWindow Buff${Math.Calc[${Me.Buff[Dead Man Floating].ID}-1].Int} leftmouseup
+  }
+  /if (${ignoreList.Find[|${chatSender}|]} || ${chatText.Left[4].Equal[cast]} || !${autoBuff} || ${autoBuff}>2 || ${Spawn[${chatSender}].Type.Equal[NPC]}) /return
+  /if (!${Defined[chatTimer]}) /declare chatTimer float outer
+  /declare chatTime float local ${MacroQuest.Running}
+  /declare oldTarget int local ${Target.ID}
+  /declare a int local
+  /declare i int local
+  /if (${chatText.Equal[mana check]}) /${chatChannel} Chanter Mana ${Me.PctMana}%
+  /if (!${Spawn[pc ${chatSender}].ID}) /return
+  /if (${chatText.Arg[1].Equal[invite]} && ${GroupLeader.ID}==${Me.ID}) {
+    /tar pc ${chatSender}
+    /if (${Me.Casting.ID}) /call WaitCast
+    /invite
+  }
+  /if (${doBuffTotal} && ${doBuffs} && ${chatSender.NotEqual[${Me.CleanName}]} && ${Spawn[pc ${chatSender}].ID}) {
+    /for i 1 to ${doBuffTotal}
+      /if ((!${outdoors} && !${doBuffIndoors${i}})) /goto :SkipBuff
+      /for a 1 to ${doBuffAliases${i}.Count[|]}
+        /if (${chatText.Find["${doBuffAliases${i}.Arg[${a},|]}"]}) {
+          /if (${chatText.Find[" pet "]} || ${chatText.Find[${Spawn[pc ${chatSender}].Pet.CleanName}]}) {
+            /call AddToQueue2 ${Spawn[pc ${chatSender}].Pet.ID} ${i}
+          } else {
+            /call AddToQueue2 ${Spawn[pc ${chatSender}].ID} ${i}
+          }
+        }
+      /next a
+      :SkipBuff
+    /next i
+  }
+  /if (${chatText.Find[Illusion:]}) {
+    /varset spellName ${chatText}
+    /call AddToQueue "${spellName},${chatSender}"
+    /return
+  }
+  /if (${chatText.Equal[pacifytarget]}) {
+    /squelch /assist ${chatSender}
+    /delay 5s ${Target.Type.Equal[NPC]}
+    /if (${Target.ID} && ${Target.Type.Equal[NPC]}) {
+      /call AddToQueue "${pacifySpell},${Target.DisplayName}"
+      /return
+    }
+  }
+  /if (${chatText.Equal[mezztarget]}) {
+    /squelch /assist ${chatSender}
+    /delay 5s ${Target.Type.Equal[NPC]}
+    /if (${Target.ID} && ${Target.Type.Equal[NPC]}) {
+      /call AddToQueue "${mezSpell},${Target.DisplayName}"
+      /return
+    }
+  }
+  /if (${chatText.Equal[tashtarget]}) {
+    /squelch /assist ${chatSender}
+    /delay 5s ${Target.Type.Equal[NPC]}
+    /if (${Target.ID} && ${Target.Type.Equal[NPC]}) {
+      /call AddToQueue "${tashSpell},${Target.DisplayName}"
+      /return
+    }
+  }
+  /if (${chatText.Equal[slowtarget]}) {
+    /squelch /assist ${chatSender}
+    /delay 5s ${Target.Type.Equal[NPC]}
+    /if (${Target.ID} && ${Target.Type.Equal[NPC]}) {
+      /call AddToQueue "${slowSpell},${Target.DisplayName}"
+      /return
+    }
+  }
+  /if (${chatText.Equal[dispelltarget]}) {
+    /squelch /assist ${chatSender}
+    /delay 5s ${Target.Type.Equal[NPC]}
+    /if (${Target.ID} && ${Target.Type.Equal[NPC]}) {
+      /call AddToQueue "${dispellSpell},${Target.DisplayName}"
+      /return
+    }
+  }
+  /if (${chatText.Equal[roottarget]}) {
+    /squelch /assist ${chatSender}
+    /delay 5s ${Target.Type.Equal[NPC]}
+    /if (${Target.ID} && ${Target.Type.Equal[NPC]}) {
+      /call AddToQueue "${rootSpell},${Target.DisplayName}"
+      /return
+    }
+  }
+  /if (${chatText.Equal[follow]} && ${chatSender.NotEqual[${Me.CleanName}]}) {
+    /delay 5
+    /if (!${Spawn[${chatSender}].ID}) {
+      /echo ${chatSender}  is not in zone for me to follow!
+      /return
+    }
+    /varset followName ${chatSender}
+    /if (${announce}) /${chatChannel} I am following ${followName}!!!
+    /if (${Me.Mount.ID}) /dismount
+    /if (${useAnchor}) /varset useAnchor 0
+    /if (${autoAnchor}) /anchor clear
+    /target pc ${followName}
+    /delay 1s ${Target.Name.Equal[${followName}]}
+    /if ((${following}==0) && (${Target.Name.Equal[${followName}]})) {
+      /stand
+      /face fast nolook
+      /if (${Me.Underwater} || ${Me.Levitating}) {
+      	/squelch /stick hold 10 uw
+      } else {
+        /squelch /stick hold 10
+      }
+      /varset following TRUE
+      /if (!${Target.ID}) /varset following FALSE
+      /delay 1
+      /doevents
+      /return
+    }
+  }
+  /if (${chatText.Equal[follow stop]} && ${chatSender.NotEqual[${Me.CleanName}]}) {
+    /if (!${Spawn[${chatSender}].ID}) {
+      /return
+    }
+    :StillMoving
+    /delay 1s
+    /if (${Spawn[${followName}].Distance}>30) /goto :StillMoving
+    /varset following FALSE
+    /squelch /stick off
+    /keypress forward
+    /keypress back
+    /keypress home
+    /if (${autoAnchor}) /anchor 30
+    /if (${announce}) /${chatChannel} I Stopped following ${followName}!!!
+    /return
+  }
+  /if (${chatText.Equal[clickzone]}) {
+  	/declare OldZoneID int local ${Zone.ID}
+  	/if (${Stick.Status.Equal[ON]}) /squelch /stick off
+  	:MoveToDoor
+  	/if (${OldZoneID}!=${Zone.ID}) /return
+  	/if (${Target.ID}) /squelch /target clear
+  	/squelch /doortarget
+  	/squelch /face fast door
+  	/if (${DoorTarget.Distance}>12) {
+ 		  /nomodkey /keypress forward hold
+  		/delay 3
+  		/nomodkey /keypress forward
+  		:goto :MoveToDoor
+  	} else /if (${DoorTarget.Distance}<7) {
+  		/nomodkey /keypress back hold
+  		/delay 1
+  		/nomodkey /keypress back
+  	}
+  	/delay 2
+  	/nomodkey /keypress u hold
+  	/delay 2
+  	/nomodkey /keypress u
+  	/delay 2
+  	/nomodkey /keypress home
+  	/delay 2
+  	/nomodkey /keypress u hold
+  	/delay 2
+  	/nomodkey /keypress u
+    /delay 1s
+  	/if (${OldZoneID}==${Zone.ID}) /goto :MoveToDoor
+  }
+  /if (${chatText.Equal[clickdoor]}) {
+  	/if (${Stick.Status.Equal[ON]}) /squelch /stick off
+  	:MoveToClick
+  	/if (${Target.ID}) /squelch /target clear
+  	/squelch /doortarget
+  	/squelch /face fast door
+  	/if (${DoorTarget.Distance}>12) {
+ 		  /nomodkey /keypress forward hold
+  		/delay 3
+  		/nomodkey /keypress forward
+  		:goto :MoveToClick
+  	} else /if (${DoorTarget.Distance}<7) {
+  		/nomodkey /keypress back hold
+  		/delay 1
+  		/nomodkey /keypress back
+  	}
+  	/delay ${ZoneDelay}
+  	/nomodkey /keypress u hold
+  	/delay 2
+  	/nomodkey /keypress u
+  	/delay 2
+  	/nomodkey /keypress home
+  	/delay 2s
+  	/doevents Zone
+  }
+  /if (${chatText.Equal[leaveraid]} && ${Raid.Member[${Me.CleanName}].ID}) /raiddisband
+  /if (${chatText.Equal[pop infusion]} && ${Me.AltAbility[Infusion of the Faithful].ID} && ${Me.AltAbilityReady[Infusion of the Faithful]}) /call Cast "Infusion of the Faithful" alt
+  /varcalc chatTimer (${MacroQuest.Running}-${chatTime})/1000
+|  /echo ${chatTimer} secs to parse chat
+/return
+
+Sub Event_ToggleString(Stuff,TempMessage,TempVar,IniSection,IniEntry,Line)
+  /if (${Defined[${TempVar}]}) {
+    /if (${Line.Length}) {
+      /varset ${TempVar} ${Line}
+      /ini "AutoEnc_${Me.Name}.ini" ${IniSection} ${IniEntry} "${${TempVar}}"
+    }
+    /echo ${TempMessage}: ${${TempVar}}
+    /varset ${IniEntry} ${${TempVar}}
+  }
+/return
+
+Sub Event_ToggleVar(Stuff,TempMessage,TempVar,IniSection,IniEntry,Line)
+  /if (${Defined[${TempVar}]}) {
+  	/if (!${Line.Length}) {
+  		/if (${${TempVar}}) {
+  			/varset ${TempVar} FALSE
+  		} else {
+  			/varset ${TempVar} TRUE
+  		}
+  	}
+  	/if (${Line.Arg[1].Equal[ON]} || ${Line.Arg[1].Equal[TRUE]} || ${Line.Arg[1].Equal[1]}) /varset ${TempVar} TRUE
+  	/if (${Line.Arg[1].Equal[OFF]} || ${Line.Arg[1].Equal[FALSE]} || ${Line.Arg[1].Equal[0]}) /varset ${TempVar} FALSE
+  	/if (${${TempVar}}) /echo ${TempMessage} ON!
+  	/if (!${${TempVar}}) /echo ${TempMessage} OFF!
+  	/if (${IniSection.NotEqual[NULL]} && ${IniEntry.NotEqual[NULL]}) /ini "AutoEnc_${Me.Name}.ini" ${IniSection} ${IniEntry} ${${TempVar}}
+  }
+/return
+
+Sub Event_RaidBuff(string line,string BuffCommand)
+  /declare j int local
+  /if (${BuffCommand.NotEqual[all]} && ${Spawn[pc ${BuffCommand}].ID}) {
+  	/for j 1 to ${RaidBuffTotal}
+  		/if (${RaidBuffTotal}) {
+  		  /call AddToQueue2 ${Spawn[pc ${BuffCommand}].ID} ${j}
+  		}
+    /next j
+    /return
+  }
+  /declare a int local
+  /declare i int local
+  /if (${RaidBuffTotal}&&${DoRaidBuffs}&&${BuffCommand.Equal[all]}) {
+    /for i 1 to ${RaidBuffTotal}
+      /if (!${Outdoors}&&!${RaidBuffIndoors${i}}) /goto :SkipRaidBuff
+      /for a 1 to ${Raid.Members}
+      	/if (${Select[${Spell[${RaidBuffID[${i}]}].TargetType},"Group v2","AE PC v2","Group v1","AE PC v1"]}&&${Raid.Member[${a}].GroupLeader}) {
+      		/call AddToRaidQueue ${Spawn[pc ${Raid.Member[${a}]}].ID} ${i}
+      	} else /if (${Select[${Spell[${RaidBuffID[${i}]}].TargetType},pc,Single]}) {
+          /call AddToRaidQueue ${Spawn[pc ${Raid.Member[${a}]}].ID} ${i}
+        }
+      /next a
+    :SkipRaidBuff
+    /next i
+  }
+/return
+
+Sub Event_SayZone(string Sender,string ZoneText)
+  /if (${Stick.Status.Equal[ON]}) /squelch /stick off
+  /squelch /assist ${Sender}
+  /squelch /face fast nolook
+  /if (${Target.ID}) /squelch /stick 10
+  /delay ${ZoneDelay}
+  /if (${ZoneText.Equal[hail]}) {
+  	/h
+  } else {
+    /say ${ZoneText}
+  }
+/return
+
+Sub Event_ExcludeMob(string line,string MobName)
+  /if (!${ExcludeList.Find[${MobName}]}) {
+  	/ini "${excludeIni}" "ExcludeMobs.${Zone.ShortName}" "Exclude" "${MobName}|"
+  } else }
+    /ini "${excludeIni}" "ExcludeMobs.${Zone.ShortName}" "Exclude" "${ExcludeList}${MobName}|"
+  }
+  /varset ExcludeList ${Ini[${excludeIni},"ExcludeMobs.${Zone.ShortName}","Exclude"]}
+  /echo ExcludeList: ${ExcludeList}
+/return
+
+Sub Event_Bewilderment(string line,string MobName)
+  /declare tempID int local
+  /if (${Spawn[${MobName}].ID}) {
+  	/varset tempID ${Spawn[${MobName}].ID}
+  	/if (!${Defined[bewildermentTimer${tempID}]}) {
+  		/declare bewildermentTimer${tempID} timer outer
+  	} else {
+  	  /varset bewildermentTimer${tempID} ${mezDuration}
+  	}
+  }
+/return
+
+Sub Event_LeviGroup
+  /declare i int local
+  /for i 0 to ${Group}
+  	/if (${Group.Member[${i}].ID} && ${Group.Member[${i}].Distance}<200) {
+  	  /squelch /target id ${Group.Member[${i}].ID}
+  	  /delay 2s ${Target.ID}==${Group.Member[${i}].ID}
+  	  /if (${Target.ID}==${Group.Member[${i}].ID} && ${Target.Type.NotEqual[Corpse]}) {
+  		  /call Cast "Levitation" gem4 2s
+  		  /delay 5s ${Me.SpellReady[Levitation]}
+  		}
+  	}
+  /next i
+/return
+
+Sub Event_Consider_Ally 
+  /varset ConsiderReturn 1  
+/return 
+
+Sub Event_Consider_Warmly  
+  /varset ConsiderReturn 2  
+/return 
+
+Sub Event_Consider_Kindly  
+  /varset ConsiderReturn 3  
+/return 
+
+Sub Event_Consider_Amiable  
+  /varset ConsiderReturn 4  
+/return 
+
+Sub Event_Consider_Indifferent  
+  /varset ConsiderReturn 5  
+/return 
+
+Sub Event_Consider_Apprehensive  
+  /varset ConsiderReturn 6  
+/return 
+
+Sub Event_Consider_Dubious  
+  /varset ConsiderReturn 7  
+/return 
+
+Sub Event_Consider_Threatening  
+  /varset ConsiderReturn 8  
+/return 
+
+Sub Event_Consider_ReadyToAttack  
+  /varset ConsiderReturn 9  
+/return
