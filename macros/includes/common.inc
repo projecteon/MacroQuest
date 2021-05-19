@@ -1,9 +1,10 @@
 Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
-    /if (!${Defined[mainAssist]})  	/declare mainAssist       string	outer 
-    /if (!${Defined[mainTank]})  	/declare mainTank         string	outer 
-    /if (!${Defined[assistPct]})  	/declare assistPct        int	    outer 100 
-    /if (!${Defined[Debug]})  		/declare Debug       	  bool  	outer FALSE 
+    /if (!${Defined[mainAssist]})  	    /declare mainAssist     string	outer 
+    /if (!${Defined[mainTank]})  	    /declare mainTank       string	outer 
+    /if (!${Defined[assistPct]})  	    /declare assistPct      int	    outer 100 
+    /if (!${Defined[Debug]})  		    /declare Debug       	bool  	outer FALSE 
+    /if (!${Defined[aggroAnimation]})   /declare aggroAnimation string  outer |5|8|12|17|18|32|42|44|80|106|129|144|
     
     | Use main assist setting to check if ini file is created
     /if (${Ini[${iniFileName},${options},MainAssist].Length}) {
@@ -32,17 +33,35 @@ Sub InitGenralIni(string iniFileName)
 
 
 | ################################################################################
-| # Checks if NPC is inside camp given radius.
-| # Radius default: 80
+| # Checks if agro NPC is inside camp given radius.
+| # Radius default: 100
 | ################################################################################	
 Sub CheckNPCInRange(int radiusCheck)
-	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local 80
+    /if (${Debug}) /echo |- CheckNPCInRange ==>
+
+	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local 100
 	
-	/if (${SpawnCount[NPC los radius ${radiusCheck}]} < 1) {
+    /if (${Debug}) /echo |- CheckNPCInRange > ${radiusCheck}
+	/if (!${Defined[npcCount]})  /declare npcCount int local ${SpawnCount[npc los radius ${radiusCheck}]}
+    /if (${Debug}) /echo |- CheckNPCInRange > ${npcCount}
+	/if (${npcCount} < 1) {
+        /if (${Debug}) /echo <== CheckNPCInRange -|
 		/return 0
 	} 
+    
+    /declare i int local 0
+    /for i 1 to ${npcCount} {
+        /if ( ${Bool[${aggroAnimation.Find[|${NearestSpawn[${i}, npc los targetable radius ${radiusCheck}].Animation}|]}]}) {
+            /if (${Debug}) /echo |-  CheckNPCInRange > TRUE
+            /if (${Debug}) /echo <== CheckNPCInRange -|
+            /return 1
+        }
+        
+        /next i
+    }
 
-/return 1
+    /if (${Debug}) /echo <== CheckNPCInRange -|
+/return 0
 
 Sub IniArray(string iniFile, string section, string keyName, int arrayDimensions, arrayName)
     /declare keys       string  local
