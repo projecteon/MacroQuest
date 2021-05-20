@@ -162,7 +162,7 @@ Sub iniHeal(string INIFile, string section, string key, array)
     /next s
 /return
 
-Sub CancelHeal
+Sub CancelHeal(int spellId)
     | Following line has issue with NetBots update report, cancels heals when it shouldnt
 	| /if (${Target.PctHPs} > ${mainHealPct}) /call Interrupt
 	/if (${Target.Distance} > ${healDist}) /call Interrupt

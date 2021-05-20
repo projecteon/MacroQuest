@@ -243,6 +243,6 @@ Sub iniBuffs(string INIFile, string section, string keyName, int arrayDimensions
 | # Called during the cast of any spell and will
 | # interuppt it if any condition pops true.
 | #################################################
-Sub CancelBuff
+Sub CancelBuff(int spellId)
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
 /return

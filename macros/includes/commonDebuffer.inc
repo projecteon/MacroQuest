@@ -85,7 +85,7 @@ Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
     /if (${Debug}) /echo <== TryDoDebuff -|
 /return 1
 
-Sub CancelDebuff
+Sub CancelDebuff(int spellId)
     /if (!${Target.ID}) /call Interrupt
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
 /return

@@ -83,7 +83,7 @@ Sub TryNukeTarget(string nuke)
     /call cast "${nuke}" gem${Me.Gem[${nuke}]} 0 CancelNuke
 /return
 
-Sub CancelNuke
+Sub CancelNuke(int spellId)
     /if (!${Target.ID}) /call Interrupt
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
 	| /doevents StartCast
