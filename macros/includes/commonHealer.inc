@@ -75,12 +75,24 @@ Sub CheckHealGroup(string healSpell, int healPct)
         /return
     }
 
+    /declare lowestMemberName   string local 
+    /declare lowestMemberId     int local 0
+    /declare lowestMemberPctHPs int local 100
+
     /declare x int local
     /for x 1 to ${Group.Members} {
         /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${healPct} && ${Group.Member[${x}].Distance} <= ${healDist}) {
-            /call CastHeal "${healSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
+            /if (${Group.Member[${x}].PctHPs} < ${lowestMemberPctHPs}) {
+                /varset lowestMemberName "${Group.Member[${x}].Name}"
+                /varset lowestMemberId ${Group.Member[${x}].ID}
+                /varset lowestMemberPctHPs ${Group.Member[${x}].PctHPs}
+            }
         }
         /next x
+    }
+
+    /if (${lowestMemberId}>0) {
+        /call CastHeal "${healSpell}" ${lowestMemberId} ${lowestMemberName}
     }
     
     /if (${Debug}) /echo <== CheckHealGroup -|
