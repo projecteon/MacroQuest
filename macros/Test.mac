@@ -30,17 +30,17 @@ Sub Main(string Search)
 
     | /call CheckNetBotsCombatState
     | /call CheckNpcAnimation
+    /echo ${Me.CombatState}
+    /echo ${Me.PctAggro}
+    /echo ${Me.Name}
+    /echo ${NetBots[${Me.Name}].Invis}
     /call CheckNPCInRange
-    | /echo CheckNPCInRange: ${Bool[${Macro.Return}]}
+    /echo CheckNPCInRange: ${Bool[${Macro.Return}]}
 /return 
 
 Sub checkMezz
     /declare mezzRadius       int    local 40
-    /echo "DoMezz npc" ${SpawnCount[npc radius ${mezzRadius}]}
-    /echo "DoMezz targetable" ${SpawnCount[targetable radius ${mezzRadius}]}
     /echo "DoMezz playerstate 4" ${SpawnCount[playerstate 4 radius ${mezzRadius}]}
-    /echo "DoMEzz npc los" ${SpawnCount[npc los radius ${mezzRadius}]}
-    /echo "Target level" ${Target.Level}
 /return
 
 
@@ -134,21 +134,3 @@ Sub CheckNpcAnimation
 
     /echo <== CheckNpcAnimation -|
 /return
-
-Sub CheckNPCInRange2(int radiusCheck)
-	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local 200
-	
-	/if (${SpawnCount[NPC los radius ${radiusCheck}]} < 1) {
-		/return 0
-	} 
-    
-    /declare i int local 0
-    /for i 1 to ${SpawnCount[npc los targetable radius ${radiusCheck}]} {
-        /if (${Bool[${aggroAnim.Find[|${NearestSpawn[${i}, npc los targetable radius ${radiusCheck}].Animation}|]}]}) {
-            /return 1
-        }
-        
-        /next i
-    }
-
-/return 0
