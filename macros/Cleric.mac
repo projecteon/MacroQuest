@@ -47,7 +47,7 @@ Sub DoHeal
 /return
 
 Sub GroupHeal
-    /if (!${Group.Members} || ${Me.Gem[${groupHealSpell}]} < 0) {
+    /if (!${Group.Members} || ${Me.Gem[${groupHealSpell}]} < 0 || ${Me.CurrentMana} < ${Spell[${groupHealSpell}].Mana}) {
         /return 0
     }
 
@@ -60,10 +60,9 @@ Sub GroupHeal
         /next x
     }
 
-	/if (${Me.CurrentMana} > ${Spell[${groupHealSpell}].Mana} && ${groupMembersWithLowHealthCount} > 2) {
+	/if (${groupMembersWithLowHealthCount} >= ${groupHealNum}) {
 		/gsay <<< ${groupHealSpell} >>>			
 		/bca <<< ${groupHealSpell} >>>			
-		/call cast "${groupHealSpell}"
         /call cast "${groupHealSpell}" gem${Me.Gem[${groupHealSpell}]} 0 CancelGroupHeal 3
 		|- Delay to give everyones hp time to update
 		/delay 50
@@ -80,6 +79,7 @@ Sub InitClericIni(string iniFileName)
     /declare healerInitResult   int     local 1
     /declare groupHealSpell     string  outer "GroupHeal" 
     /declare groupHealPct       int     outer 0
+    /declare groupHealNum       int     outer 4
         
     /call InitHealIni "${iniFileName}"
     /varset healerInitResult ${Macro.Return}
@@ -104,6 +104,12 @@ Sub InitClericIni(string iniFileName)
         /varset groupHealPct ${Ini[${iniFileName},${options},GroupHealPct]} 
     } else {
         /ini "${iniFileName}" "${options}" "GroupHealPct" "${groupHealPct}"
+    }
+    
+    /if (${Ini[${iniFileName},${options},GroupHealNum].Length}) {
+        /varset groupHealNum ${Ini[${iniFileName},${options},GroupHealNum]} 
+    } else {
+        /ini "${iniFileName}" "${options}" "GroupHealNum" "${groupHealNum}"
     }
 
 /return ${healerInitResult}
