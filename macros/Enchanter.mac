@@ -13,6 +13,7 @@ Sub Main
     /declare enchanterIniFileName   string  local "ini/${MacroQuest.Server}/Enchanter_${Me.CleanName}.ini"
     /declare autoMezz               int     outer 1
     /declare mezzRadius             int     outer 100
+    /declare mezzSpell              int     outer "Dazzle"
 
     /call InitEnchanterIni ${enchanterIniFileName}
     /if (${Macro.Return} == 0) {
@@ -41,7 +42,6 @@ Sub Main
 sub DoMezz
     /if (${Debug}) /echo <== DoMezz -|
     /if (${autoMezz}) {
-        /declare mezzSpell string local "Entrance"
         /declare retry int local
         /declare i int local 0
         /declare mezTarg int local
@@ -94,6 +94,12 @@ Sub InitEnchanterIni(string iniFileName)
        /varset mezzRadius ${Ini[${iniFileName},${enchanterOptions},AutoMezzRadius]}     
     } else {
         /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzRadius" "${mezzRadius}"
+    }
+
+    /if (${Ini[${iniFileName},${enchanterOptions},AutoMezzSpell].Length}) {
+       /varset mezzSpell "${Ini[${iniFileName},${enchanterOptions},AutoMezzSpell]}   
+    } else {
+        /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzSpell" "${mezzSpell}"
     }
 
     /call InitCasterIni "${iniFileName}"
