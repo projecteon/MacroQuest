@@ -53,8 +53,8 @@ string GenerateHud(string netbot, int counter) {
 	xAxis += 60;
 	
 	// Distance
-	stringbuilder.AppendLine($"{netbot}_Dist=3,{xAxis},{yAxis},102,153,153,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}}&&${{NetBots[{netbot}].ID}}==${{Zone.ID}},D:${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}},]}}");
-	stringbuilder.AppendLine($"{netbot}_DistInf=3,{xAxis},{yAxis},102,153,153,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}}&&${{NetBots[{netbot}].ID}}!=${{Zone.ID}},D: ∞,]}}");
+	stringbuilder.AppendLine($"{netbot}_Dist=3,{xAxis},{yAxis},102,153,153,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}}&&${{NetBots[{netbot}].Zone}}==${{Zone.ID}},D:${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}},]}}");
+	stringbuilder.AppendLine($"{netbot}_DistInf=3,{xAxis},{yAxis},102,153,153,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}}&&${{NetBots[{netbot}].Zone}}!=${{Zone.ID}},D: ∞,]}}");
 	xAxis += 50;
 	
 	// Target
