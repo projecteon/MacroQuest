@@ -4,6 +4,7 @@ Sub InitGenralIni(string iniFileName)
     /if (!${Defined[mainTank]})  	    /declare mainTank       string	outer 
     /if (!${Defined[assistPct]})  	    /declare assistPct      int	    outer 100 
     /if (!${Defined[Debug]})  		    /declare Debug       	bool  	outer FALSE 
+    | sea furious are |32, but so are guards... needs more testing
     /if (!${Defined[aggroAnimation]})   /declare aggroAnimation string  outer |5|8|12|17|18|32|42|44|80|106|129|144|
     
     | Use main assist setting to check if ini file is created
@@ -52,7 +53,7 @@ Sub CheckNPCInRange(int radiusCheck)
     /declare i int local 0
     /for i 1 to ${npcCount} {
         /if ( ${Bool[${aggroAnimation.Find[|${NearestSpawn[${i}, npc los targetable radius ${radiusCheck}].Animation}|]}]}) {
-            /if (${Debug}) /echo |-  CheckNPCInRange > TRUE
+            /if (${Debug}) /echo |-  CheckNPCInRange > TRUE > ${NearestSpawn[${i}, npc los targetable radius ${radiusCheck}].Name} > ${NearestSpawn[${i}, npc los targetable radius ${radiusCheck}].Animation}
             /if (${Debug}) /echo <== CheckNPCInRange -|
             /return 1
         }
@@ -87,3 +88,35 @@ Sub IniArray(string iniFile, string section, string keyName, int arrayDimensions
             /next s
         /next k
 /return
+
+
+| ################################################################################
+| # Creates a timer given name and default time setting.
+| # Dont use this unless you can always check the timer later 
+| # fex using mob names or IDs change on respawn etc, so not safe to use 
+| #     unless you want to populate global variable namespace indefinetly
+| ################################################################################	
+Sub CreateTimer(timerName, timerSetting)
+    /if (${Debug}) /echo |- CreateTimer ==>
+    
+    /if (${Defined[${timerName}]}) {
+        /varset ${timerName} ${timerSetting}
+    } else {
+        /declare ${timerName} timer outer ${timerSetting}
+    }
+    
+    /if (${Debug}) /echo <== CreateTimer -| created ${timerName} [${${timerName}}]
+/return
+
+Sub CheckTimerExpired(timerName)
+    /if (${Debug}) /echo |- CheckTimerExpired ==>
+    
+    /declare isExpried bool local FALSE
+    /if (!${Defined[${timerName}]} || ${${timerName}} <= 0) {
+        /varset isExpried 1      
+        /deletevar ${timerName}
+    }
+    
+    /if (${Debug}) /echo |- ${timerName} [${${timerName}}] expired: ${isExpried}
+    /if (${Debug}) /echo <== CheckTimerExpired -|
+/return ${isExpried}
