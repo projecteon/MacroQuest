@@ -2,9 +2,11 @@ Sub InitCasterIni(string iniFileName)
     /declare options            string  local "CasterOptions"
     /declare generalInitResult  int     local 1
     
-    /if (!${Defined[_minMana]})     /declare _minMana     int   outer 15 
-    /if (!${Defined[_readyMana]})   /declare _readyMana  int   outer 85 
-    /if (!${Defined[_meditateAt]})  /declare _meditateAt  int   outer 90 
+    /if (!${Defined[_minMana]})             /declare _minMana               int   outer 15 
+    /if (!${Defined[_readyMana]})           /declare _readyMana             int   outer 85 
+    /if (!${Defined[_meditateAt]})          /declare _meditateAt            int   outer 90 
+    /if (!${Defined[_manaStoneMinPctHP]})   /declare _manaStoneMinPctHP     int   outer 80 
+    /if (!${Defined[_manaStoneMaxPctMana]}) /declare _manaStoneMaxPctMana   int   outer 70 
 
     /call InitGenralIni "${iniFileName}"
     /varset generalInitResult ${Macro.Return}
@@ -26,6 +28,14 @@ Sub InitCasterIni(string iniFileName)
         /varset _meditateAt ${Ini[${iniFileName},${options},MeditateAt]} 
     } else {
         /ini "${iniFileName}" "${options}" "MeditateAt" "${_meditateAt}" 
+    }
+
+    /if (${Ini[${iniFileName},ManaStone,MinPctHP].Length}) {
+        /varset _manaStoneMinPctHP ${Ini[${iniFileName},ManaStone,MinPctHP]} 
+    }
+
+    /if (${Ini[${iniFileName},ManaStone,MaxPctMana].Length}) {
+        /varset _manaStoneMaxPctMana ${Ini[${iniFileName},ManaStone,MaxPctMana]} 
     }
 
 /return ${generalInitResult}
@@ -68,7 +78,7 @@ Sub TryMedidate
 Sub CheckManastone
     /if (${Debug}) /echo |- CheckManastone ==>
 
-    /if ((!${Me.CombatState.Equal[DEBUFFED]}) && !${Me.Invis} && ${Bool[${FindItem[=Manastone]}]} && ${Me.PctMana} < 70 && ${Me.PctHPs} > 70 && ${Me.PctAggro} < 1 && !${Me.CombatState.Equal[COMBAT]} ) {
+    /if ((!${Me.CombatState.Equal[DEBUFFED]}) && !${Me.Invis} && ${Bool[${FindItem[=Manastone]}]} && ${Me.PctMana} < ${_manaStoneMinPctHP} && ${Me.PctHPs} > ${_manaStoneMinPctHP} && ${Me.PctAggro} < 1 && !${Me.CombatState.Equal[COMBAT]} ) {
         /casting "Manastone"    
     }
     
