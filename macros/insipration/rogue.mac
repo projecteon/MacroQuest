@@ -1,0 +1,71 @@
+|# Written by Shin Noir.
+|# Note this script is expermiental. I DO NOT recommend using it for any noteworthy fights.
+|# I originally created it with the intent of having a lazy-mode farm script while killing trash.
+|# It simply sticks to the tank, assists the tank, and kills targets. 
+|# It will click BP (can be swapped with another disc) when > bpNumMobs.
+
+Sub Main
+    /if (!${Plugin[mq2cast]}) {
+
+        /echo MQ2Cast is needed to run this macro, type '/plugin mq2cast' to enable, or find the mq2cast.dll online if it isn't with your Macroquest.
+        /endmacro
+    }
+    /if (!${Plugin[mq2moveutils]}) {
+
+        /echo MQ2MoveUtils is needed to run this macro, type '/plugin mq2moveutils' to enable, or find the mq2moveutils.dll online if it isn't with your Macroquest.
+        /endmacro
+    }
+    |# Who should the rogue assist? Tank name
+    /declare tankName string outer Xackery
+
+    |# Donor BP name and click timer
+    /declare bpName string outer TriXzin, Guard of the King
+    /declare bpClick timer outer 0
+    /declare bpClickCooldown string outer 210s
+    /declare bpNumMobs int outer 2
+    /declare bpClassName string outer ROG
+    |# Engage Only if HP is above this
+    /declare engageHP int outer 80
+    |# Engage only if mob is closer than this range. This is so if your melee gets too far away, he won't engage something across the zone.
+    /declare engageDistance int outer 50
+
+    /g Started Rogue Script v 0.3f
+
+    |# You shouldn't need to edit anything below, but feel free to look over any comments for tweaks
+    :Loop
+
+    |# Uncomment the below line if you want stuff on your cursor to be auto inventoried (rogue pickpocket)
+    | /if (${Cursor.ID} ) /autoinv
+
+	/if (${Me.PctHPs} > ${engageHP} && ${Target.Type.Equal[NPC]} && ${Target.Distance}< ${engageDistance} && !${Me.Combat}) {
+        /attack on
+        |# You can take this bottom line out, but it helps clean up the "stick behind target" logic
+        /stick 10 behind id ${Target.ID}
+        /if (${Target.ID} != ${Me.ID} && ${SpawnCount[NPC radius 40]} > ${bpNumMobs} && ${Me.Class.ShortName.Equal[${bpClassName}]}) {          
+            /if (${bpClick}==0) {
+                /casting "${bpName}"                
+                /g Click
+                /varset bpClick ${bpClickCooldown}
+            }
+        }
+    }
+
+    /if (${Target.ID} != ${Me.ID} && ${SpawnCount[NPC radius ${engageDistance}]} > 0) {
+        /if (!${Me.Combat} && !${Target.Type.Equal[NPC]}) {
+            /assist ${tankName}
+            /if (${Target.Type.Equal[NPC]} && ${Target.Distance}<${engageDistance} && ${Target.PctHPs}<100) {
+                /stick 10 behind id ${Target.ID}
+                /attack on
+            }
+        }
+    }
+
+    |# When you aren't engaged, keep yourself stuck on the tank.
+    /if (${Stick.Status.Equal[OFF]}) {
+        /stick 15 id ${Spawn[pc ${tankName}].ID}
+    }
+
+	/delay 1s
+	/doevents
+	/goto :Loop
+/return
