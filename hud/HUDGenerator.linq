@@ -95,9 +95,9 @@ var group2 = new List<string>() {
 	"Regis"
 	,"Aredhel"
 	,"Freyja"
-	,"Boombero"
 	,"Marillion"
 	,"Ronin"
+	,"Osiris"
 };
 
 Console.WriteLine(macroHeader);
