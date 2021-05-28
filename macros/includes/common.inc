@@ -64,32 +64,6 @@ Sub CheckNPCInRange(int radiusCheck)
     /if (${Debug}) /echo <== CheckNPCInRange -|
 /return 0
 
-Sub IniArray(string iniFile, string section, string keyName, int arrayDimensions, arrayName)
-    /declare keys       string  local
-    /declare k          int     local
-    /declare s          int     local
-
-    /varset keys ${Ini[${iniFile},${section}]}
-    :TrimKeys
-        /if (${keys.Right[1].Equal[|]}) /varset keys ${keys.Left[${Math.Calc[${keys.Length}-1]}]}
-        
-        /if (${keys.Right[1].Equal[|]}) /goto :TrimKeys
-
-        /declare numberOfBuffs int local ${Math.Calc[${keys.Count[|]}+1]}
-        /if (${numberOfBuffs} < 1) /return
-
-        /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
-        /declare ${arrayName}[${numberOfBuffs},${arrayDimensions}] string outer
-        /declare key string local
-        /for k 1 to ${Math.Calc[${keys.Count[|]}+1]}
-            /varset key ${keys.Arg[${k},|]}
-            /for s 1 to ${arrayDimensions}
-                /varset ${arrayName}[${k},${s}] ${Ini[${iniFile},${section},${key}].Token[${s},/]}
-            /next s
-        /next k
-/return
-
-
 | ################################################################################
 | # Creates a timer given name and default time setting.
 | # Dont use this unless you can always check the timer later 
@@ -113,8 +87,8 @@ Sub CheckTimerExpired(timerName)
     
     /declare isExpried bool local FALSE
     /if (!${Defined[${timerName}]} || ${${timerName}} <= 0) {
-        /varset isExpried 1      
-        /deletevar ${timerName}
+        /varset isExpried TRUE 
+        /if (${Defined[${timerName}]} && ${${timerName}} <= 0) /deletevar ${timerName}
     }
     
     /if (${Debug}) /echo |- ${timerName} [${${timerName}}] expired: ${isExpried}

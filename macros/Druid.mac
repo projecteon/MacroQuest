@@ -1,4 +1,5 @@
 #include includes\spell_routines.inc
+#include includes\ini.inc
 #include includes\common.inc
 #include includes\commonCaster.inc
 #include includes\commonHealer.inc

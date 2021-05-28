@@ -2,6 +2,7 @@
 | http://mqemulator.net/forum2/viewtopic.php?t=794
 
 #include includes\spell_routines.inc
+#include includes\ini.inc
 #include includes\common.inc
 #include includes\commonCaster.inc
 #include includes\commonBuffer.inc
