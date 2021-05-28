@@ -25,8 +25,8 @@ Sub InitBufferIni(string iniFileName)
         /ini "${iniFileName}" "${options}" "DoBuffNetBots" "${doBuffNetBots}"
     }
 
-    /call iniBuffs "${iniFileName}" "Buffs" "Buff" ${iniBuffDimensions} Buffs
-    /call iniBuffs "${iniFileName}" "SelfBuffs" "SelfBuff" ${iniSelfBuffDimensions} SelfBuffs
+    /call IniArray "${iniFileName}" "Buffs" "Buff" ${iniBuffDimensions} Buffs
+    /call IniArray "${iniFileName}" "SelfBuffs" "SelfBuff" ${iniSelfBuffDimensions} SelfBuffs
 
     /if (${Buffs.Size} < 1) {
         /varset doBuffGroup false
@@ -211,32 +211,6 @@ Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
 			}
 		}
 	}
-/return
-
-Sub iniBuffs(string INIFile, string section, string keyName, int arrayDimensions, arrayName)
-    /declare Keys       string  local
-    /declare k          int     local
-    /declare s          int     local
-
-    /varset Keys ${Ini[${INIFile},${section}]}
-    :TrimKeys
-        /if (${Keys.Right[1].Equal[|]}) /varset Keys ${Keys.Left[${Math.Calc[${Keys.Length}-1]}]}
-        
-        /if (${Keys.Right[1].Equal[|]}) /goto :TrimKeys
-
-        /declare numberOfBuffs int local ${Math.Calc[${Keys.Count[|]}+1]}
-        /if (${numberOfBuffs} < 1) /return
-
-        /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
-        /declare ${arrayName}[${numberOfBuffs},${arrayDimensions}] string outer
-
-        /declare key string local
-        /for k 1 to ${Math.Calc[${Keys.Count[|]}+1]}
-            /varset key ${Keys.Arg[${k},|]}
-            /for s 1 to ${arrayDimensions}
-                /varset ${arrayName}[${k},${s}] ${Ini[${INIFile},${section},${key}].Token[${s},/]}
-            /next s
-        /next k
 /return
 
 | #################################################
