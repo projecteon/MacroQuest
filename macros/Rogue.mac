@@ -1,3 +1,5 @@
+#include includes\ini.inc
+#include includes\common.inc
 #turbo 40
 
 Sub Main
@@ -13,8 +15,6 @@ Sub Main
     /bca "Rogue backstabbin!"
 
     :RogueLoop
-        /if (${Me.Invis}) /goto :RogueLoop
-        
         /call doKill
         /goto :RogueLoop
 /return
@@ -24,10 +24,13 @@ Sub doKill
 	/if (!${Melee.Enable} || ${Melee.Combat}) /return
     
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
-    /declare isNPC        local ${Spawn[${NetBots[${mainAssist}].TargetID}].Type.Equal[NPC]}
-    /declare isPet        local ${Spawn[${NetBots[${mainAssist}].TargetID}].Type.Equal[PET]}
 
-    /if (!${isNPC} || !${isPet}) /return
+    /if (!${targetId}) /return
+
+    /declare isNPC local ${Spawn[${targetId}].Type.Equal[NPC]}
+    /declare isPet local ${Spawn[${targetId}].Type.Equal[PET]}
+
+    /if (!${isNPC} && !${isPet}) /return  
 	/if (${SpawnCount[los id ${targetId}]} < 1) /return
 	/if (${NetBots[${mainAssist}].TargetHP} > 90) /return
 
@@ -35,6 +38,7 @@ Sub doKill
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
         /return
     }
+
     
 	/killthis
 
@@ -48,15 +52,11 @@ Sub doKill
 /return
 
 
-Sub InitRogueIni(string fileName, string mainAssist)
+Sub InitRogueIni(string iniFileName, string mainAssist)
     /declare rogueOptions       string  outer "RogueOptions"
     /declare parentResult       int     local 1
 
     /call InitGenralIni "${iniFileName}"
     /varset parentResult ${Macro.Return}
     
-    /call InitBufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentResult 0
-    }
 /return ${parentResult}
