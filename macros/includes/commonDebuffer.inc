@@ -42,13 +42,13 @@ Sub CheckDeBuffs
 Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime)
     /if (${Debug}) /echo |- TryDoDebuff ==>
 
-    /if (${Me.Casting.ID} || ${Me.Moving} || !${Me.Gem[${debuffSpell}]} || ${minMana} > ${Spell[${debuffSpell}].Mana}) {
+    /declare targetId int local ${NetBots[${mainAssist}].TargetID}
+    /if (!${targetId}) {
         /if (${Debug}) /echo <== TryDoDebuff -|
         /return 0
     }
 
-    /declare targetId int local ${NetBots[${mainAssist}].TargetID}
-    /if (!${targetId}) {
+    /if (${Me.Casting.ID} || ${Me.Moving} || !${Me.Gem[${debuffSpell}]} || ${minMana} > ${Me.PctMana} || ${Me.CurrentMana} < ${Spell[${debuffSpell}].Mana}) {
         /if (${Debug}) /echo <== TryDoDebuff -|
         /return 0
     }
