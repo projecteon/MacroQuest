@@ -14,7 +14,7 @@ Sub Main
     /declare enchanterIniFileName   string  local "ini/${MacroQuest.Server}/Enchanter_${Me.CleanName}.ini"
     /declare autoMezz               int     outer 1
     /declare mezzRadius             int     outer 100
-    /declare mezzSpell              int     outer "Dazzle"
+    /declare mezzSpell              string  outer "Dazzle"
 
     /call InitEnchanterIni ${enchanterIniFileName}
     /if (${Macro.Return} == 0) {
@@ -41,7 +41,7 @@ Sub Main
 /return
 
 sub DoMezz
-    /if (${Debug}) /echo <== DoMezz -|
+    /if (${Debug}) /echo |- DoMezz ==>
     /if (${autoMezz}) {
         /declare retry int local
         /declare i int local 0
@@ -49,7 +49,6 @@ sub DoMezz
         /declare maTargetId int local ${NetBots[${mainAssist}].TargetID}
 
         /if (!${SpawnCount[npc los targetable radius ${mezzRadius}]} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana}) /return
-        /if (${Debug}) /echo "DoMezz targets" ${SpawnCount[npc los targetable radius ${mezzRadius}]}
 
         /if (${Debug}) /echo |- DoMezz - # of mezz targets: ${SpawnCount[npc los targetable radius ${mezzRadius}]}
         /for i 1 to ${SpawnCount[npc los targetable radius ${mezzRadius}]}
@@ -98,7 +97,7 @@ Sub InitEnchanterIni(string iniFileName)
     }
 
     /if (${Ini[${iniFileName},${enchanterOptions},AutoMezzSpell].Length}) {
-       /varset mezzSpell "${Ini[${iniFileName},${enchanterOptions},AutoMezzSpell]}   
+       /varset mezzSpell "${Ini[${iniFileName},${enchanterOptions},AutoMezzSpell]}"   
     } else {
         /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzSpell" "${mezzSpell}"
     }
