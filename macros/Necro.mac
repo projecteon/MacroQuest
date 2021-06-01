@@ -1,0 +1,52 @@
+| http://mqemulator.net/forum2/viewtopic.php?t=1551
+| http://mqemulator.net/forum2/viewtopic.php?t=794
+
+#include includes\spell_routines.inc
+#include includes\ini.inc
+#include includes\common.inc
+#include includes\commonCaster.inc
+#include includes\commonBuffer.inc
+#include includes\commonPet.inc
+#include includes\commonNuke.inc
+#turbo 40
+
+Sub Main
+    /declare mageIniFileName    string  local "ini/${MacroQuest.Server}/Necro_${Me.CleanName}.ini"
+
+    /call InitNecroIni ${mageIniFileName}
+    /if (${Macro.Return} == 0) {
+        /echo "Bootstrapped INI file, please update variables in: ${mageIniFileName}"
+        /endmacro
+    }
+
+    /echo "Necro ruling the dead!"
+    /bca "Necro ruling the dead!"
+    :NecroLoop
+        /if (${Me.Invis}) /goto :NecroLoop
+        
+        /call CheckManaStatus
+        /call TryMedidate
+        /call DoBuffs
+        /call DoPet
+        /call DoNuke
+        /goto :NecroLoop
+/return
+
+Sub InitNecroIni(string iniFileName)
+    /declare necroOptions   string  outer "NecroOptions"
+    /declare casterInitResult   int     local 1
+
+    /call InitNukeIni "${iniFileName}"
+    /varset casterInitResult ${Macro.Return}
+
+    /call InitBufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset casterInitResult 0
+    }
+
+    /call InitPetIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset casterInitResult 0
+    }
+
+/return ${casterInitResult}
