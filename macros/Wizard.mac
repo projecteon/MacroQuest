@@ -22,15 +22,36 @@ Sub Main
     /bca "Wizard all fired up!"
     :WizardLoop
         /call CheckManaStatus
+        /call DoHarvest
         /call TryMedidate
         /call DoBuffs
         /call DoNuke
         /goto :WizardLoop
 /return
 
+Sub DoHarvest
+    /if (${Debug}) /echo |- DoHarvest ==>
+    
+    /if (${autoHarvest} && ${Defined[harvestSpell]} && ${Cast.Ready[${harvestSpell}]} && ${Me.Gem[${harvestSpell}]}) {
+      /call CheckNPCInRange
+      /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}  
+
+      /declare manaFromMax int local ${Math.Calc[${Me.MaxMana}-${Me.CurrentMana}]}
+
+      /if ((!${hasNpcInCamp} && ${manaFromMax} > 350) || ${Me.PctMana} < 2) {
+        /if (${Debug}) /echo |- DoHarvest > casting ${harvestSpell}
+        /call cast "${harvestSpell}"
+      }
+    }
+
+    /if (${Debug}) /echo <== DoHarvest -|
+/return
+
 Sub InitWizardIni(string iniFileName)
-    /declare wizardOptions   string  outer "WizardOptions"
-    /declare casterInitResult   int     local 1
+    /declare wizardOptions    string  outer "WizardOptions"
+    /declare casterInitResult int     local 1
+    /declare autoHarvest      bool    local FALSE
+    /declare harvestSpell     string  local 
 
     /call InitNukeIni "${iniFileName}"
     /varset casterInitResult ${Macro.Return}
@@ -38,6 +59,18 @@ Sub InitWizardIni(string iniFileName)
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset casterInitResult 0
+    }
+
+    /if (${Ini[${iniFileName},${wizardOptions},AutoHarvest].Length}) {
+       /varset autoHarvest ${Bool[${Ini[${iniFileName},${wizardOptions},AutoHarvest]}]}
+    } else {
+        /ini "${iniFileName}" "${wizardOptions}" "AutoHarvest" "${autoHarvest}"
+    }
+
+    /if (${Ini[${iniFileName},${wizardOptions},HarvestSpell].Length}) {
+       /varset harvestSpell "${Ini[${iniFileName},${wizardOptions},HarvestSpell]}"   
+    } else {
+        /ini "${iniFileName}" "${wizardOptions}" "HarvestSpell" "${harvestSpell}"
     }
 
 /return ${casterInitResult}
