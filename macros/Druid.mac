@@ -4,6 +4,7 @@
 #include includes\commonCaster.inc
 #include includes\commonHealer.inc
 #include includes\commonBuffer.inc
+#include includes\commonDebuffer.inc
 #include includes\commonNuke.inc
 #turbo 40
 
@@ -18,6 +19,7 @@ Sub Main
 
     /echo "Druid sow'ed up!"
     /bca "Druid sow'ed up!"
+
     :DruidLoop
         /if (${Me.Invis}) /goto :DruidLoop
         
@@ -25,6 +27,7 @@ Sub Main
         /if (${Macro.Return} == 1) /goto :DruidLoop
         /call CheckManaStatus
         /call TryMedidate
+        /call DoDeBuffs 
         /call DoNuke
         /call DoBuffs
         /goto :DruidLoop
@@ -37,6 +40,11 @@ Sub InitDruidIni(string iniFileName)
     /varset bootstrapInitResult ${Macro.Return}
     
     /call InitBufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset bootstrapInitResult 0
+    }
+    
+    /call InitDebufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset bootstrapInitResult 0
     }
