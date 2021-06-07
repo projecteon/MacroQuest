@@ -83,4 +83,4 @@ Sub CheckManastone
     }
     
     /if (${Debug}) /echo <== CheckManastone -|
-/RETURN
+/return
