@@ -1,5 +1,6 @@
 #include includes\ini.inc
 #include includes\common.inc
+#include includes\commonMelee.inc
 #include includes\wait4rez.inc
 #turbo 40
 
@@ -17,41 +18,9 @@ Sub Main
 
     :RogueLoop
         /call Wait4Rez_Background_Events
-        /call doKill
+        /call DoKill
         /goto :RogueLoop
 /return
-
-Sub doKill
-	/if (!${Melee.Enable} || ${Melee.Combat}) /return
-    
-    /declare targetId int local ${NetBots[${mainAssist}].TargetID}
-
-    /if (!${targetId}) /return
-
-    /declare isNPC local ${Spawn[${targetId}].Type.Equal[NPC]}
-    /declare isPet local ${Spawn[${targetId}].Type.Equal[PET]}
-
-    /if (!${isNPC} && !${isPet}) /return  
-	/if (${SpawnCount[los id ${targetId}]} < 1) /return
-	/if (${NetBots[${mainAssist}].TargetHP} > ${assistPct}) /return
-
-	/target id ${targetId}
-    /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
-        /return
-    }
-
-    
-	/killthis
-
-    :gotoloopkeepfighting
-        /if (${Target.ID} && ${Me.Combat} && ${Target.Type.Equal[NPC]}) {
-            /delay 10
-            /doevents
-            /if (${Debug}) /echo DEBUG: KillMob: Combat Loop
-            /goto :gotoloopkeepfighting            
-        } 
-/return
-
 
 Sub InitRogueIni(string iniFileName, string mainAssist)
     /declare rogueOptions       string  outer "RogueOptions"

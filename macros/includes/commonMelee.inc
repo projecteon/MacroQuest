@@ -1,4 +1,35 @@
-Sub doMelee
+Sub DoKill
+	/if (!${Melee.Enable} || ${Melee.Combat}) /return
+    
+    /declare targetId int local ${NetBots[${mainAssist}].TargetID}
+
+    /if (!${targetId}) /return
+
+    /declare isNPC local ${Spawn[${targetId}].Type.Equal[NPC]}
+    /declare isPet local ${Spawn[${targetId}].Type.Equal[PET]}
+
+    /if (!${isNPC} && !${isPet}) /return  
+	/if (${SpawnCount[los id ${targetId}]} < 1) /return
+	/if (${NetBots[${mainAssist}].TargetHP} > ${assistPct}) /return
+
+	/target id ${targetId}
+    /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
+        /return
+    }
+
+    
+	/killthis
+
+    :gotoloopkeepfighting
+        /if (${Target.ID} && ${Me.Combat} && ${Target.Type.Equal[NPC]}) {
+            /delay 10
+            /doevents
+            /if (${Debug}) /echo DEBUG: KillMob: Combat Loop
+            /goto :gotoloopkeepfighting            
+        } 
+/return
+
+Sub DoMelee
     /if (${Me.Combat} || ${Me.Moving}) {
         /return
     }
@@ -37,7 +68,7 @@ Sub doMelee
     }
 /return
 
-Sub doRogueStrike
+Sub DoRogueStrike
     /if (${Debug}) /echo |- doRogueStrike ==>	
 
 	/if (${Me.Endurance} > ${strikeDiscEndCost} && ${Me.PctEndurance} >= ${strikeDiscMinEnd} && ${Me.CombatAbilityReady[${strikeDisc}]} && ${Me.AbilityReady[Backstab]} && !${Me.ActiveDisc.ID} && ${Me.Invis} && ${Me.Sneaking}) {
