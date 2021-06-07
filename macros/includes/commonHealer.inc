@@ -1,39 +1,71 @@
 Sub InitHealIni(string iniFileName)
     /declare options            string  local "HealingOptions"
-    /declare casterInitResult   int     local 1
-    /if (!${Defined[mainHeal]})             /declare mainHeal                       string  outer "Main Heal" 
-    /if (!${Defined[mainHealPct]})          /declare mainHealPct                    int     outer 90 
-    /if (!${Defined[healDist]})             /declare healDist                       int     outer 200 
-    /if (!${Defined[hasNotifiedNoMana]})    /declare hasNotifiedNoMana                      outer FALSE
-    /if (!${Defined[doHealGroup]})          /declare doHealGroup                    bool    outer false 
-    /if (!${Defined[doHealNetBots]})        /declare doHealNetBots                  bool    outer false 
+    /declare healerInitResult   int     local 1
+    /if (!${Defined[defaultHeal]})              /declare defaultHeal                    string  outer  
+    /if (!${Defined[defaultHealPct]})           /declare defaultHealPct                 int     outer 90 
+    /if (!${Defined[mainTankHeal]})             /declare mainTankHeal                   string  outer  
+    /if (!${Defined[mainTankHealPct]})          /declare mainTankHealPct                int     outer 90 
+    /if (!${Defined[mainTankEmergencyHeal]})    /declare mainTankEmergencyHeal          string  outer  
+    /if (!${Defined[mainTankEmergencyHealPct]}) /declare mainTankEmergencyHealPct       int     outer 0 
+    /if (!${Defined[healDist]})                 /declare healDist                       int     outer 200 
+    /if (!${Defined[hasNotifiedNoMana]})        /declare hasNotifiedNoMana              bool    outer FALSE
+    /if (!${Defined[doHealGroup]})              /declare doHealGroup                    bool    outer FALSE 
+    /if (!${Defined[doHealNetBots]})            /declare doHealNetBots                  bool    outer FALSE 
         
     /call InitCasterIni "${iniFileName}"
-    /varset casterInitResult ${Macro.Return}
+    /varset healerInitResult ${Macro.Return}
     
-    /if (${Ini[${iniFileName},${options},MainHeal].Length}) {
-       /varset mainHeal "${Ini[${iniFileName},${options},MainHeal]}"       
+    /if (${Ini[${iniFileName},${options},DeafultHeal].Length}) {
+       /varset defaultHeal "${Ini[${iniFileName},${options},DeafultHeal]}"       
     } else {
-        /ini "${iniFileName}" "${options}" "MainHeal" "${mainHeal}"
-        /varset casterInitResult 0
+        /ini "${iniFileName}" "${options}" "DeafultHeal" "${defaultHeal}"
+        /varset healerInitResult 0
     }
 
-    /if (${Ini[${iniFileName},${options},MainHealPct].Length}) {
-       /varset mainHealPct ${Ini[${iniFileName},${options},MainHealPct]}       
+    /if (${Ini[${iniFileName},${options},DeafultHealPct].Length}) {
+       /varset defaultHealPct ${Ini[${iniFileName},${options},DeafultHealPct]}       
     } else {
-        /ini "${iniFileName}" "${options}" "MainHealPct" "${mainHealPct}"
-        /varset casterInitResult 0
+        /ini "${iniFileName}" "${options}" "DeafultHealPct" "${defaultHealPct}"
+        /varset healerInitResult 0
+    }
+    
+    /if (${Ini[${iniFileName},${options},MainTankHeal].Length}) {
+       /varset mainTankHeal "${Ini[${iniFileName},${options},MainTankHeal]}"       
+    } else {
+        /ini "${iniFileName}" "${options}" "MainTankHeal" "${mainTankHeal}"
+        /varset healerInitResult 0
+    }
+
+    /if (${Ini[${iniFileName},${options},MainTankHealPct].Length}) {
+       /varset mainTankHealPct ${Ini[${iniFileName},${options},MainTankHealPct]}       
+    } else {
+        /ini "${iniFileName}" "${options}" "MainTankHealPct" "${mainTankHealPct}"
+        /varset healerInitResult 0
+    }
+    
+    /if (${Ini[${iniFileName},${options},MainTankEmergencyHeal].Length}) {
+       /varset mainTankEmergencyHeal "${Ini[${iniFileName},${options},MainTankEmergencyHeal]}"       
+    } else {
+        /ini "${iniFileName}" "${options}" "MainTankEmergencyHeal" "${mainTankEmergencyHeal}"
+        /varset healerInitResult 0
+    }
+
+    /if (${Ini[${iniFileName},${options},MainTankEmergencyHealPct].Length}) {
+       /varset mainTankEmergencyHealPct ${Ini[${iniFileName},${options},MainTankEmergencyHealPct]}       
+    } else {
+        /ini "${iniFileName}" "${options}" "MainTankEmergencyHealPct" "${mainTankEmergencyHealPct}"
+        /varset healerInitResult 0
     }
 
     /if (${Ini[${iniFileName},${options},HealingDist].Length}) {
        /varset healDist ${Ini[${iniFileName},${options},HealingDist]}
 
-        /if (${Spell[${mainHeal}].Range} < ${healDist}) {
-            /varset healDist ${Spell[${mainHeal}].Range}
+        /if (${Spell[${defaultHeal}].Range} < ${healDist}) {
+            /varset healDist ${Spell[${defaultHeal}].Range}
         }       
     } else {
         /ini "${iniFileName}" "${options}" "HealingDist" "${healDist}"  
-        /varset casterInitResult 0
+        /varset healerInitResult 0
     }
 
     /if (${Ini[${iniFileName},${options},DoHealGroup].Length}) {
@@ -48,7 +80,7 @@ Sub InitHealIni(string iniFileName)
         /ini "${iniFileName}" "${options}" "DoHealNetBots" "${doHealNetBots}"
     }
 
-/return ${casterInitResult}
+/return ${healerInitResult}
 
 Sub CheckHeals
     /if (${Debug}) /echo |- CheckHeals ==>
@@ -58,14 +90,43 @@ Sub CheckHeals
         /return
     }
 
-    /if (${Me.PctHPs} <= ${mainHealPct}) {
-        /call CastHeal ${mainHeal} ${Me.ID} "${Me.Name}"
+    /call CheckMainTankHeal ${mainTankHeal} ${mainTankHealPct}
+
+    /if (${Me.PctHPs} <= ${defaultHealPct}) {
+        /call CastHeal ${defaultHeal} ${Me.ID} "${Me.Name}"
     }
 
-    /if (${doHealGroup}) /call CheckHealGroup ${mainHeal} ${mainHealPct}
-    /if (${doHealNetBots}) /call CheckHealNetBots ${mainHeal} ${mainHealPct}
+    /if (${doHealGroup}) /call CheckHealGroup ${defaultHeal} ${defaultHealPct}
+    /if (${doHealNetBots}) /call CheckHealNetBots ${defaultHeal} ${defaultHealPct}
     
     /if (${Debug}) /echo <== CheckHeals -|
+/return
+
+Sub CheckMainTankHeal(string healSpell, int healPct)
+    /if (${Debug}) /echo |- CheckMaintankHeal ==>
+
+    /if (!${Defined[mainTank]}) {
+        /if (${Debug}) /echo |- No main tank defined
+        /if (${Debug}) /echo <== CheckMaintankHeal -|
+        /return
+    }
+
+    /if (${NetBots[${mainTank}].ID} && (!${NetBots[${mainTank}].InZone} || ${NetBots[${mainTank}].PctHPs} > ${healPct} || ${Spawn[${NetBots[${mainTank}].ID}].Distance} > ${healDist})) {
+        /if (${Debug}) /echo <== CheckMaintankHeal -|
+        /return        
+    }
+
+    /target pc ${mainTank}
+    /delay 2s ${Target.Name.Equal[${mainTank}]}
+
+    |- Check their hitpoints and cast if required
+    /if (${Target.Name.Equal[${mainTank}]}) {
+        /if (${Target.PctHPs} <= ${mainTankHealPct}) { 
+            /call CastHeal "${healSpell}" ${Target.ID} ${mainTank}
+        }
+    }
+
+    /if (${Debug}) /echo <== CheckMaintankHeal -|
 /return
 
 Sub CheckHealGroup(string healSpell, int healPct)
@@ -91,7 +152,7 @@ Sub CheckHealGroup(string healSpell, int healPct)
         /next x
     }
 
-    /if (${lowestMemberId}>0) {
+    /if (${lowestMemberId}>0 && ${lowestMemberPctHPs} <= ${healPct}) {
         /call CastHeal "${healSpell}" ${lowestMemberId} ${lowestMemberName}
     }
     
@@ -106,13 +167,19 @@ Sub CheckHealNetBots(string healSpell, int healPct)
         /return
     }
 
+    /declare isExpired bool local false
     /declare netbotsClient string local
     /declare x int local
     /for x 1 to ${NetBots.Counts} {
         /varset netbotsClient "${NetBots.Client[${x}]}"
         /if (${NetBots[${netbotsClient}].InZone} && ${NetBots[${netbotsClient}].PctHPs} <= ${healPct} && ${Spawn[${NetBots[${netbotsClient}].ID}].Distance} <= ${healDist} && (!${doHealGroup} || !${NetBots[${netbotsClient}].InGroup})) {            
-            /if (${Debug}) /echo |- CheckHealNetBots > ${NetBots[${netbotsClient}].Name} > ${NetBots[${netbotsClient}].PctHPs}
-            /call CastHeal "${healSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+            /call CheckTimerExpired "${netbotsClient}_nbh_timer"            
+            /varset isExpired ${Macro.Return}
+            /if (${isExpired}) {
+                /if (${Debug}) /echo |- CheckHealNetBots > ${NetBots[${netbotsClient}].Name} > ${NetBots[${netbotsClient}].PctHPs}
+                /call CastHeal "${healSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+                /call CreateTimer "${netbotsClient}_nbh_timer" 30
+            }
         }
         /next x
     }
@@ -175,8 +242,16 @@ Sub iniHeal(string INIFile, string section, string key, array)
 /return
 
 Sub CancelHeal(int spellId)
+    /if (${Target.Name.Equal[${mainTank}]} && ${Spell[${mainTankHeal}].ID}==${spellId} && ${Bool[${mainTankEmergencyHeal}]} && ${Me.Gem[${mainTankEmergencyHeal}]}) {
+        /if (${Target.PctHPs} <= ${mainTankEmergencyHealPct} && ${mainTankEmergencyHeal.NotEqual[${mainTankHeal}]}) { 
+            /echo F this interrupt
+            /call Interrupt
+            /call CastHeal "${mainTankEmergencyHeal}" ${Target.ID} ${mainTank}
+        }
+    }
+
     | Following line has issue with NetBots update report, cancels heals when it shouldnt
-	| /if (${Target.PctHPs} > ${mainHealPct}) /call Interrupt
+	| /if (${Target.PctHPs} > ${defaultHealPct}) /call Interrupt
 	/if (${Target.Distance} > ${healDist}) /call Interrupt
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
 	| /if (${Me.AltAbilityReady[Divine Arbitration]}) /call DivineArbitration
