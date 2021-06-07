@@ -6,8 +6,10 @@
 #include includes\common.inc
 #include includes\commonCaster.inc
 #include includes\commonBuffer.inc
+#include includes\commonDebuffer.inc
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
+#include includes\wait4rez.inc
 #turbo 40
 
 Sub Main
@@ -22,31 +24,43 @@ Sub Main
     /echo "Necro ruling the dead!"
     /bca "Necro ruling the dead!"
     :NecroLoop
+        /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :NecroLoop
         
         /call CheckManaStatus
         /call TryMedidate
-        /call DoBuffs
         /call DoPet
+        /call DoDeBuffs
         /call DoNuke
+        /call DoBuffs
         /goto :NecroLoop
 /return
 
 Sub InitNecroIni(string iniFileName)
-    /declare necroOptions   string  outer "NecroOptions"
-    /declare casterInitResult   int     local 1
+    /declare necroOptions       string  outer "NecroOptions"
+    /declare parentInitResult   int     local 1
 
     /call InitNukeIni "${iniFileName}"
-    /varset casterInitResult ${Macro.Return}
+    /varset parentInitResult ${Macro.Return}
 
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset casterInitResult 0
+        /varset parentInitResult 0
+    }
+    
+    /call InitDebufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
     }
 
     /call InitPetIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset casterInitResult 0
+        /varset parentInitResult 0
+    }
+    
+    /call InitWait4Rez "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
     }
 
-/return ${casterInitResult}
+/return ${parentInitResult}

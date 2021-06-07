@@ -8,6 +8,7 @@
 #include includes\commonBuffer.inc
 #include includes\commonDebuffer.inc
 #include includes\commonNuke.inc
+#include includes\wait4rez.inc
 #turbo 40
 
 Sub Main
@@ -27,6 +28,7 @@ Sub Main
     /echo "Enchanter all mezzed up!"
     /bca "Enchanter all mezzed up!"
     :EnchanterLoop
+        /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :EnchanterLoop
         
         /call DoMezz
@@ -82,7 +84,7 @@ Sub CancelMezz
 
 Sub InitEnchanterIni(string iniFileName)
     /declare enchanterOptions   string  outer "EnchanterOptions"
-    /declare casterInitResult   int     local 1
+    /declare parentInitResult   int     local 1
 
     /if (${Ini[${iniFileName},${enchanterOptions},AutoMezz].Length}) {
        /varset autoMezz ${Ini[${iniFileName},${enchanterOptions},AutoMezz]}     
@@ -103,21 +105,26 @@ Sub InitEnchanterIni(string iniFileName)
     }
 
     /call InitCasterIni "${iniFileName}"
-    /varset casterInitResult ${Macro.Return}
+    /varset parentInitResult ${Macro.Return}
 
     /call InitNukeIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset casterInitResult 0
+        /varset parentInitResult 0
     }
 
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset casterInitResult 0
+        /varset parentInitResult 0
     }
 
     /call InitDebufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset casterInitResult 0
+        /varset parentInitResult 0
+    }
+    
+    /call InitWait4Rez "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
     }
 
-/return ${casterInitResult}
+/return ${parentInitResult}

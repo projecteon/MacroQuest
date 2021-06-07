@@ -7,6 +7,7 @@
 #include includes\commonDebuffer.inc
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
+#include includes\wait4rez.inc
 #turbo 40
 
 Sub Main
@@ -21,6 +22,7 @@ Sub Main
     /echo "Shaman in trance!"
     /bca "Shaman in trance!"
     :ShamanLoop
+        /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :ShamanLoop
         
         /call CheckHeals
@@ -39,7 +41,7 @@ Sub Main
 Sub DoCannibalize
     /if (${Debug}) /echo |- DoCannibalize ==>
 
-    /if (${Me.Gem[${cannibalizeSpell}]} && !${Me.Invis} && ${Me.PctHPs}>75 && !${Me.Casting.ID} && ${Me.PctMana}<70) {
+    /if (${Me.Gem[${cannibalizeSpell}]} && !${Me.Invis} && ${Me.PctHPs}>65 && !${Me.Casting.ID} && ${Me.PctMana}<80) {
         
         /call CheckNPCInRange
         /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
@@ -65,12 +67,22 @@ Sub InitShamanIni(string iniFileName)
         /varset parentInitResult 0
     }
     
+    /call InitDebufferIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset bootstrapInitResult 0
+    }
+    
     /call InitNukeIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset parentInitResult 0
     }
 
     /call InitPetIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
+    
+    /call InitWait4Rez "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset parentInitResult 0
     }

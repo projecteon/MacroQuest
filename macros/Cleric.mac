@@ -5,6 +5,7 @@
 #include includes\commonHealer.inc
 #include includes\commonBuffer.inc
 #include includes\commonNuke.inc
+#include includes\wait4rez.inc
 #turbo 40
 
 Sub Main
@@ -19,6 +20,7 @@ Sub Main
     /echo "Cleric all set!"
     /bca "Cleric all set!"
     :ClericLoop
+        /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :ClericLoop
 
         /call DoHeal
@@ -77,22 +79,27 @@ Sub CancelGroupHeal
 
 Sub InitClericIni(string iniFileName)
     /declare options            string  local "HealingOptions"
-    /declare healerInitResult   int     local 1
+    /declare parentInitResult   int     local 1
     /declare groupHealSpell     string  outer "GroupHeal" 
     /declare groupHealPct       int     outer 0
     /declare groupHealNum       int     outer 4
         
     /call InitHealIni "${iniFileName}"
-    /varset healerInitResult ${Macro.Return}
+    /varset parentInitResult ${Macro.Return}
     
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset healerInitResult 0
+        /varset parentInitResult 0
     }
     
     /call InitNukeIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset healerInitResult 0
+        /varset parentInitResult 0
+    }
+    
+    /call InitWait4Rez "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
     }
     
     /if (${Ini[${iniFileName},${options},GroupHeal].Length}) {
@@ -113,4 +120,4 @@ Sub InitClericIni(string iniFileName)
         /ini "${iniFileName}" "${options}" "GroupHealNum" "${groupHealNum}"
     }
 
-/return ${healerInitResult}
+/return ${parentInitResult}

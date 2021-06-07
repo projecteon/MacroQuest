@@ -1,5 +1,6 @@
 #include includes\ini.inc
 #include includes\common.inc
+#include includes\wait4rez.inc
 #turbo 40
 
 Sub Main
@@ -15,6 +16,7 @@ Sub Main
     /bca "Rogue backstabbin!"
 
     :RogueLoop
+        /call Wait4Rez_Background_Events
         /call doKill
         /goto :RogueLoop
 /return
@@ -53,9 +55,14 @@ Sub doKill
 
 Sub InitRogueIni(string iniFileName, string mainAssist)
     /declare rogueOptions       string  outer "RogueOptions"
-    /declare parentResult       int     local 1
+    /declare parentInitResult   int     local 1
 
     /call InitGenralIni "${iniFileName}"
-    /varset parentResult ${Macro.Return}
+    /varset parentInitResult ${Macro.Return}
     
-/return ${parentResult}
+    /call InitWait4Rez "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
+    
+/return ${parentInitResult}

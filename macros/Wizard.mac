@@ -7,6 +7,7 @@
 #include includes\commonCaster.inc
 #include includes\commonBuffer.inc
 #include includes\commonNuke.inc
+#include includes\wait4rez.inc
 #turbo 40
 
 Sub Main
@@ -21,6 +22,7 @@ Sub Main
     /echo "Wizard all fired up!"
     /bca "Wizard all fired up!"
     :WizardLoop
+        /call Wait4Rez_Background_Events
         /call CheckManaStatus
         /call DoHarvest
         /call TryMedidate
@@ -49,16 +51,21 @@ Sub DoHarvest
 
 Sub InitWizardIni(string iniFileName)
     /declare wizardOptions    string  outer "WizardOptions"
-    /declare casterInitResult int     local 1
+    /declare parentInitResult int     local 1
     /declare autoHarvest      bool    local FALSE
     /declare harvestSpell     string  local 
 
     /call InitNukeIni "${iniFileName}"
-    /varset casterInitResult ${Macro.Return}
+    /varset parentInitResult ${Macro.Return}
 
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset casterInitResult 0
+        /varset parentInitResult 0
+    }
+    
+    /call InitWait4Rez "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
     }
 
     /if (${Ini[${iniFileName},${wizardOptions},AutoHarvest].Length}) {
@@ -73,4 +80,4 @@ Sub InitWizardIni(string iniFileName)
         /ini "${iniFileName}" "${wizardOptions}" "HarvestSpell" "${harvestSpell}"
     }
 
-/return ${casterInitResult}
+/return ${parentInitResult}

@@ -8,6 +8,7 @@
 #include includes\commonBuffer.inc
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
+#include includes\wait4rez.inc
 #turbo 40
 
 Sub Main
@@ -22,6 +23,7 @@ Sub Main
     /echo "Ranger ready to roll!"
     /bca "Ranger ready to roll!"
     :RangerLoop
+        /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :RangerLoop        
         | /if (${Me.Attacking}) /goto :RangerLoop
 
@@ -31,19 +33,25 @@ Sub Main
 /return
 
 Sub InitRangerIni(string iniFileName)
-    /declare enchanterOptions   string  outer "RangerOptions"
-    /declare parentResult       int     local 1
+    /declare rangerOptions   string  outer "RangerOptions"
+    /declare parentInitResult   int     local 1
 
     /call InitGenralIni "${iniFileName}"
-    /varset parentResult ${Macro.Return}
+    /varset parentInitResult ${Macro.Return}
     
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset parentResult 0
+        /varset parentInitResult 0
     }
     
     /call InitNukeIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset parentResult 0
+        /varset parentInitResult 0
     }
-/return ${parentResult}
+    
+    /call InitWait4Rez "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
+
+/return ${parentInitResult}

@@ -8,6 +8,7 @@
 #include includes\commonBuffer.inc
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
+#include includes\wait4rez.inc
 #turbo 40
 
 Sub Main
@@ -22,6 +23,7 @@ Sub Main
     /echo "Mage pettified!"
     /bca "Mage pettified!"
     :MageLoop
+        /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :MageLoop
         
         /call CheckManaStatus
@@ -33,20 +35,25 @@ Sub Main
 /return
 
 Sub InitMageIni(string iniFileName)
-    /declare mageOptions   string  outer "MageOptions"
-    /declare casterInitResult   int     local 1
+    /declare mageOptions        string  outer "MageOptions"
+    /declare parentInitResult   int     local 1
 
     /call InitNukeIni "${iniFileName}"
-    /varset casterInitResult ${Macro.Return}
+    /varset parentInitResult ${Macro.Return}
 
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset casterInitResult 0
+        /varset parentInitResult 0
     }
 
     /call InitPetIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset casterInitResult 0
+        /varset parentInitResult 0
+    }
+    
+    /call InitWait4Rez "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
     }
 
-/return ${casterInitResult}
+/return ${parentInitResult}

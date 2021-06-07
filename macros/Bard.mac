@@ -1,4 +1,6 @@
+#include includes\ini.inc
 #include includes\common.inc
+#include includes\wait4rez.inc
 #turbo 40
 
 Sub Main
@@ -14,6 +16,7 @@ Sub Main
     /bca "Bard rock'n'rolling!"
 
     :BardLoop
+        /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :BardLoop
         
         /call doKill
@@ -53,9 +56,14 @@ Sub doKill
 
 Sub InitBardIni(string iniFileName, string mainAssist)
     /declare bardOptions       string  outer "BardOptions"
-    /declare parentResult       int     local 1
+    /declare parentInitResult  int     local 1
 
     /call InitGenralIni "${iniFileName}"
-    /varset parentResult ${Macro.Return}
+    /varset parentInitResult ${Macro.Return}
     
-/return ${parentResult}
+    /call InitWait4Rez "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
+    
+/return ${parentInitResult}

@@ -64,6 +64,19 @@ Sub CheckNPCInRange(int radiusCheck)
     /if (${Debug}) /echo <== CheckNPCInRange -|
 /return 0
 
+Sub EnsureTarget(targetId) 
+    /if (${Debug}) /echo |- EnsureTarget ==>
+
+    /if (${SpawnCount[id ${targetId}]}) {
+			/squelch /target id ${targetId}
+			/delay 3s ${Target.ID} == ${targetId}
+	} else {
+		/echo EnsureTarget has no spawncount
+	}
+    
+    /if (${Debug}) /echo <== EnsureTarget -|
+/return
+
 | ################################################################################
 | # Creates a timer given name and default time setting.
 | # Dont use this unless you can always check the timer later 
