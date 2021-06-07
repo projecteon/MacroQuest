@@ -20,7 +20,6 @@ Sub Main
 /return
 
 Sub doKill
-    /if (!${Group.Members}) /return
 	/if (!${Melee.Enable} || ${Melee.Combat}) /return
     
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
@@ -32,7 +31,7 @@ Sub doKill
 
     /if (!${isNPC} && !${isPet}) /return  
 	/if (${SpawnCount[los id ${targetId}]} < 1) /return
-	/if (${NetBots[${mainAssist}].TargetHP} > 90) /return
+	/if (${NetBots[${mainAssist}].TargetHP} > ${assistPct}) /return
 
 	/target id ${targetId}
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {

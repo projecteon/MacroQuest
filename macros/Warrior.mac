@@ -2,22 +2,22 @@
 #turbo 40
 
 Sub Main
-    /declare bardIniFileName        string  outer "ini/${MacroQuest.Server}/Bard_${Me.CleanName}.ini"
+    /declare warriorIniFileName        string  outer "ini/${MacroQuest.Server}/Warrior_${Me.CleanName}.ini"
 
-    /call InitBardIni ${bardIniFileName}
+    /call InitBardIni ${warriorIniFileName}
     /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${bardIniFileName}"
+        /echo "Bootstrapped INI file, please update variables in: ${warriorIniFileName}"
         /endmacro
     }
 
-    /echo "Bard rock'n'rolling!"
-    /bca "Bard rock'n'rolling!"
+    /echo "Warrior tankin' and spankin'!"
+    /bca "Warrior tankin' and spankin'!"
 
-    :BardLoop
-        /if (${Me.Invis}) /goto :BardLoop
+    :WarriorLoop
+        /if (${Me.Invis}) /goto :WarriorLoop
         
         /call doKill
-        /goto :BardLoop
+        /goto :WarriorLoop
 /return
 
 Sub doKill
@@ -52,7 +52,7 @@ Sub doKill
 
 
 Sub InitBardIni(string iniFileName, string mainAssist)
-    /declare bardOptions       string  outer "BardOptions"
+    /declare warriorOptions       string  outer "WarriorOptions"
     /declare parentResult       int     local 1
 
     /call InitGenralIni "${iniFileName}"
