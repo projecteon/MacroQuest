@@ -4,6 +4,7 @@
 #include includes\commonCaster.inc
 #include includes\commonHealer.inc
 #include includes\commonBuffer.inc
+#include includes\commonDebuffer.inc
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
 #turbo 40
@@ -25,33 +26,53 @@ Sub Main
         /call CheckHeals
         /if (${Macro.Return} == 1) /goto :ShamanLoop
         /call CheckManaStatus
+        /call DoCannibalize
         /call TryMedidate
         /call DoPet
+        /call DoDeBuffs
         /call DoNuke
         /call DoBuffs
         /goto :ShamanLoop
 /return
 
+
+Sub DoCannibalize
+    /if (${Debug}) /echo |- DoCannibalize ==>
+
+    /if (${Me.Gem[${cannibalizeSpell}]} && !${Me.Invis} && ${Me.PctHPs}>75 && !${Me.Casting.ID} && ${Me.PctMana}<70) {
+        
+        /call CheckNPCInRange
+        /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
+        
+        /if (!${hasNpcInCamp}) {
+            /call cast "${cannibalizeSpell}" gem${Me.Gem[${cannibalizeSpell}]} 0
+        }
+    }
+    
+    /if (${Debug}) /echo <== DoCannibalize -|
+/return
+
 Sub InitShamanIni(string iniFileName)
-    /declare options           string  local "HealingOptions"
-    /declare bootstrapInitResult  int     local 1
+    /declare options            string  local "HealingOptions"
+    /declare parentInitResult   int     local 1
+    /declare cannibalizeSpell   string  outer "Cannibalize"
         
     /call InitHealIni "${iniFileName}"
-    /varset bootstrapInitResult ${Macro.Return}
+    /varset parentInitResult ${Macro.Return}
     
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset bootstrapInitResult 0
+        /varset parentInitResult 0
     }
     
     /call InitNukeIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset bootstrapInitResult 0
+        /varset parentInitResult 0
     }
 
     /call InitPetIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
-        /varset casterInitResult 0
+        /varset parentInitResult 0
     }
 
-/return ${bootstrapInitResult}
+/return ${parentInitResult}
