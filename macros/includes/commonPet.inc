@@ -2,6 +2,7 @@ Sub InitPetIni(string iniFileName)
     /declare petOptions         string  local "PetOptions"
     /declare petInitResult      int     local 1
     /declare petSpell           string  outer 
+    /declare petAssistPct       int     outer 
     /declare petWeaponsSpell    string  outer 
     /declare petTaunt           bool    outer false
     /declare currentPetTargetId int     outer 0
@@ -12,6 +13,12 @@ Sub InitPetIni(string iniFileName)
         /ini "${iniFileName}" "${petOptions}" "Pet Spell" "${petSpell}"
     }
 
+    /if (${Ini[${iniFileName},${petOptions},"Pet AssistPct"].Length}) {
+        /varset petAssistPct ${Ini[${iniFileName},${petOptions},"Pet TaAssistPctunt"]}
+    } else {
+        /ini "${iniFileName}" "${petOptions}" "Pet AssistPct" "${petAssistPct}"
+    }
+
     /if (${Ini[${iniFileName},${petOptions},"Pet Weapons Spell"].Length}) {
         /varset petWeaponsSpell ${Ini[${iniFileName},${petOptions},"Pet Weapons Spell"]}
     } else {
@@ -19,7 +26,7 @@ Sub InitPetIni(string iniFileName)
     }
 
     /if (${Ini[${iniFileName},${petOptions},"Pet Taunt"].Length}) {
-        /varset petTaunt ${Ini[${iniFileName},${petOptions},"Pet Taunt"]}
+        /varset petTaunt ${Bool[${Ini[${iniFileName},${petOptions},"Pet Taunt"]}]}
     } else {
         /ini "${iniFileName}" "${petOptions}" "Pet Taunt" "${petTaunt}"
     }
@@ -52,7 +59,7 @@ Sub DoPet
     /declare hasLineOfSight local ${Spawn[${targetId}].LineOfSight}
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
-    /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight} || ${Spawn[${targetId}].Distance} > 100) {
+    /if ((!${isNPC} && !${isPet}) || (${targetHP} > ${assistPct} && ${targetHP} > ${petAssistPct}) || !${hasLineOfSight} || ${Spawn[${targetId}].Distance} > 100) {
         /if (${Debug}) /echo <== DoPet -|
         /return
     }
