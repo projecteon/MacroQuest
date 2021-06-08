@@ -21,6 +21,7 @@ Sub Main
         /if (${Me.Invis}) /goto :BardLoop
         
         /call DoKill
+        /call DoClearCampEvents
         /goto :BardLoop
 /return
 

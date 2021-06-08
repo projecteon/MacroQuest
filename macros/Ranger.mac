@@ -29,6 +29,7 @@ Sub Main
 
         /call DoBuffs
         | /call DoNuke
+        /call DoClearCampEvents
         /goto :RangerLoop
 /return
 

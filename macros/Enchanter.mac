@@ -39,6 +39,7 @@ Sub Main
         /call TryMedidate
         /call DoNuke
         /call DoBuffs
+        /call DoClearCampEvents
         /goto :EnchanterLoop
 /return
 

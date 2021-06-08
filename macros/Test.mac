@@ -29,13 +29,13 @@ Sub Main(string Search)
     | /echo ${SpellTimer[${Target.ID},"Snare"]}
 
     | /call CheckNetBotsCombatState
-    /call CheckNpcAnimation
+    | /call CheckNpcAnimation
     | /echo ${Me.CombatState}
     | /echo ${Me.PctAggro}
     | /echo ${Me.Name}
     | /echo ${NetBots[${Me.Name}].Invis}
-    /call CheckNPCInRange
-    /echo CheckNPCInRange: ${Bool[${Macro.Return}]}
+    | /call CheckNPCInRange
+    | /echo CheckNPCInRange: ${Bool[${Macro.Return}]}
 
     | /call CreateTimer ${Me.Name}_nbh_timer 30
     | /delay 10
@@ -44,6 +44,12 @@ Sub Main(string Search)
     | /delay 50
     | /call CheckTimerExpired "${Me.Name}_nbh_timer"  
     
+
+    /call InitLoot
+    /call Event_SellItems
+    | :TestLoop
+    |     /doevents
+    |     /goto :TestLoop
 /return 
 
 Sub checkMezz

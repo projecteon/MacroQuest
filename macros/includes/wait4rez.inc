@@ -14,8 +14,8 @@
 Sub InitWait4Rez(string iniFileName)
     /declare options                        string  local "Wait4Rez"
     /declare Debug_Wait4Rez                 bool    outer FALSE 
-    /declare wait4RezEnabled                    bool    outer FALSE 
-    /declare wait4RezAlertCount                  int     outer 1 
+    /declare wait4RezEnabled                bool    outer FALSE 
+    /declare wait4RezAlertCount             int     outer 1 
     /declare waiting4Rez                    bool    outer FALSE 
 
     /if (${Ini[${iniFileName},${options},Enabled].Length}) {
@@ -30,6 +30,7 @@ Sub InitWait4Rez(string iniFileName)
         /ini "${iniFileName}" "${options}" "AlertBeepsCount" "${wait4RezAlertCount}"
     }
 
+    /call Wait4Rez_Aliases
 /return 1
 
 

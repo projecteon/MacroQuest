@@ -29,6 +29,7 @@ Sub Main
         /call TryMedidate
         /call DoNuke
         /call DoBuffs
+        /call DoClearCampEvents
         /goto :ClericLoop
 /return
 

@@ -19,6 +19,7 @@ Sub Main
     :RogueLoop
         /call Wait4Rez_Background_Events
         /call DoKill
+        /call DoClearCampEvents
         /goto :RogueLoop
 /return
 

@@ -1,3 +1,5 @@
+#include includes\commonLoot.inc
+
 Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
     /if (!${Defined[mainAssist]})  	    /declare mainAssist     string	outer 
@@ -30,6 +32,7 @@ Sub InitGenralIni(string iniFileName)
        /varset Debug ${Bool[${Ini[${iniFileName},${options},Debug]}]}     
     } 
 
+    /call InitLoot
 /return 1
 
 
@@ -107,3 +110,96 @@ Sub CheckTimerExpired(timerName)
     /if (${Debug}) /echo |- ${timerName} [${${timerName}}] expired: ${isExpried}
     /if (${Debug}) /echo <== CheckTimerExpired -|
 /return ${isExpried}
+
+
+| ################################################################################
+| # Use MQ2MoveUtils /moveto function, to move to destination.
+| ################################################################################	
+Sub MoveToLoc(int yLoc, int xLoc, int timeToWait, int arrivalDist)
+    /if (${Debug}) /echo |- MoveToLoc ==>
+    
+    /if (!${Bool[${arrivalDist}]}) /varset arrivalDist 10
+    /if (!${Bool[${timeToWait}]}) /varset timeToWait 30
+    
+    /declare moveTimer timer local ${timeToWait}
+    /if (${Debug})  /echo MoveToLoc ${yLoc},${xLoc},${timeToWait},${arrivalDist}
+
+    /if (${Math.Distance[${yLoc},${xLoc}]}<=${arrivalDist}) {
+        /goto :endMoveToLoc
+    }
+
+    /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
+    
+    /squelch /moveto loc ${yLoc} ${xLoc} dist ${arrivalDist}
+    :retryMove
+        | /call Background_Events
+        /delay ${Math.Calc[${timeToWait}/5]} ${Math.Distance[${yLoc},${xLoc}]}<=${arrivalDist}
+        /if (${Math.Distance[${yLoc},${xLoc}]}>${arrivalDist} && ${moveTimer}) {
+            /goto :retryMove
+        } 
+
+    /moveto off
+
+    :endMoveToLoc
+    /if (${Debug}) /echo <== MoveToLoc -|
+/return
+
+Sub DoClearCampEvents
+    /if (${Debug}) /echo |- DoClearCampEvents ==>
+
+    /call Wait4Rez_Background_Events
+
+    /call CheckNPCInRange
+    /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
+    /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
+    /if (${hasNpcInCamp}) /goto :endDoClearCampEvents
+    
+    /call DoLootEvents
+
+    :endDoClearCampEvents
+    /if (${Debug}) /echo <== DoClearCampEvents -|
+/return
+
+
+| #####################################################################################
+| # Auto inventories items from your cursor. 										
+| # Alerts the user, and ends the macro, if there is no free inventory space available
+| #####################################################################################	
+Sub ClearCursor
+    /if (${Debug}) /echo |- ClearCursor ==>
+
+	/declare i int local 1
+    :check_cursor
+	/if (${Cursor.ID}) {
+        /autoinventory
+        /if (${i} > 5) {
+            /beep
+            /bc ${Me.Name} cannot clear cursor, ending macro
+            /popup ${Me.Name} cannot clear cursor, ending macro
+            /endmacro
+        } else {
+            /delay 1s !${Cursor.ID}
+        }
+
+        /varcalc i ${i}+1
+        /goto :check_cursor
+    }
+
+    /if (${Debug}) /echo <== ClearCursor -|
+/return
+
+| #####################################################################################
+| # Type string by chrs 										
+| #####################################################################################	
+Sub Type(string inputString)
+    /declare char       string local
+    /declare loopctr    int local
+    /for loopctr 1 to ${inputString.Length}
+        /varset char ${inputString.Mid[${loopctr},1]}
+        /if (!${char.Length}) {
+            /nomodkey /keypress space chat
+        } else {
+            /nomodkey /keypress ${char} chat
+        }
+        /next loopctr
+/return

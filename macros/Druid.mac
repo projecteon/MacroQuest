@@ -32,6 +32,7 @@ Sub Main
         /call DoDeBuffs 
         /call DoNuke
         /call DoBuffs
+        /call DoClearCampEvents
         /goto :DruidLoop
 /return
 
