@@ -41,8 +41,13 @@ Sub InitNecroIni(string iniFileName)
     /declare necroOptions       string  outer "NecroOptions"
     /declare parentInitResult   int     local 1
 
-    /call InitNukeIni "${iniFileName}"
+    /call InitGenralIni "${iniFileName}"
     /varset parentInitResult ${Macro.Return}
+
+    /call InitNukeIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
 
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {

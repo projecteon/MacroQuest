@@ -149,10 +149,10 @@ Sub DoCommonEvents
 
     /call Wait4Rez_Background_Events
 
-    /call CheckNPCInRange
-    /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
-    /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
-    /if (${hasNpcInCamp}) /goto :endDoClearCampEvents
+    | /call CheckNPCInRange
+    | /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
+    | /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
+    | /if (${hasNpcInCamp}) /goto :endDoClearCampEvents
     
     /call DoLootEvents
 

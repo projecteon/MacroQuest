@@ -84,9 +84,14 @@ Sub InitClericIni(string iniFileName)
     /declare groupHealSpell     string  outer "GroupHeal" 
     /declare groupHealPct       int     outer 0
     /declare groupHealNum       int     outer 4
+
+    /call InitGenralIni "${iniFileName}"
+    /varset parentInitResult ${Macro.Return}
         
     /call InitHealIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
     
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {

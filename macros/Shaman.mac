@@ -59,9 +59,14 @@ Sub InitShamanIni(string iniFileName)
     /declare options            string  local "HealingOptions"
     /declare parentInitResult   int     local 1
     /declare cannibalizeSpell   string  outer "Cannibalize"
+
+    /call InitGenralIni "${iniFileName}"
+    /varset parentInitResult ${Macro.Return}
         
     /call InitHealIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
     
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {

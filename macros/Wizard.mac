@@ -56,8 +56,13 @@ Sub InitWizardIni(string iniFileName)
     /declare autoHarvest      bool    local FALSE
     /declare harvestSpell     string  local 
 
-    /call InitNukeIni "${iniFileName}"
+    /call InitGenralIni "${iniFileName}"
     /varset parentInitResult ${Macro.Return}
+
+    /call InitNukeIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
 
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {

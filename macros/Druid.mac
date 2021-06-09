@@ -38,9 +38,14 @@ Sub Main
 
 Sub InitDruidIni(string iniFileName)
     /declare parentInitResult    int     local 1
+
+    /call InitGenralIni "${iniFileName}"
+    /varset parentInitResult ${Macro.Return}
         
     /call InitHealIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
     
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {

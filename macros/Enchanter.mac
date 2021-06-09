@@ -105,8 +105,13 @@ Sub InitEnchanterIni(string iniFileName)
         /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzSpell" "${mezzSpell}"
     }
 
-    /call InitCasterIni "${iniFileName}"
+    /call InitGenralIni "${iniFileName}"
     /varset parentInitResult ${Macro.Return}
+
+    /call InitCasterIni "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
 
     /call InitNukeIni "${iniFileName}"
     /if (${Macro.Return} == 0) {

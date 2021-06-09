@@ -1,6 +1,6 @@
 Sub InitCasterIni(string iniFileName)
     /declare options            string  local "CasterOptions"
-    /declare generalInitResult  int     local 1
+    /declare initResult         int     local 1
     
     /if (!${Defined[_minMana]})             /declare _minMana               int   outer 15 
     /if (!${Defined[_readyMana]})           /declare _readyMana             int   outer 85 
@@ -8,14 +8,11 @@ Sub InitCasterIni(string iniFileName)
     /if (!${Defined[_manaStoneMinPctHP]})   /declare _manaStoneMinPctHP     int   outer 80 
     /if (!${Defined[_manaStoneMaxPctMana]}) /declare _manaStoneMaxPctMana   int   outer 70 
 
-    /call InitGenralIni "${iniFileName}"
-    /varset generalInitResult ${Macro.Return}
-
     /if (${Ini[${iniFileName},${options},MinMana].Length}) {
         /varset _minMana ${Ini[${iniFileName},${options},MinMana]}
     } else {
         /ini "${iniFileName}" "${options}" "MinMana" "${_minMana}"
-        /varset generalInitResult 0
+        /varset initResult 0
     }
 
     /if (${Ini[${iniFileName},${options},ReadyMana].Length}) {
@@ -38,7 +35,7 @@ Sub InitCasterIni(string iniFileName)
         /varset _manaStoneMaxPctMana ${Ini[${iniFileName},ManaStone,MaxPctMana]} 
     }
 
-/return ${generalInitResult}
+/return ${initResult}
 
 Sub CheckManaStatus
     /if (${Debug}) /echo |- CheckManaStatus ==>
