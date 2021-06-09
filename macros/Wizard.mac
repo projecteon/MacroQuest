@@ -28,7 +28,7 @@ Sub Main
         /call TryMedidate
         /call DoBuffs
         /call DoNuke
-        /call DoClearCampEvents
+        /call DoCommonEvents
         /goto :WizardLoop
 /return
 

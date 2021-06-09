@@ -144,8 +144,8 @@ Sub MoveToLoc(int yLoc, int xLoc, int timeToWait, int arrivalDist)
     /if (${Debug}) /echo <== MoveToLoc -|
 /return
 
-Sub DoClearCampEvents
-    /if (${Debug}) /echo |- DoClearCampEvents ==>
+Sub DoCommonEvents
+    /if (${Debug}) /echo |- DoCommonEvents ==>
 
     /call Wait4Rez_Background_Events
 
@@ -157,7 +157,7 @@ Sub DoClearCampEvents
     /call DoLootEvents
 
     :endDoClearCampEvents
-    /if (${Debug}) /echo <== DoClearCampEvents -|
+    /if (${Debug}) /echo <== DoCommonEvents -|
 /return
 
 

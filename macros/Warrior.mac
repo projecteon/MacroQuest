@@ -21,7 +21,7 @@ Sub Main
         /if (${Me.Invis}) /goto :WarriorLoop
         
         /call DoKill
-        /call DoClearCampEvents
+        /call DoCommonEvents
         /goto :WarriorLoop
 /return
 
