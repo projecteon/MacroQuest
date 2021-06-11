@@ -82,10 +82,12 @@ Sub DoPet
 /return
 
 Sub SummonPet
+    /if (${Debug} || ${Debug_Pet}) /echo |- SummonPet
+
     /if (!${Me.Gem[${petSpell}]}) {
-        /echo !!! SPELL NOT MEMORIZED ${petSpell} - SHUTDOWN !!!
-        /bca !!! SPELL NOT MEMORIZED ${petSpell} - SHUTDOWN !!!
-        /endmac
+        /echo !!! SPELL NOT MEMORIZED <<${petSpell}>> !!!
+        /bca !!! SPELL NOT MEMORIZED <<${petSpell}>> !!!
+        /goto :endSummonPet
     }
 
     |handle zone delay to prevent summoning pet if one exists
@@ -104,27 +106,39 @@ Sub SummonPet
     } else {
         /pet taunt off
     }
+    
+    :endSummonPet
+    /if (${Debug} || ${Debug_Sell}) /echo <== SummonPet -|
+/return
 
-    /call weaponizePet
-/RETURN
 
 
+Sub WeaponizePet(int petID)
+    /if (${Debug} || ${Debug_Pet}) /echo |- WeaponizePet ==> ${petID} 
 
-Sub WeaponizePet
     /if (!${Me.Gem[${petWeaponsSpell}]}) {
-        /echo !!! SPELL NOT MEMORIZED ${petWeaponsSpell} - SHUTDOWN !!!
-        /bca !!! SPELL NOT MEMORIZED ${petWeaponsSpell} - SHUTDOWN !!!
-        /endmac
+        /echo !!! SPELL NOT MEMORIZED <<${petWeaponsSpell}>> !!!
+        /bca !!! SPELL NOT MEMORIZED <<${petWeaponsSpell}>> !!!
+        /goto :endWeaponizePet
     }
 
-    /if (!${Me.Pet.ID} || ${Me.Casting} || !${Me.SpellReady[${petSpell}]} || ${Me.CurrentMana} < ${Spell[${petSpell}].Mana}) {
-        /return
+    /if (!${Defined[petID]}) {
+        /declare petID int local ${Me.Pet.ID} 
     }
 
-    /if (!${Target.ID} || ${Target.ID}!=${Pet.ID}) {
-	    /target id ${Pet.ID}
-        /delay 1s ${Target.ID}==${Pet.ID}
+    
+
+    /if (!${petID} || !${Spawn[pet ${petID}].ID}) {  
+        /echo No pet to weaponize, missing pet id
+        /bca No pet to weaponize, missing pet id
+        /goto :endWeaponizePet       
     }
+
+    /if (${Me.Casting} || !${Me.SpellReady[${petSpell}]} || ${Me.CurrentMana} < ${Spell[${petSpell}].Mana}) {
+        /goto :endWeaponizePet       
+    }
+
+    /call EnsureTarget ${Pet.ID}
 
     /declare k  int local
     /for k 1 to 2 {
@@ -138,6 +152,9 @@ Sub WeaponizePet
         }
         /next k
     }
+    
+    :endWeaponizePet
+    /if (${Debug} || ${Debug_Sell}) /echo <== WeaponizePet -|
 /RETURN
 
 Sub MakePetIni(string fileName)
@@ -145,4 +162,33 @@ Sub MakePetIni(string fileName)
     /echo Building Pet INI file.....
 
     | /ini "${fileName}" "${petOptions}" "AttackPct" "${assistPct}"
+/return
+
+| ################################################################################
+| # Summon pet event
+| ################################################################################
+#Event SummonYourPet "#*#[MQ2] summon your pet#*#"
+Sub Event_SummonYourPet
+    /if (${Debug}) /echo |- Event_SummonYourPet ==>
+
+    /call SummonPet
+    
+    /if (${Debug}) /echo <== Event_SummonYourPet -|
+/return
+
+| ################################################################################
+| # Weaponize pet event
+| ################################################################################
+#Event WeaponizeThePet "#*#[MQ2] waponize the pet #1##*#"
+Sub Event_WeaponizeThePet(eventText, int petID)
+    /if (${Debug}) /echo |- Event_WeaponizeThePet ==>
+
+    /call SummonPet ${petID}
+    
+    /if (${Debug}) /echo <== Event_WeaponizeThePet -|
+/return
+
+Sub DoPetEvents
+  /doevents SummonPet
+  /doevents WeaponizeThePet
 /return

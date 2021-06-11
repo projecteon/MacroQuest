@@ -35,6 +35,7 @@ Sub Main
         /call DoNuke
         /call DoBuffs
         /call DoCommonEvents
+        /call DoPetEvents
         /goto :ShamanLoop
 /return
 
