@@ -28,8 +28,8 @@ Sub InitGenralIni(string iniFileName)
         /varset assistPct ${Ini[${iniFileName},${options},AssistPct]}    
     } 
 
-    /if (${Ini[${iniFileName},${options},Debug].Length}) {
-       /varset Debug ${Bool[${Ini[${iniFileName},${options},Debug]}]}     
+    /if (${Ini[${iniFileName},Debug,Debug].Length}) {
+       /varset Debug ${Bool[${Ini[${iniFileName},Debug,Debug]}]}     
     } 
 
     /call InitLoot
