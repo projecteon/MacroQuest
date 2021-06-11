@@ -548,8 +548,9 @@ Sub Event_LootNearest
     /if (${Debug}) /echo <== Event_LootNearest -|
 /return
 
-|----------------------------------------------------------------|
-|- Adds corpses that are not yours to the looted corpse list.	  -|
+| ################################################################################
+| # Adds corpses that are not yours to the looted corpse list.	
+| ################################################################################
 #Event CheckCanLootCorpse "Someone is already looting that corpse."
 #Event CheckCanLootCorpse "You may not loot this corpse at this time."
 #Event CheckCanLootCorpse "You are too far away to loot that corpse."
@@ -561,8 +562,16 @@ Sub InitLoot
     /declare lootSettingsIniFileName string outer "ini/${MacroQuest.Server}/Loot Settings.ini"
 
     /declare Debug_Loot     bool    outer FALSE
-    /declare Debug_Sell     bool    outer TRUE
+    /declare Debug_Sell     bool    outer FALSE
     /declare linkChannel    string  outer "/bca"
+
+    /if (${Ini[${iniFileName},Debug,Debug_Loot].Length}) {
+       /varset Debug_Loot ${Bool[${Ini[${iniFileName},Debug,Debug_Loot]}]}     
+    } 
+
+    /if (${Ini[${iniFileName},Debug,Debug_Sell].Length}) {
+       /varset Debug_Sell ${Bool[${Ini[${iniFileName},Debug,Debug_Sell]}]}     
+    } 
 
     /squelch /alias /setsellitem /echo mark item for selling
     /squelch /alias /setdestroyitem /echo mark item for destroy
