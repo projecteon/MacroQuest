@@ -35,14 +35,14 @@ Sub DoNuke
     /if (${Debug}) /echo |- DoNuke ==>
 
     /if (${Me.Casting.ID} || ${Me.Moving} || ${Me.PctMana} <= ${minNukeMana}) {
-        /if (${Debug}) /echo <== DoNuke -|
-        /return
+        /if (${Debug}) /echo |- Unabel to cast right now
+        /goto :endDoNuke
     }
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
-        /if (${Debug}) /echo <== DoNuke -|
-        /return
+        /if (${Debug}) /echo |- No MA target
+        /goto :endDoNuke
     }
     
     /declare isNPC          local ${Spawn[${targetId}].Type.Equal[NPC]}
@@ -51,15 +51,14 @@ Sub DoNuke
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
     /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight}) {
-        /if (${Debug}) /echo <== DoNuke -|
-        /return
+        /if (${Debug}) /echo |- Wrong target type
+        /goto :endDoNuke
     }
 
-    /target id ${targetId}
-    /delay 2s ${Target.ID}==${targetId}
+    /call EnsureTarget ${targetId}
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
-        /if (${Debug}) /echo <== DoNuke -|
-        /return
+        /if (${Debug}) /echo |- Invalid target
+        /goto :endDoNuke
     }
     
     /if (${Select[${Target.Body},Undead]} && ${Me.Gem[${undeadNuke}]}) {
@@ -68,12 +67,15 @@ Sub DoNuke
         /call TryNukeTarget ${mainNuke}
     }
     
+    :endDoNuke
     /if (${Debug}) /echo <== DoNuke -|
 /return
 
 Sub TryNukeTarget(string nuke)
+    /if (${Debug}) /echo |- TryNukeTarget ==>
+
     /if (!${Cast.Ready[${nuke}]} || ${Me.CurrentMana} < ${Spell[${nuke}].Mana} || ${Target.Distance} > ${Spell[${nuke}].Range}) {
-        /return
+        /goto :endTryNukeTarget
     }
 
     /if (${Me.Sitting}) {
@@ -81,6 +83,9 @@ Sub TryNukeTarget(string nuke)
     }
     
     /call cast "${nuke}" gem${Me.Gem[${nuke}]} 0 CancelNuke
+
+    :endTryNukeTarget
+    /if (${Debug}) /echo <== TryNukeTarget -|
 /return
 
 Sub CancelNuke(int spellId)
