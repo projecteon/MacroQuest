@@ -33,25 +33,24 @@ Sub InitPetIni(string iniFileName)
 /return 1
 
 Sub DoPet
-    /if (${Debug}) /echo |- DoPet ==>
+    /if (${Debug} || ${Debug_Pet}) /echo |- DoPet ==>
 
     /if (!${Me.Pet.ID}) {
-        /if (${Debug}) /echo <== DoPet -|
-        /return
+        /if (${Debug} || ${Debug_Pet}) /echo |- Has no pet
+        /goto :endDoPet
     }
 
     /if (${currentPetTargetId} > 0 && (${Spawn[${currentPetTargetId}].Type.Equal[Corpse]} || !${SpawnCount[id ${currentPetTargetId}]})) {
         /pet back off
         /varset currentPetTargetId 0
     } else /if (${currentPetTargetId} > 0) {
-        /if (${Debug}) /echo <== DoPet -|
-        /return
+        /goto :endDoPet
     }
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
-        /if (${Debug}) /echo <== DoPet -|
-        /return
+        /if (${Debug} || ${Debug_Pet}) /echo <== DoPet -|
+        /goto :endDoPet
     }
 
     /declare isNPC          local ${Spawn[${targetId}].Type.Equal[NPC]}
@@ -60,25 +59,23 @@ Sub DoPet
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
     /if ((!${isNPC} && !${isPet}) || (${targetHP} > ${assistPct} && ${targetHP} > ${petAssistPct}) || !${hasLineOfSight} || ${Spawn[${targetId}].Distance} > 100) {
-        /if (${Debug}) /echo <== DoPet -|
-        /return
+        /if (${Debug} || ${Debug_Pet}) /echo |- Not a valid target for pet
+        /goto :endDoPet
     }
 
-    /if (!${Target.ID} || ${Target.ID}!=${targetId}) {
-	    /target id ${targetId}
-        /delay 1s ${Target.ID}==${targetId}
-    }
+    /call EnsureTarget ${targetId}
 
     /if (!${Target.ID} || ${Target.ID}!=${targetId}) {
-        /if (${Debug}) /echo <== DoPet -|
-        /return
+        /if (${Debug} || ${Debug_Pet}) /echo |- Not correct target
+        /goto :endDoPet
     }
 
     /varset currentPetTargetId ${targetId}
     /pet back off
     /pet attack
     
-    /if (${Debug}) /echo <== DoPet -|
+    :endDoPet
+    /if (${Debug} || ${Debug_Pet}) /echo <== DoPet -|
 /return
 
 Sub SummonPet
@@ -108,7 +105,7 @@ Sub SummonPet
     }
     
     :endSummonPet
-    /if (${Debug} || ${Debug_Sell}) /echo <== SummonPet -|
+    /if (${Debug} || ${Debug_Pet}) /echo <== SummonPet -|
 /return
 
 
@@ -154,7 +151,7 @@ Sub WeaponizePet(int petID)
     }
     
     :endWeaponizePet
-    /if (${Debug} || ${Debug_Sell}) /echo <== WeaponizePet -|
+    /if (${Debug} || ${Debug_Pet}) /echo <== WeaponizePet -|
 /RETURN
 
 Sub MakePetIni(string fileName)

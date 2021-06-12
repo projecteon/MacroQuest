@@ -70,6 +70,10 @@ Sub CheckNPCInRange(int radiusCheck)
 Sub EnsureTarget(targetId) 
     /if (${Debug}) /echo |- EnsureTarget ==>
 
+    /if (${Target.ID}==${targetId}) {
+        /goto :endEnsureTarget
+    }
+
     /if (${SpawnCount[id ${targetId}]}) {
 			/squelch /target id ${targetId}
 			/delay 3s ${Target.ID} == ${targetId}
@@ -77,6 +81,7 @@ Sub EnsureTarget(targetId)
 		/echo EnsureTarget has no spawncount
 	}
     
+    :endEnsureTarget
     /if (${Debug}) /echo <== EnsureTarget -|
 /return
 
