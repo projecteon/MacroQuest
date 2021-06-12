@@ -10,16 +10,16 @@ Sub InitNukeIni(string fileName)
     /declare mainNuke           string  outer 
     /declare undeadNuke         string  outer 
     /declare minNukeMana        int     outer 0
-    /declare casterInitResult   int     local 1
+    /declare nukeInitResult     int     local 1
 
     /call InitCasterIni "${fileName}"
-    /varset casterInitResult ${Macro.Return}
+    /varset nukeInitResult ${Macro.Return}
 
     /if (${Ini[${fileName},${nukeOptions},MainNuke].Length}) {
         /varset mainNuke "${Ini[${fileName},${nukeOptions},MainNuke]}"
     } else {
         /ini "${fileName}" "${nukeOptions}" "MainNuke" "${mainNuke}"
-        /varset casterInitResult 0
+        /varset nukeInitResult 0
     }
 
     /if (${Ini[${fileName},${nukeOptions},UndeadNuke].Length}) {
@@ -29,7 +29,7 @@ Sub InitNukeIni(string fileName)
     /if (${Ini[${fileName},${nukeOptions},MinMana].Length}) {
        /varset minNukeMana ${Ini[${fileName},${nukeOptions},MinMana]}       
     }
-/return ${casterInitResult}
+/return ${nukeInitResult}
 
 Sub DoNuke
     /if (${Debug}) /echo |- DoNuke ==>
