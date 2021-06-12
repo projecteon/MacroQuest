@@ -12,6 +12,8 @@ Sub InitBufferIni(string iniFileName)
     /if (!${Defined[iniSelfBuffDimensions]})            /declare iniSelfBuffDimensions          int     outer 2
     /if (!${Defined[doBuffGroup]})                      /declare doBuffGroup                    bool    outer false 
     /if (!${Defined[doBuffNetBots]})                    /declare doBuffNetBots                  bool    outer false 
+    /if (!${Defined[Debug_Group_Buffs]})                /declare Debug_Group_Buffs              bool    outer FALSE
+    /if (!${Defined[Debug_NetBots_Buffs]})              /declare Debug_NetBots_Buffs            bool    outer FALSE
 
     /if (${Ini[${iniFileName},${options},DoBuffGroup].Length}) {
        /varset doBuffGroup ${Bool[${Ini[${iniFileName},${options},DoBuffGroup]}]}     
@@ -32,6 +34,14 @@ Sub InitBufferIni(string iniFileName)
         /varset doBuffGroup false
         /varset doBuffNetBots false
     }
+
+    /if (${Ini[${iniFileName},Debug,Debug_Group_Buffs].Length}) {
+       /varset Debug_Group_Buffs ${Bool[${Ini[${iniFileName},Debug,Debug_Group_Buffs]}]}     
+    } 
+
+    /if (${Ini[${iniFileName},Debug,Debug_NetBots_Buffs].Length}) {
+       /varset Debug_NetBots_Buffs ${Bool[${Ini[${iniFileName},Debug,Debug_NetBots_Buffs]}]}     
+    } 
 
 /return 1
 
@@ -73,17 +83,17 @@ Sub CheckSelfBuffs
 /return
 
 Sub CheckGroupBuffs
-    /if (${Debug}) /echo  |- CheckGroupBuffs ==>
+    /if (${Debug} || ${Debug_Group_Buffs}) /echo  |- CheckGroupBuffs ==>
     
     /if (!${Defined[Buffs]}) {
-        /if (${Debug}) /echo No Buffs defined.
-        /if (${Debug}) /echo <== CheckGroupBuffs -|
+        /if (${Debug} || ${Debug_Group_Buffs}) /echo No Buffs defined.
+        /if (${Debug} || ${Debug_Group_Buffs}) /echo <== CheckGroupBuffs -|
         /return
     }
     
     /if (!${Group.Members}) {
-        /if (${Debug}) /echo Not enough in a group. 
-        /if (${Debug}) /echo <== CheckGroupBuffs -|
+        /if (${Debug} || ${Debug_Group_Buffs}) /echo Not enough in a group. 
+        /if (${Debug} || ${Debug_Group_Buffs}) /echo <== CheckGroupBuffs -|
         /return
     }
 
@@ -108,21 +118,21 @@ Sub CheckGroupBuffs
         /next k 
     }
 
-    /if (${Debug}) /echo <== CheckGroupBuffs -|
+    /if (${Debug} || ${Debug_Group_Buffs}) /echo <== CheckGroupBuffs -|
 /return
 
 Sub CheckNetBotBuffs
-    /if (${Debug}) /echo  |- CheckNetBotBuffs ==>
+    /if (${Debug} || ${Debug_NetBots_Buffs}) /echo  |- CheckNetBotBuffs ==>
     
     /if (!${Defined[Buffs]}) {
-        /if (${Debug}) /echo No Buffs defined.
-        /if (${Debug}) /echo <== CheckNetBotBuffs -|
+        /if (${Debug} || ${Debug_NetBots_Buffs}) /echo No Buffs defined.
+        /if (${Debug} || ${Debug_NetBots_Buffs}) /echo <== CheckNetBotBuffs -|
         /return
     }
     
     /if (${NetBots.Counts} < 2) {
-        /if (${Debug}) /echo Not enough Nebots clients, current: ${NetBots.Counts} 
-        /if (${Debug}) /echo <== CheckNetBotBuffs -|
+        /if (${Debug} || ${Debug_NetBots_Buffs}) /echo Not enough Nebots clients, current: ${NetBots.Counts} 
+        /if (${Debug} || ${Debug_NetBots_Buffs}) /echo <== CheckNetBotBuffs -|
         /return
     }
     
@@ -160,7 +170,7 @@ Sub CheckNetBotBuffs
         /next k 
     }
 
-    /if (${Debug}) /echo <== CheckNetBotBuffs -|
+    /if (${Debug} || ${Debug_NetBots_Buffs}) /echo <== CheckNetBotBuffs -|
 /return
 
 Sub CanCastBuff(string buffSpell, int minMana)

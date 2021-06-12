@@ -9,25 +9,30 @@ Sub InitDebufferIni(string iniFileName)
     /if (!${Defined[debuffPctHpDimension]})    /declare debuffPctHpDimension    int     outer 2 
     /if (!${Defined[debuffManaDimension]})     /declare debuffManaDimension     int     outer 3 
     /if (!${Defined[debuffTimeDimension]})     /declare debuffTimeDimension     int     outer 4 
+    /if (!${Defined[Debug_DeBuffs]})           /declare Debug_DeBuffs           bool    outer FALSE
 
     /call IniArray "${iniFileName}" "DeBuffs" "DeBuff" ${debuffDimensions} DeBuffs
+
+    /if (${Ini[${iniFileName},Debug,Debug_DeBuffs].Length}) {
+       /varset Debug_DeBuffs ${Bool[${Ini[${iniFileName},Debug,Debug_DeBuffs]}]}     
+    } 
 
 /return 1
 
 Sub DoDeBuffs
-    /if (${Debug}) /echo |- DoDeBuffs ==>
+    /if (${Debug} || ${Debug_DeBuffs}) /echo |- DoDeBuffs ==>
 
     /call CheckDeBuffs
     
-    /if (${Debug}) /echo <== DoDeBuffs -|
+    /if (${Debug} || ${Debug_DeBuffs}) /echo <== DoDeBuffs -|
 /return
 
 Sub CheckDeBuffs
-    /if (${Debug}) /echo |- CheckDeBuffs ==>
+    /if (${Debug} || ${Debug_DeBuffs}) /echo |- CheckDeBuffs ==>
 
     /if (!${Defined[DeBuffs]}) {
-        /if (${Debug}) /echo No DeBuffs defined.
-        /if (${Debug}) /echo <== CheckDeBuffs -|
+        /if (${Debug} || ${Debug_DeBuffs}) /echo No DeBuffs defined.
+        /if (${Debug} || ${Debug_DeBuffs}) /echo <== CheckDeBuffs -|
         /return
     }
 
@@ -36,20 +41,20 @@ Sub CheckDeBuffs
         /call TryDoDebuff "${DeBuffs[${k},${debuffNameDimension}]}" ${DeBuffs[${k},${debuffPctHpDimension}]} ${DeBuffs[${k},${debuffManaDimension}]} ${DeBuffs[${k},${debuffTimeDimension}]}
     /next k 
     
-    /if (${Debug}) /echo <== CheckDeBuffs -|
+    /if (${Debug} || ${Debug_DeBuffs}) /echo <== CheckDeBuffs -|
 /return
 
 Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime)
-    /if (${Debug}) /echo |- TryDoDebuff ==>
+    /if (${Debug} || ${Debug_DeBuffs}) /echo |- TryDoDebuff ==>
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
-        /if (${Debug}) /echo <== TryDoDebuff -|
+        /if (${Debug} || ${Debug_DeBuffs}) /echo <== TryDoDebuff -|
         /return 0
     }
 
     /if (${Me.Casting.ID} || ${Me.Moving} || !${Me.Gem[${debuffSpell}]} || ${minMana} > ${Me.PctMana} || ${Me.CurrentMana} < ${Spell[${debuffSpell}].Mana}) {
-        /if (${Debug}) /echo <== TryDoDebuff -|
+        /if (${Debug} || ${Debug_DeBuffs}) /echo <== TryDoDebuff -|
         /return 0
     }
     
@@ -59,19 +64,19 @@ Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
     /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${minPctHp} || !${hasLineOfSight} || ${SpellTimer[${targetId},any,${debuffSpell}]} > ${remainingTime}) {
-        /if (${Debug}) /echo <== TryDoDebuff -|
+        /if (${Debug} || ${Debug_DeBuffs}) /echo <== TryDoDebuff -|
         /return 0
     }
 
     /target id ${targetId}
     /delay 2s ${Target.ID}==${targetId}
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
-        /if (${Debug}) /echo <== TryDoDebuff -|
+        /if (${Debug} || ${Debug_DeBuffs}) /echo <== TryDoDebuff -|
         /return 0
     }
 
     /if (!${Cast.Ready[${debuffSpell}]} || ${Target.Distance} > ${Spell[${debuffSpell}].Range}) {
-        /if (${Debug}) /echo <== TryDoDebuff -|
+        /if (${Debug} || ${Debug_DeBuffs}) /echo <== TryDoDebuff -|
         /return 0
     }
 
@@ -82,7 +87,7 @@ Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
     /call cast "${debuffSpell}" gem${Me.Gem[${debuffSpell}]} 0 CancelDebuff
     /bca ${Target.Name} debuffed with ${debuffSpell}
     
-    /if (${Debug}) /echo <== TryDoDebuff -|
+    /if (${Debug} || ${Debug_DeBuffs}) /echo <== TryDoDebuff -|
 /return 1
 
 Sub CancelDebuff(int spellId)
