@@ -48,6 +48,10 @@ Sub InitBufferIni(string iniFileName)
 Sub DoBuffs
     /if (${Debug}) /echo |- DoBuffs ==>
     
+    /if (${Stick.Status.Equal[ON]}) {
+        /goto :endDoBuffs
+    }
+
     /call CheckNPCInRange
     /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
     /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
@@ -57,6 +61,7 @@ Sub DoBuffs
     /if (${doBuffGroup}) /call CheckGroupBuffs
     /if (${doBuffNetBots}) /call CheckNetBotBuffs
 
+    :endDoBuffs
     /if (${Debug}) /echo <== DoBuffs -|
 /return
 
