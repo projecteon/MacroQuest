@@ -2,11 +2,13 @@ Sub InitCasterIni(string iniFileName)
     /declare options            string  local "CasterOptions"
     /declare initResult         int     local 1
     
-    /if (!${Defined[_minMana]})             /declare _minMana               int   outer 15 
-    /if (!${Defined[_readyMana]})           /declare _readyMana             int   outer 85 
-    /if (!${Defined[_meditateAt]})          /declare _meditateAt            int   outer 90 
-    /if (!${Defined[_manaStoneMinPctHP]})   /declare _manaStoneMinPctHP     int   outer 80 
-    /if (!${Defined[_manaStoneMaxPctMana]}) /declare _manaStoneMaxPctMana   int   outer 70 
+    /if (!${Defined[_minMana]})             /declare _minMana               int     outer 15 
+    /if (!${Defined[_readyMana]})           /declare _readyMana             int     outer 85 
+    /if (!${Defined[_meditateAt]})          /declare _meditateAt            int     outer 90 
+    /if (!${Defined[_manaStoneMinPctHP]})   /declare _manaStoneMinPctHP     int     outer 80 
+    /if (!${Defined[_manaStoneMaxPctMana]}) /declare _manaStoneMaxPctMana   int     outer 70 
+    /if (!${Defined[_evacSpell]})           /declare _evacSpell             string  outer 
+    /if (!${Defined[Debug_Caster]})         /declare Debug_Caster         bool    outer FALSE
 
     /if (${Ini[${iniFileName},${options},MinMana].Length}) {
         /varset _minMana ${Ini[${iniFileName},${options},MinMana]}
@@ -35,6 +37,15 @@ Sub InitCasterIni(string iniFileName)
         /varset _manaStoneMaxPctMana ${Ini[${iniFileName},ManaStone,MaxPctMana]} 
     }
 
+    /if (${Ini[${iniFileName},${options},EvacSpell].Length}) {
+        /varset _evacSpell ${Ini[${iniFileName},${options},EvacSpell]} 
+    }
+
+    /if (${Ini[${iniFileName},Debug,Debug_Caster].Length}) {
+       /varset Debug_Caster ${Bool[${Ini[${iniFileName},Debug,Debug_Caster]}]}     
+    } 
+
+    /squelch /alias /evacute /echo EVACUATE NOW
 /return ${initResult}
 
 Sub CheckManaStatus
@@ -73,11 +84,53 @@ Sub TryMedidate
 /return
 
 Sub CheckManastone
-    /if (${Debug}) /echo |- CheckManastone ==>
+    /if (${Debug} || ${Debug_Caster}) /echo |- CheckManastone ==>
 
-    /if ((!${Me.CombatState.Equal[DEBUFFED]}) && !${Me.Invis} && ${Bool[${FindItem[=Manastone]}]} && ${Me.PctMana} < ${_manaStoneMinPctHP} && ${Me.PctHPs} > ${_manaStoneMinPctHP} && ${Me.PctAggro} < 1 && !${Me.CombatState.Equal[COMBAT]} ) {
+    /if (!${Me.Invis} && ${Bool[${FindItem[=Manastone]}]} && ${Me.PctMana} < ${_manaStoneMaxPctMana} && ${Me.PctHPs} > ${_manaStoneMinPctHP}) {
         /casting "Manastone"    
     }
     
-    /if (${Debug}) /echo <== CheckManastone -|
+    /if (${Debug} || ${Debug_Caster}) /echo <== CheckManastone -|
+/return
+
+
+Sub DoEvacute
+    /if (${Debug}) /echo |- DoEvacute ==>
+
+    /if (!${bool[${_evacSpell}]}) {
+        /goto :endDoEvac
+    }
+
+    /if (!${Me.Gem[${_evacSpell}]}) {
+        /goto :endDoEvac
+    }
+
+    /if (${Me.Casting.ID}) /call Interrupt
+    
+    /if (!${Me.SpellReady[${_evacSpell}]}) /delay 3s ${Me.SpellReady[${_evacSpell}]}
+
+    /call cast "${_evacSpell}" gem${Me.Gem[${_evacSpell}]} 0 CancelEvac 3
+    /bca <<< EVACUATING >>>
+    
+    :endDoEvac
+    /if (${Debug}) /echo <== DoEvacute -|
+/return
+
+Sub CancelEvac
+/return
+
+| ################################################################################
+| # Summon pet event
+| ################################################################################
+#Event Evac "#*#[MQ2] EVACUATE NOW#*#"
+Sub Event_Evac
+    /if (${Debug}) /echo |- Event_Evac ==>
+
+    /call DoEvacute
+    
+    /if (${Debug}) /echo <== Event_Evac -|
+/return
+
+Sub DoCasterEvents
+  /doevents Evac
 /return
