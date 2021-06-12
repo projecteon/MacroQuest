@@ -2,13 +2,14 @@ Sub InitCasterIni(string iniFileName)
     /declare options            string  local "CasterOptions"
     /declare initResult         int     local 1
     
-    /if (!${Defined[_minMana]})             /declare _minMana               int     outer 15 
-    /if (!${Defined[_readyMana]})           /declare _readyMana             int     outer 85 
-    /if (!${Defined[_meditateAt]})          /declare _meditateAt            int     outer 90 
-    /if (!${Defined[_manaStoneMinPctHP]})   /declare _manaStoneMinPctHP     int     outer 80 
-    /if (!${Defined[_manaStoneMaxPctMana]}) /declare _manaStoneMaxPctMana   int     outer 70 
-    /if (!${Defined[_evacSpell]})           /declare _evacSpell             string  outer 
-    /if (!${Defined[Debug_Caster]})         /declare Debug_Caster         bool    outer FALSE
+    /if (!${Defined[_minMana]})                 /declare _minMana               int     outer 15 
+    /if (!${Defined[_readyMana]})               /declare _readyMana             int     outer 85 
+    /if (!${Defined[_meditateAt]})              /declare _meditateAt            int     outer 90 
+    /if (!${Defined[_meditateWithNpcInCamp]})   /declare _meditateWithNpcInCamp bool    outer FALSE 
+    /if (!${Defined[_manaStoneMinPctHP]})       /declare _manaStoneMinPctHP     int     outer 80 
+    /if (!${Defined[_manaStoneMaxPctMana]})     /declare _manaStoneMaxPctMana   int     outer 70 
+    /if (!${Defined[_evacSpell]})               /declare _evacSpell             string  outer 
+    /if (!${Defined[Debug_Caster]})             /declare Debug_Caster           bool    outer FALSE
 
     /if (${Ini[${iniFileName},${options},MinMana].Length}) {
         /varset _minMana ${Ini[${iniFileName},${options},MinMana]}
@@ -27,6 +28,12 @@ Sub InitCasterIni(string iniFileName)
         /varset _meditateAt ${Ini[${iniFileName},${options},MeditateAt]} 
     } else {
         /ini "${iniFileName}" "${options}" "MeditateAt" "${_meditateAt}" 
+    }
+
+    /if (${Ini[${iniFileName},${options},MeditateWithNpcInCamp].Length}) {
+        /varset _meditateWithNpcInCamp ${Ini[${iniFileName},${options},MeditateWithNpcInCamp]} 
+    } else {
+        /ini "${iniFileName}" "${options}" "MeditateWithNpcInCamp" "${_meditateWithNpcInCamp}" 
     }
 
     /if (${Ini[${iniFileName},ManaStone,MinPctHP].Length}) {
@@ -67,19 +74,20 @@ Sub TryMedidate
     /if (${Debug}) /echo |- TryMedidate ==>
 
     /if (${Me.Casting.ID}) {
-        /return
+        /goto :endTryMedidate
     }
 
     /call CheckManastone
     /call CheckNPCInRange
     /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
     /if (${Debug}) /echo |- hasNpcInCamp ${hasNpcInCamp}
-    /if (${Math.Calc[${Me.CurrentMana} / ${Me.MaxMana} * 100]} < ${_meditateAt} && !${Me.Sitting} && !${hasNpcInCamp} && ${Stick.Status.Equal[OFF]}) {
+    /if (${Math.Calc[${Me.CurrentMana} / ${Me.MaxMana} * 100]} < ${_meditateAt} && !${Me.Sitting} && (!${hasNpcInCamp} || ${_meditateWithNpcInCamp}) && ${Stick.Status.Equal[OFF]}) {
         /sit
-    } else /if (${Me.Sitting} && (${Me.CurrentMana} == ${Me.MaxMana} || ${hasNpcInCamp})) {
+    } else /if (${Me.Sitting} && (${Me.CurrentMana} == ${Me.MaxMana} || (${hasNpcInCamp} && !${_meditateWithNpcInCamp}))) {
         /stand
     }
     
+    :endTryMedidate
     /if (${Debug}) /echo <== TryMedidate -|
 /return
 
