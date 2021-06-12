@@ -191,7 +191,7 @@ Sub ClearCursor
 | #####################################################################################
 | # Type string by chrs 										
 | #####################################################################################	
-Sub Type(string inputString)
+Sub TypeChrs(string inputString)
     /declare char       string local
     /declare loopctr    int local
     /for loopctr 1 to ${inputString.Length}

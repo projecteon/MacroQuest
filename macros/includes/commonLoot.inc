@@ -154,7 +154,7 @@ SUB LootCorpse
     /if (${Corpse.Items}) {
         /keypress /
         /delay 1
-        /call Type "${linkChannel} ${Target.ID}-"
+        /call TypeChrs "${linkChannel} ${Target.ID}-"
         /delay 1
         /notify LootWnd BroadcastButton leftmouseup
         /delay 1
