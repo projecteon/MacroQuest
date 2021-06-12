@@ -122,7 +122,7 @@ Sub Wait4Rez(functionCall)
 	:rezmeffs
         /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez -| Waiting to accept rez.
 
-        /call Background_Events
+        /call Wait4Rez_Background_Events
         /delay 10 ${Window[ConfirmationDialogBox].Open}
         /if (!${Window[ConfirmationDialogBox].Open}) /goto :rezmeffs
 
