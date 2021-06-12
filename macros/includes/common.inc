@@ -4,36 +4,46 @@ Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
     /if (!${Defined[mainAssist]})  	    /declare mainAssist     string	outer 
     /if (!${Defined[mainTank]})  	    /declare mainTank       string	outer 
-    /if (!${Defined[assistPct]})  	    /declare assistPct      int	    outer 100 
+    /if (!${Defined[assistPct]})  	    /declare assistPct      int	    outer 95 
+    /if (!${Defined[campRadius]})  	    /declare campRadius     int	    outer 100 
     /if (!${Defined[Debug]})  		    /declare Debug       	bool  	outer FALSE 
     | sea furious are |32, but so are guards... needs more testing
     /if (!${Defined[aggroAnimation]})   /declare aggroAnimation string  outer |5|8|12|17|18|32|42|44|80|106|129|144|
-    
+    /declare initResult                                         int     local 1
+
     | Use main assist setting to check if ini file is created
     /if (${Ini[${iniFileName},${options},MainAssist].Length}) {
         /varset mainAssist "${Ini[${iniFileName},${options},MainAssist]}"    
     } else {
         /ini "${iniFileName}" "${options}" "MainAssist" "${mainAssist}"      
-        /return 0   
+        /varset initResult 0   
     }
     
     /if (${Ini[${iniFileName},${options},MainTank].Length}) {
         /varset mainTank "${Ini[${iniFileName},${options},MainTank]}"    
     } else {
-        /ini "${iniFileName}" "${options}" "MainTank" "${mainTank}"      
-        /return 0   
+        /ini "${iniFileName}" "${options}" "MainTank" "${mainTank}"     
+        /varset initResult 0   
     }    				    				
     
     /if (${Ini[${iniFileName},${options},AssistPct].Length}) {
         /varset assistPct ${Ini[${iniFileName},${options},AssistPct]}    
-    } 
+    } else {
+        /ini "${iniFileName}" "${options}" "AssistPct" "${assistPct}"      
+    }     				    				
+    
+    /if (${Ini[${iniFileName},${options},CampRadius].Length}) {
+        /varset campRadius ${Ini[${iniFileName},${options},CampRadius]}    
+    } else {
+        /ini "${iniFileName}" "${options}" "CampRadius" "${campRadius}"      
+    }  
 
     /if (${Ini[${iniFileName},Debug,Debug].Length}) {
        /varset Debug ${Bool[${Ini[${iniFileName},Debug,Debug]}]}     
     } 
 
     /call InitLoot
-/return 1
+/return ${initResult}
 
 
 | ################################################################################
