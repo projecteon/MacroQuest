@@ -21,9 +21,14 @@ Sub InitDebufferIni(string iniFileName)
 
 Sub DoDeBuffs
     /if (${Debug} || ${Debug_DeBuffs}) /echo |- DoDeBuffs ==>
+    
+    /if (${Stick.Status.Equal[ON]}) {
+        /goto :endDoDeBuffs
+    }
 
     /call CheckDeBuffs
     
+    :endDoDeBuffs
     /if (${Debug} || ${Debug_DeBuffs}) /echo <== DoDeBuffs -|
 /return
 
