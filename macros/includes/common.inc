@@ -207,6 +207,8 @@ Sub ClearCursor
 | # Type string by chrs 										
 | #####################################################################################	
 Sub TypeChrs(string inputString)
+    /if (${Debug}) /echo |- TypeChrs ==>
+
     /declare char       string local
     /declare loopctr    int local
     /for loopctr 1 to ${inputString.Length}
@@ -217,4 +219,6 @@ Sub TypeChrs(string inputString)
             /nomodkey /keypress ${char} chat
         }
         /next loopctr
+
+    /if (${Debug}) /echo <== TypeChrs -|
 /return

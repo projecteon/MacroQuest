@@ -11,6 +11,7 @@ Sub InitHealIni(string iniFileName)
     /if (!${Defined[hasNotifiedNoMana]})        /declare hasNotifiedNoMana              bool    outer FALSE
     /if (!${Defined[doHealGroup]})              /declare doHealGroup                    bool    outer FALSE 
     /if (!${Defined[doHealNetBots]})            /declare doHealNetBots                  bool    outer FALSE 
+    /if (!${Defined[Debug_Heals]})              /declare Debug_Heals                    bool    outer FALSE
         
     /call InitCasterIni "${iniFileName}"
     /varset healerInitResult ${Macro.Return}
@@ -80,13 +81,17 @@ Sub InitHealIni(string iniFileName)
         /ini "${iniFileName}" "${options}" "DoHealNetBots" "${doHealNetBots}"
     }
 
+    /if (${Ini[${iniFileName},Debug,Debug_Heals].Length}) {
+       /varset Debug_Heals ${Bool[${Ini[${iniFileName},Debug,Debug_Heals]}]}     
+    } 
+
 /return ${healerInitResult}
 
 Sub CheckHeals
-    /if (${Debug}) /echo |- CheckHeals ==>
+    /if (${Debug} || ${Debug_Heals}) /echo |- CheckHeals ==>
 
     /if (${Me.Casting.ID}) {
-        /if (${Debug}) /echo <== CheckHeals -|
+        /if (${Debug} || ${Debug_Heals}) /echo <== CheckHeals -|
         /return
     }
 
@@ -99,20 +104,20 @@ Sub CheckHeals
     /if (${doHealGroup}) /call CheckHealGroup ${defaultHeal} ${defaultHealPct}
     /if (${doHealNetBots}) /call CheckHealNetBots ${defaultHeal} ${defaultHealPct}
     
-    /if (${Debug}) /echo <== CheckHeals -|
+    /if (${Debug} || ${Debug_Heals}) /echo <== CheckHeals -|
 /return
 
 Sub CheckMainTankHeal(string healSpell, int healPct)
-    /if (${Debug}) /echo |- CheckMaintankHeal ==>
+    /if (${Debug} || ${Debug_Heals}) /echo |- CheckMaintankHeal ==>
 
     /if (!${Defined[mainTank]}) {
-        /if (${Debug}) /echo |- No main tank defined
-        /if (${Debug}) /echo <== CheckMaintankHeal -|
+        /if (${Debug} || ${Debug_Heals}) /echo |- No main tank defined
+        /if (${Debug} || ${Debug_Heals}) /echo <== CheckMaintankHeal -|
         /return
     }
 
     /if (${NetBots[${mainTank}].ID} && (!${NetBots[${mainTank}].InZone} || ${NetBots[${mainTank}].PctHPs} > ${healPct} || ${Spawn[${NetBots[${mainTank}].ID}].Distance} > ${healDist})) {
-        /if (${Debug}) /echo <== CheckMaintankHeal -|
+        /if (${Debug} || ${Debug_Heals}) /echo <== CheckMaintankHeal -|
         /return        
     }
 
@@ -126,11 +131,11 @@ Sub CheckMainTankHeal(string healSpell, int healPct)
         }
     }
 
-    /if (${Debug}) /echo <== CheckMaintankHeal -|
+    /if (${Debug} || ${Debug_Heals}) /echo <== CheckMaintankHeal -|
 /return
 
 Sub CheckHealGroup(string healSpell, int healPct)
-    /if (${Debug}) /echo |- CheckHealGroup ==>
+    /if (${Debug} || ${Debug_Heals}) /echo |- CheckHealGroup ==>
 
     /if (!${Group.Members}) {
         /return
@@ -156,14 +161,15 @@ Sub CheckHealGroup(string healSpell, int healPct)
         /call CastHeal "${healSpell}" ${lowestMemberId} ${lowestMemberName}
     }
     
-    /if (${Debug}) /echo <== CheckHealGroup -|
+    /if (${Debug} || ${Debug_Heals}) /echo <== CheckHealGroup -|
 /return
 
 Sub CheckHealNetBots(string healSpell, int healPct)
-    /if (${Debug}) /echo |- CheckHealNetBots ==>
+    /if (${Debug} || ${Debug_Heals}) /echo |- CheckHealNetBots ==>
+
     /if (${NetBots.Counts} < 2) {
         /if (${Debug} && ${NetBots.Counts} < 2) /echo Not enough Nebots clients, current: ${NetBots.Counts} 
-        /if (${Debug}) /echo <== CheckHealNetBots -|
+        /if (${Debug} || ${Debug_Heals}) /echo <== CheckHealNetBots -|
         /return
     }
 
@@ -176,7 +182,7 @@ Sub CheckHealNetBots(string healSpell, int healPct)
             /call CheckTimerExpired "${netbotsClient}_nbh_timer"            
             /varset isExpired ${Macro.Return}
             /if (${isExpired}) {
-                /if (${Debug}) /echo |- CheckHealNetBots > ${NetBots[${netbotsClient}].Name} > ${NetBots[${netbotsClient}].PctHPs}
+                /if (${Debug} || ${Debug_Heals}) /echo |- CheckHealNetBots > ${NetBots[${netbotsClient}].Name} > ${NetBots[${netbotsClient}].PctHPs}
                 /call CastHeal "${healSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
                 /call CreateTimer "${netbotsClient}_nbh_timer" 30
             }
@@ -184,10 +190,12 @@ Sub CheckHealNetBots(string healSpell, int healPct)
         /next x
     }
 
-    /if (${Debug}) /echo <== CheckHealNetBots -|
+    /if (${Debug} || ${Debug_Heals}) /echo <== CheckHealNetBots -|
 /return
 
 Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
+    /if (${Debug} || ${Debug_Heals}) /echo |- CastHeal ==>
+    
     /if (!${Defined[DontStop]}) /declare DontStop bool local FALSE
 
     /if (!${Me.Gem[${healSpell}]}) {
@@ -232,6 +240,8 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 			}
 		}
 	}
+
+    /if (${Debug} || ${Debug_Heals}) /echo <== CastHeal -|
 /return 1
 
 Sub iniHeal(string INIFile, string section, string key, array)
@@ -244,7 +254,6 @@ Sub iniHeal(string INIFile, string section, string key, array)
 Sub CancelHeal(int spellId)
     /if (${Target.Name.Equal[${mainTank}]} && ${Spell[${mainTankHeal}].ID}==${spellId} && ${Bool[${mainTankEmergencyHeal}]} && ${Me.Gem[${mainTankEmergencyHeal}]}) {
         /if (${Target.PctHPs} <= ${mainTankEmergencyHealPct} && ${mainTankEmergencyHeal.NotEqual[${mainTankHeal}]}) { 
-            /echo F this interrupt
             /call Interrupt
             /call CastHeal "${mainTankEmergencyHeal}" ${Target.ID} ${mainTank}
         }

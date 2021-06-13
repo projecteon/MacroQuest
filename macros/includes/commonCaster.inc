@@ -56,7 +56,7 @@ Sub InitCasterIni(string iniFileName)
 /return ${initResult}
 
 Sub CheckManaStatus
-    /if (${Debug}) /echo |- CheckManaStatus ==>
+    /if (${Debug} || ${Debug_Caster}) /echo |- CheckManaStatus ==>
 
 	/if (!${Defined[_lowMana]}) /declare _lowMana outer FALSE 	
 	/if (${Math.Calc[${Me.MaxMana}*${_minMana}/100]} >= ${Me.CurrentMana} && !${_lowMana}) { 
@@ -67,11 +67,11 @@ Sub CheckManaStatus
         /varset _lowMana FALSE
 	} 
     
-    /if (${Debug}) /echo <== CheckManaStatus -|
+    /if (${Debug} || ${Debug_Caster}) /echo <== CheckManaStatus -|
 /return 
 
 Sub TryMedidate 
-    /if (${Debug}) /echo |- TryMedidate ==>
+    /if (${Debug} || ${Debug_Caster}) /echo |- TryMedidate ==>
 
     /if (${Me.Casting.ID}) {
         /goto :endTryMedidate
@@ -80,7 +80,7 @@ Sub TryMedidate
     /call CheckManastone
     /call CheckNPCInRange
     /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
-    /if (${Debug}) /echo |- hasNpcInCamp ${hasNpcInCamp}
+    /if (${Debug} || ${Debug_Caster}) /echo |- hasNpcInCamp ${hasNpcInCamp}
     /if (${Math.Calc[${Me.CurrentMana} / ${Me.MaxMana} * 100]} < ${_meditateAt} && !${Me.Sitting} && (!${hasNpcInCamp} || ${_meditateWithNpcInCamp}) && ${Stick.Status.Equal[OFF]}) {
         /sit
     } else /if (${Me.Sitting} && (${Me.CurrentMana} == ${Me.MaxMana} || (${hasNpcInCamp} && !${_meditateWithNpcInCamp}))) {
@@ -88,7 +88,7 @@ Sub TryMedidate
     }
     
     :endTryMedidate
-    /if (${Debug}) /echo <== TryMedidate -|
+    /if (${Debug} || ${Debug_Caster}) /echo <== TryMedidate -|
 /return
 
 Sub CheckManastone
@@ -103,7 +103,7 @@ Sub CheckManastone
 
 
 Sub DoEvacute
-    /if (${Debug}) /echo |- DoEvacute ==>
+    /if (${Debug} || ${Debug_Caster}) /echo |- DoEvacute ==>
 
     /if (!${bool[${_evacSpell}]}) {
         /goto :endDoEvac
@@ -121,7 +121,7 @@ Sub DoEvacute
     /bca <<< EVACUATING >>>
     
     :endDoEvac
-    /if (${Debug}) /echo <== DoEvacute -|
+    /if (${Debug} || ${Debug_Caster}) /echo <== DoEvacute -|
 /return
 
 Sub CancelEvac
@@ -132,11 +132,11 @@ Sub CancelEvac
 | ################################################################################
 #Event Evac "#*#[MQ2] EVACUATE NOW#*#"
 Sub Event_Evac
-    /if (${Debug}) /echo |- Event_Evac ==>
+    /if (${Debug} || ${Debug_Caster}) /echo |- Event_Evac ==>
 
     /call DoEvacute
     
-    /if (${Debug}) /echo <== Event_Evac -|
+    /if (${Debug} || ${Debug_Caster}) /echo <== Event_Evac -|
 /return
 
 Sub DoCasterEvents

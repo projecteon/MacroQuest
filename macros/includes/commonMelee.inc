@@ -1,4 +1,6 @@
 Sub DoKill
+    /if (${Debug}) /echo |- DoKill ==>	
+
 	/if (!${Melee.Enable} || ${Melee.Combat}) /return
     
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
@@ -27,10 +29,14 @@ Sub DoKill
             /if (${Debug}) /echo DEBUG: KillMob: Combat Loop
             /goto :gotoloopkeepfighting            
         } 
+
+    /if (${Debug}) /echo <== DoKill -|
 /return
 
-Sub DoMelee
-    /if (${Me.Combat} || ${Me.Moving}) {
+Sub DoMelee    
+    /if (${Debug}) /echo |- DoMelee ==>	
+
+	/if (${Me.Combat} || ${Me.Moving}) {
         /return
     }
 
@@ -66,10 +72,12 @@ Sub DoMelee
             }
         }
     }
+
+    /if (${Debug}) /echo <== DoMelee -|
 /return
 
 Sub DoRogueStrike
-    /if (${Debug}) /echo |- doRogueStrike ==>	
+    /if (${Debug}) /echo |- DoRogueStrike ==>	
 
 	/if (${Me.Endurance} > ${strikeDiscEndCost} && ${Me.PctEndurance} >= ${strikeDiscMinEnd} && ${Me.CombatAbilityReady[${strikeDisc}]} && ${Me.AbilityReady[Backstab]} && !${Me.ActiveDisc.ID} && ${Me.Invis} && ${Me.Sneaking}) {
 		| Use 'Assassin's Strike' type disc.
@@ -82,5 +90,5 @@ Sub DoRogueStrike
 		/attack on
 	}
 
-    /if (${Debug}) /echo <== doRogueStrike -|
+    /if (${Debug}) /echo <== DoRogueStrike -|
 /return

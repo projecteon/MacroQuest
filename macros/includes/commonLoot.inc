@@ -451,7 +451,7 @@ Sub SellItem(int inventorySlot, int packSlot)
 | ################################################################################
 #Event SetCursorItemForSelling "#*#[MQ2] mark item for selling#*#"
 Sub Event_SetCursorItemForSelling
-    /if (${Debug}) /echo |- Event_SetCursorItemForSelling ==>
+    /if (${Debug} || ${Debug_Sell}) /echo |- Event_SetCursorItemForSelling ==>
 
     /if (${Cursor.ID}) {
         /call CanSellItem "${Cursor}" ${Cursor.ID}
@@ -471,7 +471,7 @@ Sub Event_SetCursorItemForSelling
         }
     }
     
-    /if (${Debug}) /echo <== Event_SetCursorItemForSelling -|
+    /if (${Debug} || ${Debug_Sell}) /echo <== Event_SetCursorItemForSelling -|
 /return
 
 | ################################################################################
@@ -479,7 +479,7 @@ Sub Event_SetCursorItemForSelling
 | ################################################################################
 #Event SetCursorItemForDestroy "#*#[MQ2] mark item for destroy#*#"
 Sub Event_SetCursorItemForDestroy
-    /if (${Debug}) /echo |- Event_SetCursorItemForDestroy ==>
+    /if (${Debug} || ${Debug_Loot}) /echo |- Event_SetCursorItemForDestroy ==>
 
     /if (${Cursor.ID}) {
         /call CanDestroyItem "${Cursor}" ${Cursor.ID}
@@ -499,7 +499,7 @@ Sub Event_SetCursorItemForDestroy
         }
     }
     
-    /if (${Debug}) /echo <== Event_SetCursorItemForDestroy -|
+    /if (${Debug} || ${Debug_Loot}) /echo <== Event_SetCursorItemForDestroy -|
 /return
 
 
@@ -508,7 +508,7 @@ Sub Event_SetCursorItemForDestroy
 | ################################################################################
 #Event SellItems "#*#[MQ2] sell items to vendor#*#"
 Sub Event_SellItems
-    /if (${Debug}) /echo |- Event_SellItems ==>
+    /if (${Debug} || ${Debug_Sell}) /echo |- Event_SellItems ==>
 
     | Record starting location.
 	/declare startingLoc string local ${Me.Loc.Replace[ ,]}
@@ -532,7 +532,7 @@ Sub Event_SellItems
 		/echo I have finished selling.
 	}
 
-    /if (${Debug}) /echo <== Event_SellItems -|
+    /if (${Debug} || ${Debug_Sell}) /echo <== Event_SellItems -|
 /return
 
 
@@ -541,11 +541,11 @@ Sub Event_SellItems
 | ################################################################################
 #Event LootNearest "#*#[MQ2] loot nearest corpse#*#"
 Sub Event_LootNearest
-    /if (${Debug}) /echo |- Event_LootNearest ==>
+    /if (${Debug} || ${Debug_Loot}) /echo |- Event_LootNearest ==>
 
     /call LootNearestCorpse
     
-    /if (${Debug}) /echo <== Event_LootNearest -|
+    /if (${Debug} || ${Debug_Loot}) /echo <== Event_LootNearest -|
 /return
 
 | ################################################################################

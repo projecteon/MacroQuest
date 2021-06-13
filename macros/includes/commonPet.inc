@@ -107,7 +107,7 @@ Sub SummonPet
     /delay 1s ${Me.Pet.ID}
     /if (${Me.Pet.ID} && ${petTaunt}) {
         /pet taunt on
-    } else {
+    } else /if (${Me.Pet.ID}) {
         /pet taunt off
     }
     

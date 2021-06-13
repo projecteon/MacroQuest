@@ -6,11 +6,12 @@
 #turbo
 
 Sub InitNukeIni(string fileName)
-    /declare nukeOptions        string  outer "NukeOptions"
-    /declare mainNuke           string  outer 
-    /declare undeadNuke         string  outer 
-    /declare minNukeMana        int     outer 0
-    /declare nukeInitResult     int     local 1
+    /if (!${Defined[nukeOptions]})  		/declare nukeOptions        string  outer "NukeOptions"
+    /if (!${Defined[mainNuke]})  		    /declare mainNuke           string  outer 
+    /if (!${Defined[undeadNuke]})  		    /declare undeadNuke         string  outer 
+    /if (!${Defined[minNukeMana]})  		/declare minNukeMana        int     outer 0
+    /if (!${Defined[nukeInitResult]})  		/declare nukeInitResult     int     local 1
+    /if (!${Defined[Debug_Nuke]})  		    /declare Debug_Nuke       	bool  	outer FALSE 
 
     /call InitCasterIni "${fileName}"
     /varset nukeInitResult ${Macro.Return}
@@ -28,20 +29,24 @@ Sub InitNukeIni(string fileName)
 
     /if (${Ini[${fileName},${nukeOptions},MinMana].Length}) {
        /varset minNukeMana ${Ini[${fileName},${nukeOptions},MinMana]}       
-    }
+    } 
+
+    /if (${Ini[${iniFileName},Debug,Debug_Nuke].Length}) {
+       /varset Debug_Nuke ${Bool[${Ini[${iniFileName},Debug,Debug_Nuke]}]}     
+    } 
 /return ${nukeInitResult}
 
 Sub DoNuke
-    /if (${Debug}) /echo |- DoNuke ==>
+    /if (${Debug} || ${Debug_Nuke}) /echo |- DoNuke ==>
 
     /if (${Me.Casting.ID} || ${Me.Moving} || ${Me.PctMana} <= ${minNukeMana}) {
-        /if (${Debug}) /echo |- Unabel to cast right now
+        /if (${Debug} || ${Debug_Nuke}) /echo |- Unabel to cast right now
         /goto :endDoNuke
     }
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
-        /if (${Debug}) /echo |- No MA target
+        /if (${Debug} || ${Debug_Nuke}) /echo |- No MA target
         /goto :endDoNuke
     }
     
@@ -51,13 +56,13 @@ Sub DoNuke
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
     /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight}) {
-        /if (${Debug}) /echo |- Wrong target type
+        /if (${Debug} || ${Debug_Nuke}) /echo |- Wrong target type
         /goto :endDoNuke
     }
 
     /call EnsureTarget ${targetId}
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
-        /if (${Debug}) /echo |- Invalid target
+        /if (${Debug} || ${Debug_Nuke}) /echo |- Invalid target
         /goto :endDoNuke
     }
     
@@ -68,11 +73,11 @@ Sub DoNuke
     }
     
     :endDoNuke
-    /if (${Debug}) /echo <== DoNuke -|
+    /if (${Debug} || ${Debug_Nuke}) /echo <== DoNuke -|
 /return
 
 Sub TryNukeTarget(string nuke)
-    /if (${Debug}) /echo |- TryNukeTarget ==>
+    /if (${Debug} || ${Debug_Nuke}) /echo |- TryNukeTarget ==>
 
     /if (!${Cast.Ready[${nuke}]} || ${Me.CurrentMana} < ${Spell[${nuke}].Mana} || ${Target.Distance} > ${Spell[${nuke}].Range}) {
         /goto :endTryNukeTarget
@@ -85,7 +90,7 @@ Sub TryNukeTarget(string nuke)
     /call cast "${nuke}" gem${Me.Gem[${nuke}]} 0 CancelNuke
 
     :endTryNukeTarget
-    /if (${Debug}) /echo <== TryNukeTarget -|
+    /if (${Debug} || ${Debug_Nuke}) /echo <== TryNukeTarget -|
 /return
 
 Sub CancelNuke(int spellId)
