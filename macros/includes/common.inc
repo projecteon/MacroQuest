@@ -88,7 +88,7 @@ Sub EnsureTarget(targetId)
 			/squelch /target id ${targetId}
 			/delay 3s ${Target.ID} == ${targetId}
 	} else {
-		/echo EnsureTarget has no spawncount
+		/echo EnsureTarget has no spawncount for target id ${targetId}
 	}
     
     :endEnsureTarget
