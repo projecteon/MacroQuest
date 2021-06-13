@@ -6,6 +6,7 @@ Sub InitPetIni(string iniFileName)
     /declare petWeaponsSpell    string  outer 
     /declare petTaunt           bool    outer false
     /declare currentPetTargetId int     outer 0
+    /declare Debug_Pet          bool    outer FALSE
 
     /if (${Ini[${iniFileName},${petOptions},"Pet Spell"].Length}) {
         /varset petSpell ${Ini[${iniFileName},${petOptions},"Pet Spell"]}
@@ -30,6 +31,11 @@ Sub InitPetIni(string iniFileName)
     } else {
         /ini "${iniFileName}" "${petOptions}" "Pet Taunt" "${petTaunt}"
     }
+
+    /if (${Ini[${iniFileName},Debug,Debug_Pet].Length}) {
+       /varset Debug_Pet ${Bool[${Ini[${iniFileName},Debug,Debug_Pet]}]}     
+    } 
+
 /return 1
 
 Sub DoPet
@@ -94,10 +100,11 @@ Sub SummonPet
     |     /return
     | }
 
-    /if (!${Me.Pet.ID} && !${Me.Casting} && ${Me.SpellReady[${petSpell}]} && ${Me.CurrentMana} > ${Spell[${petSpell}].Mana}) {
-        /call cast ${petSpell}
+    /if (!${Bool[${Me.Pet.ID}]} && !${Bool[${Me.Casting}]} && ${Me.SpellReady[${petSpell}]} && ${Me.CurrentMana} > ${Spell[${petSpell}].Mana}) {
+        /call cast "${petSpell}"
     }
 
+    /delay 1s ${Me.Pet.ID}
     /if (${Me.Pet.ID} && ${petTaunt}) {
         /pet taunt on
     } else {
@@ -113,6 +120,10 @@ Sub SummonPet
 Sub WeaponizePet(int petID)
     /if (${Debug} || ${Debug_Pet}) /echo |- WeaponizePet ==> ${petID} 
 
+    /if (!${petWeaponsSpell}) {
+        /goto :endWeaponizePet
+    }
+
     /if (!${Me.Gem[${petWeaponsSpell}]}) {
         /echo !!! SPELL NOT MEMORIZED <<${petWeaponsSpell}>> !!!
         /bca !!! SPELL NOT MEMORIZED <<${petWeaponsSpell}>> !!!
@@ -121,12 +132,14 @@ Sub WeaponizePet(int petID)
 
     /if (!${Defined[petID]}) {
         /declare petID int local ${Me.Pet.ID} 
+    } else /if (${petID} == 0) {
+        /varset petID ${Me.Pet.ID} 
     }
 
     
 
-    /if (!${petID} || !${Spawn[pet ${petID}].ID}) {  
-        /echo No pet to weaponize, missing pet id
+    /if (!${petID} && !${Spawn[pet id ${petID}].ID}) {  
+        /echo No pet to weaponize, missing pet id ${petID} ${Spawn[pet id ${petID}].ID}
         /bca No pet to weaponize, missing pet id
         /goto :endWeaponizePet       
     }
@@ -135,11 +148,16 @@ Sub WeaponizePet(int petID)
         /goto :endWeaponizePet       
     }
 
-    /call EnsureTarget ${Pet.ID}
+    /call EnsureTarget ${petID}
 
     /declare k  int local
     /for k 1 to 2 {
-        /call cast ${petWeaponsSpell}
+        /if (!${Me.SpellReady[${petSpell}]}) {
+            | /delay ${Spell[${petSpell}].RecastTime} | reports wrong, reports recovery time
+            /delay 6s
+        }
+
+        /call cast "${petWeaponsSpell}"
         /delay 3
         /click left target
         /delay 1s ${Window[GiveWnd].Open}
@@ -166,26 +184,27 @@ Sub MakePetIni(string fileName)
 | ################################################################################
 #Event SummonYourPet "#*#[MQ2] summon your pet#*#"
 Sub Event_SummonYourPet
-    /if (${Debug}) /echo |- Event_SummonYourPet ==>
+    /if (${Debug} || ${Debug_Pet}) /echo |- Event_SummonYourPet ==>
 
     /call SummonPet
     
-    /if (${Debug}) /echo <== Event_SummonYourPet -|
+    /if (${Debug} || ${Debug_Pet}) /echo <== Event_SummonYourPet -|
 /return
 
 | ################################################################################
 | # Weaponize pet event
 | ################################################################################
-#Event WeaponizeThePet "#*#[MQ2] waponize the pet #1##*#"
+#Event WeaponizeThePet "#*#[MQ2] weaponize the pet:#1##*#"
+#Event WeaponizeThePet "#*#[MQ2] weaponize your pet#1##*#"
 Sub Event_WeaponizeThePet(eventText, int petID)
-    /if (${Debug}) /echo |- Event_WeaponizeThePet ==>
+    /if (${Debug} || ${Debug_Pet}) /echo |- Event_WeaponizeThePet ==>
 
-    /call SummonPet ${petID}
+    /call WeaponizePet ${petID}
     
-    /if (${Debug}) /echo <== Event_WeaponizeThePet -|
+    /if (${Debug} || ${Debug_Pet}) /echo <== Event_WeaponizeThePet -|
 /return
 
 Sub DoPetEvents
-  /doevents SummonPet
-  /doevents WeaponizeThePet
+    /doevents SummonYourPet
+    /doevents WeaponizeThePet
 /return
