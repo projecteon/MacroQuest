@@ -120,7 +120,7 @@ Sub SummonPet
 Sub WeaponizePet(int petID)
     /if (${Debug} || ${Debug_Pet}) /echo |- WeaponizePet ==> ${petID} 
 
-    /if (!${petWeaponsSpell}) {
+    /if (!${Bool[${petWeaponsSpell}]}) {
         /goto :endWeaponizePet
     }
 
