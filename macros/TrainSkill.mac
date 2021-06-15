@@ -1,0 +1,43 @@
+#include includes\spell_routines.inc
+#include includes\common.inc
+#include includes\commonCaster.inc
+#include includes\commonBuffer.inc
+#include includes\commonPet.inc
+#include includes\commonNuke.inc
+
+#turbo
+
+Sub Main(string ability)
+
+    | https://www.redguides.com/community/threads/spell-skill-up-macro.9117/
+    | https://www.redguides.com/community/threads/skills-auto-skill-raiser.27492/
+    | https://www.redguides.com/community/threads/lockpick-mac.12231/
+
+    :trainloop
+        /if (!${Bool[${Me.Skill[${ability}]}]}) {
+            /echo You do not have the skill: ${ability}
+            /endmac
+        }
+
+        /if (!${Bool[${Me.Ability[${ability}]}]}) {
+            /echo Ability is not mapped to action button: ${ability}
+            /endmac
+        }
+
+        /if (${Me.Skill[${ability}]} == ${Skill[${ability}].SkillCap} ) {
+            /echo You maxed the skill: ${ability}
+            /endmac
+        }
+
+        /if (${Bool[${Me.AbilityReady[${ability}]}]}) {
+            /doability "${ability}"
+            /delay 2
+        } 
+
+        /if (${Bool[${Cursor.ID}]}) {
+            /autoinv
+        }
+
+        /goto :trainloop
+
+/return
