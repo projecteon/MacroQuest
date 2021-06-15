@@ -53,7 +53,7 @@ Sub InitGenralIni(string iniFileName)
 Sub CheckNPCInRange(int radiusCheck)
     /if (${Debug}) /echo |- CheckNPCInRange ==>
 
-	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local 100
+	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local ${campRadius}
 	
     /if (${Debug}) /echo |- CheckNPCInRange > ${radiusCheck}
 	/if (!${Defined[npcCount]})  /declare npcCount int local ${SpawnCount[npc los radius ${radiusCheck}]}
