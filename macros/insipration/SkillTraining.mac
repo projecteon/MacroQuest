@@ -1,0 +1,178 @@
+| BardSkill.mac - blueninja
+|
+| Trains bard instrument skills and various other skills
+|
+| To use edit the instruments and songs below to match your setup
+| Memorize the songs you want to train, to skip one of the instrument skills
+| start the macro without that song memorized.
+|
+| By default it uses Denon`s disruptive discord to train brass instruments, this is an AoE song
+| that will agro npc's close to you. Run it in a non-agro zone like pok or the nexus.
+|
+
+
+#include spell_routines.inc
+#event Skillup "You have become better at #1#! (#2#)"
+Sub Event_Skillup(string Line,string SkillN, string SkillL)
+   /echo Skill ${SkillN}: ${SkillL}
+/return
+
+Sub Main
+
+|------------ Edit stuff here to configure the macro -----------------------
+
+| Define what skills to be trained 1=train, 0=don't train
+   /declare TrainInstrument bool local 1
+   /declare TrainForage bool local 1
+   /declare TrainSneak bool local 1
+   /declare TrainHide bool local 0
+   /declare TrainSense bool local 1
+   /declare TrainDisarmtraps bool local 1
+   /declare TrainTrack bool local 0
+
+   /declare SkillName[5] string outer
+   /declare SongName[5] string local
+   /declare Instrument[5] string local
+
+| Define the songs and instruments to use for the various skills   
+   /varset SkillName[5] Percussion instruments
+   /varset SongName[5] Selo`s accelerando
+   /varset Instrument[5] Thunderous drum of Karana
+
+   /varset SkillName[2] Wind instruments
+   /varset SongName[2] Cinda`s Charismatic Carillon
+   /varset Instrument[2] Combine Wooden Flute
+
+   /varset SkillName[3] Brass instruments
+   /varset SongName[3] Denon`s disruptive Discord
+   /varset Instrument[3] Combine Horn
+
+   /varset SkillName[4] Stringed instruments
+   /varset SongName[4] Hymn of restoration
+   /varset Instrument[4] Orcish Lute of Singing
+
+   /varset SkillName[1] Sing
+   /varset SongName[1] Jonthan's Whistling Warsong
+   /varset Instrument[1] None
+
+|------------ Below this line nothing should need to be edited    -----------
+
+   /if (${Me.Level}<12 && ${Me.Race.ID}!=4) /varset TrainForage 0
+   /if (${Me.Level}<17) /varset TrainSneak 0
+   /if (${Me.Level}<25 && ${Me.Race.ID}!=4) /varset TrainHide 0
+   /if (${Me.Level}<20) /varset TrainSense 0
+   /if (${Me.Level}<20) /varset TrainDisarmtraps 0
+   /if (${Me.Level}<35) /varset TrainTrack 0
+
+   /declare MaxSkill int local ${Math.Calc[${Me.Level}*5+5]}
+   /if (${MaxSkill}>235) /varset MaxSkill 235
+
+   /echo Max instrument skill: ${MaxSkill}
+   
+   /declare MaxForage int local ${Math.Calc[${Me.Level}*5+5]}
+   /if (${MaxForage}>55) /varset MaxForage 55
+
+   /declare MaxSneak int local ${Math.Calc[${Me.Level}*5+5]}
+   /if (${MaxSneak}>75) /varset MaxSneak 75
+
+   /declare MaxHide int local ${Math.Calc[${Me.Level}*5+5]}
+   /if (${MaxHide}>40) /varset MaxHide 40
+
+   /declare MaxSense int local ${Math.Calc[${Me.Level}*3]}
+   /if (${MaxSense}>120) /varset MaxSense 120
+
+   /declare MaxDisarmtraps int local ${Math.Calc[${Me.Level}*5+5]}
+   /if (${MaxDisarmtraps}>120) /varset MaxDisarmtraps 120
+
+   /declare MaxTrack int local ${Math.Calc[${Me.Level}*5+5]}
+   /if (${MaxTrack}>100) /varset MaxTrack 100
+
+
+   /declare SneakTimer timer outer
+   /declare HideTimer timer outer
+
+   /declare CurSkill int outer 1
+   
+   :loop
+      /if ((${CurSkill}>5 || !${TrainInstrument}) && !(${TrainForage} || ${TrainSneak} || ${TrainHide} || ${TrainSense} || ${TrainDisarmtraps} || ${TrainTrack})) {
+         /echo Training done!
+         /endmacro
+      }
+
+      /if (!${Me.Standing}) /stand
+      /doevents
+      /if (${CurSkill}<6 && ${Me.Skill[${SkillName[${CurSkill}]}]}>=${MaxSkill}) {
+         /varcalc CurSkill ${CurSkill}+1
+         /if (${CurSkill}>5) {
+            /echo Instrument skills done!
+            /stopsong
+            /goto :loop
+         }
+         /if (!${Me.Gem[${SongName[${CurSkill}]}]}) {
+            /echo ${SongName[${CurSkill}]} not memmed! Skipping ${SkillName[${CurSkill}]}!
+            /varcalc CurSkill ${CurSkill}+1
+            /goto :loop
+         }
+         /echo Training ${SkillName[${CurSkill}]}: ${Me.Skill[${SkillName[${CurSkill}]}]}
+         /goto :loop
+      }
+      /if (${CurSkill}<6 && (!${InvSlot[offhand].Item.ID} || ${InvSlot[offhand].Item.Name.NotEqual[${Instrument[${CurSkill}]}]}) && ${Instrument[${CurSkill}].NotEqual[None]}) /call EquipItem "${Instrument[${CurSkill}]}|offhand"
+      /if (${CurSkill}<6 && (!${Me.Casting.ID} || ${Me.Casting.Name.NotEqual[${SongName[${CurSkill}]}]})) {
+         /if (${Me.Casting.ID}) /stopsong
+         /echo Singing: ${SongName[${CurSkill}]} (${SkillName[${CurSkill}]}: ${Me.Skill[${SkillName[${CurSkill}]}]} / ${MaxSkill})
+         /cast "${SongName[${CurSkill}]}"
+         /delay 5
+      }
+      /if (${TrainSense} && ${Me.Skill[sense traps]}>=${MaxSense}) {
+         /echo Sense traps done!
+         /varset TrainSense 0
+      }
+      /if (${TrainDisarmtraps} && ${Me.Skill[disarm traps]}>=${MaxDisarmtraps}) {
+         /echo Disarm traps done!
+         /varset TrainDisarmtraps 0
+      }
+      /if (${TrainTrack} && ${Me.Skill[tracking]}>=${MaxTrack}) {
+         /echo Track done!
+         /varset TrainTrack 0
+      }
+      /if (${TrainHide} && ${Me.Skill[hide]}>=${MaxHide}) {
+         /echo Hide done!
+         /varset TrainHide 0
+      }
+      /if (${TrainSneak} && ${Me.Skill[sneak]}>=${MaxSneak}) {
+         /echo Sneak done!
+         /varset TrainSneak 0
+      }
+      /if (${TrainForage} && ${Me.Skill[forage]}>=${MaxForage}) {
+         /echo Forage done!
+         /varset TrainForage 0
+      }
+      
+      /if (${TrainForage} && ${Me.AbilityReady[forage]} && ${Me.Standing}) /doability forage
+      /delay 2
+      /if (${Cursor.ID}) /autoinv
+      /if (${TrainSneak} && ${Me.AbilityReady[sneak]} && !${SneakTimer} && ${Me.Standing} && ${Me.Skill[sneak]}<${MaxSneak}) {
+         /doability sneak
+         /delay 5
+         /varset SneakTimer 120
+         /doability sneak
+      }
+      /delay 2
+
+      /if (${TrainHide} && ${Me.AbilityReady[hide]} && !${HideTimer} && ${Me.Standing}) {
+         /doability hide
+         /delay 5
+         /varset HideTimer 120
+         /doability Hide
+      }
+      /delay 2
+      /if (${TrainSense} && ${TrainSense} && ${Me.AbilityReady[sense traps]} && ${Me.Standing}) /doability "sense traps"
+      /delay 2
+      /if (${TrainDisarmtraps} && ${Me.AbilityReady[disarm traps]} && ${Me.Standing}) /doability "disarm traps"
+
+      /delay 2
+      /if (${TrainTrack} && ${Me.AbilityReady[tracking]} && ${Me.Standing}) /doability "tracking"
+      
+   /goto :loop
+   
+/return
