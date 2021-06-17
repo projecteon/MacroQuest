@@ -81,7 +81,7 @@ Sub TryMedidate
     /call CheckNPCInRange
     /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
     /if (${Debug} || ${Debug_Caster}) /echo |- hasNpcInCamp ${hasNpcInCamp}
-    /if (${Math.Calc[${Me.CurrentMana} / ${Me.MaxMana} * 100]} < ${_meditateAt} && !${Me.Sitting} && (!${hasNpcInCamp} || ${_meditateWithNpcInCamp}) && ${Stick.Status.Equal[OFF]}) {
+    /if (${Me.PctMana} < ${_meditateAt} && !${Me.Sitting} && (!${hasNpcInCamp} || ${_meditateWithNpcInCamp}) && ${Stick.Status.Equal[OFF]}) {
         /sit
     } else /if (${Me.Sitting} && (${Me.CurrentMana} == ${Me.MaxMana} || (${hasNpcInCamp} && !${_meditateWithNpcInCamp}))) {
         /stand
