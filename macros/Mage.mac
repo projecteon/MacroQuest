@@ -32,7 +32,6 @@ Sub Main
         /call DoPet
         /call DoNuke
         /call DoCommonEvents
-        /call DoPetEvents
         /goto :MageLoop
 /return
 

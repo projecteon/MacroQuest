@@ -81,6 +81,8 @@ Sub DoPet
     /pet attack
     
     :endDoPet
+    /call DoPetEvents
+    
     /if (${Debug} || ${Debug_Pet}) /echo <== DoPet -|
 /return
 
@@ -169,6 +171,7 @@ Sub WeaponizePet(int petID)
     }
     
     :endWeaponizePet
+
     /if (${Debug} || ${Debug_Pet}) /echo <== WeaponizePet -|
 /RETURN
 

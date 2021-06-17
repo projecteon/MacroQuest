@@ -27,6 +27,7 @@ Sub Main
         
         /call CheckHeals
         /if (${Macro.Return} == 1) /goto :ShamanLoop
+        
         /call CheckManaStatus
         /call DoCannibalize
         /call TryMedidate
@@ -35,7 +36,6 @@ Sub Main
         /call DoNuke
         /call DoBuffs
         /call DoCommonEvents
-        /call DoPetEvents
         /goto :ShamanLoop
 /return
 
