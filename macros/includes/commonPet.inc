@@ -3,6 +3,7 @@ Sub InitPetIni(string iniFileName)
     /declare petInitResult      int     local 1
     /declare petSpell           string  outer 
     /declare petAssistPct       int     outer 
+    /declare petFocusItem       string  outer 
     /declare petWeaponsSpell    string  outer 
     /declare petTaunt           bool    outer false
     /declare currentPetTargetId int     outer 0
@@ -14,8 +15,14 @@ Sub InitPetIni(string iniFileName)
         /ini "${iniFileName}" "${petOptions}" "Pet Spell" "${petSpell}"
     }
 
+    /if (${Ini[${iniFileName},${petOptions},"Pet Focus Item"].Length}) {
+        /varset petFocusItem ${Ini[${iniFileName},${petOptions},"Pet Focus Item"]}
+    } else {
+        /ini "${iniFileName}" "${petOptions}" "Pet Focus Item" "${petFocusItem}"
+    }
+
     /if (${Ini[${iniFileName},${petOptions},"Pet AssistPct"].Length}) {
-        /varset petAssistPct ${Ini[${iniFileName},${petOptions},"Pet TaAssistPctunt"]}
+        /varset petAssistPct ${Ini[${iniFileName},${petOptions},"Pet AssistPct"]}
     } else {
         /ini "${iniFileName}" "${petOptions}" "Pet AssistPct" "${petAssistPct}"
     }
@@ -103,7 +110,18 @@ Sub SummonPet
     | }
 
     /if (!${Bool[${Me.Pet.ID}]} && !${Bool[${Me.Casting}]} && ${Me.SpellReady[${petSpell}]} && ${Me.CurrentMana} > ${Spell[${petSpell}].Mana}) {
+        /if (${Bool[${petFocusItem}]} && ${Bool[${FindItem[=${petFocusItem}]}]} && ${FindItem[=${petFocusItem}].ItemSlot} >=23) {
+            /declare currentMainHand string local ${Me.Inventory[mainhand]} | 13 - mainhand
+            /exchange "${petFocusItem}" mainhand
+            /delay 1s ${Me.Inventory[mainhand].Name.Equal[${petFocusItem}]}
+        }
+
         /call cast "${petSpell}"
+
+        /if (${Defined[currentMainHand]} && ${Bool[${currentMainHand}]}) {
+            /exchange "${currentMainHand}" mainhand
+            /delay 1s ${Me.Inventory[mainhand].Name.Equal[${currentMainHand}]}
+        }
     }
 
     /delay 1s ${Me.Pet.ID}
