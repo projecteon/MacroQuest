@@ -12,6 +12,7 @@ Sub InitBufferIni(string iniFileName)
     /if (!${Defined[iniSelfBuffDimensions]})            /declare iniSelfBuffDimensions          int     outer 2
     /if (!${Defined[doBuffGroup]})                      /declare doBuffGroup                    bool    outer false 
     /if (!${Defined[doBuffNetBots]})                    /declare doBuffNetBots                  bool    outer false 
+    /if (!${Defined[doBuffsWithNpcInCamp]})             /declare doBuffsWithNpcInCamp           bool    outer FALSE 
     /if (!${Defined[Debug_Group_Buffs]})                /declare Debug_Group_Buffs              bool    outer FALSE
     /if (!${Defined[Debug_NetBots_Buffs]})              /declare Debug_NetBots_Buffs            bool    outer FALSE
 
@@ -25,6 +26,12 @@ Sub InitBufferIni(string iniFileName)
        /varset doBuffNetBots ${Bool[${Ini[${iniFileName},${options},DoBuffNetBots]}]}
     } else {
         /ini "${iniFileName}" "${options}" "DoBuffNetBots" "${doBuffNetBots}"
+    }
+
+    /if (${Ini[${iniFileName},${options},DoBuffsWithNpcInCamp].Length}) {
+       /varset doBuffsWithNpcInCamp ${Bool[${Ini[${iniFileName},${options},DoBuffsWithNpcInCamp]}]}
+    } else {
+        /ini "${iniFileName}" "${options}" "DoBuffsWithNpcInCamp" "${doBuffsWithNpcInCamp}"
     }
 
     /call IniArray "${iniFileName}" "Buffs" "Buff" ${iniBuffDimensions} Buffs
@@ -52,12 +59,14 @@ Sub DoBuffs
         /goto :endDoBuffs
     }
 
-    /call CheckNPCInRange
-    /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
-    /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
-    /if (${hasNpcInCamp}) {
-        /echo ${hasNpcInCamp} ${campRadius}
-        /goto :endDoBuffs
+    /if (!${doBuffsWithNpcInCamp}) {
+        /call CheckNPCInRange
+        /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
+        /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
+        /if (${hasNpcInCamp}) {
+            /echo ${hasNpcInCamp} ${campRadius}
+            /goto :endDoBuffs
+        }
     }
 
     /call CheckSelfBuffs
