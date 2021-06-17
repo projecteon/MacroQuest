@@ -82,7 +82,7 @@ Sub DoPet
     
     :endDoPet
     /call DoPetEvents
-    
+
     /if (${Debug} || ${Debug_Pet}) /echo <== DoPet -|
 /return
 
@@ -185,6 +185,7 @@ Sub MakePetIni(string fileName)
 | ################################################################################
 | # Summon pet event
 | ################################################################################
+#Event SummonYourPet "<#1#> summon your pet#*#"
 #Event SummonYourPet "#*#[MQ2] summon your pet#*#"
 Sub Event_SummonYourPet
     /if (${Debug} || ${Debug_Pet}) /echo |- Event_SummonYourPet ==>
@@ -197,6 +198,8 @@ Sub Event_SummonYourPet
 | ################################################################################
 | # Weaponize pet event
 | ################################################################################
+#EVENT WeaponizeThePet "<#1#> weaponize the pet:#1##*#"
+#EVENT WeaponizeThePet "<#1#> weaponize the pet:#1##*#"
 #Event WeaponizeThePet "#*#[MQ2] weaponize the pet:#1##*#"
 #Event WeaponizeThePet "#*#[MQ2] weaponize your pet#1##*#"
 Sub Event_WeaponizeThePet(eventText, int petID)

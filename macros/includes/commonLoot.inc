@@ -477,6 +477,7 @@ Sub Event_SetCursorItemForSelling
 | ################################################################################
 | # Set item on cursor for selling
 | ################################################################################
+#Event SetCursorItemForDestroy "<#*#> mark item for destroy#*#"
 #Event SetCursorItemForDestroy "#*#[MQ2] mark item for destroy#*#"
 Sub Event_SetCursorItemForDestroy
     /if (${Debug} || ${Debug_Loot}) /echo |- Event_SetCursorItemForDestroy ==>
@@ -506,6 +507,7 @@ Sub Event_SetCursorItemForDestroy
 | ################################################################################
 | # Set item on cursor for selling
 | ################################################################################
+#Event SellItems "<#*#> sell items to vendor#*#"
 #Event SellItems "#*#[MQ2] sell items to vendor#*#"
 Sub Event_SellItems
     /if (${Debug} || ${Debug_Sell}) /echo |- Event_SellItems ==>
@@ -539,6 +541,7 @@ Sub Event_SellItems
 | ################################################################################
 | # Set item on cursor for selling
 | ################################################################################
+#Event LootNearest "<#*#> loot nearest corpse#*#"
 #Event LootNearest "#*#[MQ2] loot nearest corpse#*#"
 Sub Event_LootNearest
     /if (${Debug} || ${Debug_Loot}) /echo |- Event_LootNearest ==>
