@@ -7,8 +7,11 @@
 
 Sub InitNukeIni(string fileName)
     /if (!${Defined[nukeOptions]})  		/declare nukeOptions        string  outer "NukeOptions"
-    /if (!${Defined[mainNuke]})  		    /declare mainNuke           string  outer 
-    /if (!${Defined[undeadNuke]})  		    /declare undeadNuke         string  outer 
+    /if (!${Defined[useNuke]})  		    /declare useNuke                   outer 
+    /if (!${Defined[Undead]})  		        /declare Undead             string  outer 
+    /if (!${Defined[Fire]})  		        /declare Fire               string  outer 
+    /if (!${Defined[Cold]})  		        /declare Cold               string  outer 
+    /if (!${Defined[Magic]})  		        /declare Magic              string  outer 
     /if (!${Defined[minNukeMana]})  		/declare minNukeMana        int     outer 0
     /if (!${Defined[nukeInitResult]})  		/declare nukeInitResult     int     local 1
     /if (!${Defined[Debug_Nuke]})  		    /declare Debug_Nuke       	bool  	outer FALSE 
@@ -16,15 +19,33 @@ Sub InitNukeIni(string fileName)
     /call InitCasterIni "${fileName}"
     /varset nukeInitResult ${Macro.Return}
 
-    /if (${Ini[${fileName},${nukeOptions},MainNuke].Length}) {
-        /varset mainNuke "${Ini[${fileName},${nukeOptions},MainNuke]}"
-    } else {
-        /ini "${fileName}" "${nukeOptions}" "MainNuke" "${mainNuke}"
-        /varset nukeInitResult 0
+    /if (${Ini[${fileName},${nukeOptions},UndeadNuke].Length}) {
+       /varset Undead ${Ini[${fileName},${nukeOptions},Undead]}       
     }
 
-    /if (${Ini[${fileName},${nukeOptions},UndeadNuke].Length}) {
-       /varset undeadNuke ${Ini[${fileName},${nukeOptions},UndeadNuke]}       
+    /if (${Ini[${fileName},${nukeOptions},Fire].Length}) {
+       /varset Fire ${Ini[${fileName},${nukeOptions},Fire]}       
+    }
+
+    /if (${Ini[${fileName},${nukeOptions},Cold].Length}) {
+       /varset Cold ${Ini[${fileName},${nukeOptions},Cold]}       
+    }
+
+    /if (${Ini[${fileName},${nukeOptions},Magic].Length}) {
+        /echo ${Ini[${fileName},${nukeOptions},Magic]}
+        /varset Magic ${Ini[${fileName},${nukeOptions},Magic]}       
+        /echo ${Magic}
+    }
+
+    /if (${Ini[${fileName},${nukeOptions},UseNuke].Length}) {
+        /varset useNuke ${Ini[${fileName},${nukeOptions},UseNuke]}
+        /if (!${Bool[${${useNuke}}]}) {
+            /echo Unable to set nuke spell to '${useNuke}'.
+            /varset nukeInitResult 0
+        }
+    } else {
+        /ini "${fileName}" "${nukeOptions}" "NukeType" "${useNuke}"        
+        /varset nukeInitResult 0
     }
 
     /if (${Ini[${fileName},${nukeOptions},MinMana].Length}) {
@@ -69,10 +90,11 @@ Sub DoNuke
     /if (${Select[${Target.Body},Undead]} && ${Me.Gem[${undeadNuke}]}) {
         /call TryNukeTarget "${undeadNuke}"
     } else {
-        /call TryNukeTarget ${mainNuke}
+        /call TryNukeTarget ${${useNuke}}
     }
     
     :endDoNuke
+    /call DoNukeEvents
     /if (${Debug} || ${Debug_Nuke}) /echo <== DoNuke -|
 /return
 
@@ -99,11 +121,23 @@ Sub CancelNuke(int spellId)
 	| /doevents StartCast
 /return
 
-Sub MakeNukeIni(string fileName)
-    |- Build the INI file
-    /echo Building Nuke INI file.....
 
-    /ini "${fileName}" "${nukeOptions}" "MainNuke" "${mainNuke}"
-    /ini "${fileName}" "${nukeOptions}" "UndeadNuke" "${undeadNuke}"
+
+| ################################################################################
+| # Change type of nuke
+| ################################################################################
+#Event ChangeNukeLineup "#*#[MQ2] nuke lineup #1#"
+Sub Event_ChangeNukeLineup(eventText, lineup)
+    /if (${Debug} || ${Debug_Nuke}) /echo |- Event_ChangeNukeLineup ==>
+
+    /if (${Defined[${lineup}]} && ${Defined[${${lineup}}]} &&${Bool[${${lineup}}]} && ${Me.Gem[${${lineup}}]}) {
+        /varset useNuke ${lineup}
+        /if (${Debug} || ${Debug_Nuke}) /echo Nuke set to '${lineup}'
+    }
+    
+    /if (${Debug} || ${Debug_Nuke}) /echo <== Event_ChangeNukeLineup -|
 /return
-	
+
+Sub DoNukeEvents
+    /doevents ChangeNukeLineup
+/return	
