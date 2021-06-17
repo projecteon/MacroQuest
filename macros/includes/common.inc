@@ -7,6 +7,7 @@ Sub InitGenralIni(string iniFileName)
     /if (!${Defined[assistPct]})  	    /declare assistPct      int	    outer 95 
     /if (!${Defined[campRadius]})  	    /declare campRadius     int	    outer 100 
     /if (!${Defined[Debug]})  		    /declare Debug       	bool  	outer FALSE 
+    /if (!${Defined[Debug_Common]})	    /declare Debug_Common  	bool  	outer FALSE 
     | sea furious are |32, but so are guards... needs more testing
     /if (!${Defined[aggroAnimation]})   /declare aggroAnimation string  outer |5|8|12|17|18|32|42|44|80|106|129|144|
     /declare initResult                                         int     local 1
@@ -40,6 +41,10 @@ Sub InitGenralIni(string iniFileName)
 
     /if (${Ini[${iniFileName},Debug,Debug].Length}) {
        /varset Debug ${Bool[${Ini[${iniFileName},Debug,Debug]}]}     
+    }  
+
+    /if (${Ini[${iniFileName},Debug,Debug_Common].Length}) {
+       /varset Debug_Common ${Bool[${Ini[${iniFileName},Debug,Debug_Common]}]}     
     } 
 
     /call InitLoot
@@ -51,34 +56,34 @@ Sub InitGenralIni(string iniFileName)
 | # Radius default: 100
 | ################################################################################	
 Sub CheckNPCInRange(int radiusCheck)
-    /if (${Debug}) /echo |- CheckNPCInRange ==>
+    /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange ==>
 
 	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local ${campRadius}
 	
-    /if (${Debug}) /echo |- CheckNPCInRange > ${radiusCheck}
+    /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${radiusCheck}
 	/if (!${Defined[npcCount]})  /declare npcCount int local ${SpawnCount[npc los radius ${radiusCheck}]}
-    /if (${Debug}) /echo |- CheckNPCInRange > ${npcCount}
+    /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${npcCount}
 	/if (${npcCount} < 1) {
-        /if (${Debug}) /echo <== CheckNPCInRange -|
+        /if (${Debug} || ${Debug_Common}) /echo <== CheckNPCInRange -|
 		/return 0
 	} 
     
     /declare i int local 0
     /for i 1 to ${npcCount} {
         /if ( ${Bool[${aggroAnimation.Find[|${NearestSpawn[${i}, npc los targetable radius ${radiusCheck}].Animation}|]}]}) {
-            /if (${Debug}) /echo |-  CheckNPCInRange > TRUE > ${NearestSpawn[${i}, npc los targetable radius ${radiusCheck}].Name} > ${NearestSpawn[${i}, npc los targetable radius ${radiusCheck}].Animation}
-            /if (${Debug}) /echo <== CheckNPCInRange -|
+            /if (${Debug} || ${Debug_Common}) /echo |-  CheckNPCInRange > TRUE > ${NearestSpawn[${i}, npc los targetable radius ${radiusCheck}].Name} > ${NearestSpawn[${i}, npc los targetable radius ${radiusCheck}].Animation}
+            /if (${Debug} || ${Debug_Common}) /echo <== CheckNPCInRange -|
             /return 1
         }
         
         /next i
     }
 
-    /if (${Debug}) /echo <== CheckNPCInRange -|
+    /if (${Debug} || ${Debug_Common}) /echo <== CheckNPCInRange -|
 /return 0
 
 Sub EnsureTarget(targetId) 
-    /if (${Debug}) /echo |- EnsureTarget ==>
+    /if (${Debug} || ${Debug_Common}) /echo |- EnsureTarget ==>
 
     /if (${Target.ID}==${targetId}) {
         /goto :endEnsureTarget
@@ -92,7 +97,7 @@ Sub EnsureTarget(targetId)
 	}
     
     :endEnsureTarget
-    /if (${Debug}) /echo <== EnsureTarget -|
+    /if (${Debug} || ${Debug_Common}) /echo <== EnsureTarget -|
 /return
 
 | ################################################################################
@@ -102,7 +107,7 @@ Sub EnsureTarget(targetId)
 | #     unless you want to populate global variable namespace indefinetly
 | ################################################################################	
 Sub CreateTimer(timerName, timerSetting)
-    /if (${Debug}) /echo |- CreateTimer ==>
+    /if (${Debug} || ${Debug_Common}) /echo |- CreateTimer ==>
     
     /if (${Defined[${timerName}]}) {
         /varset ${timerName} ${timerSetting}
@@ -110,11 +115,11 @@ Sub CreateTimer(timerName, timerSetting)
         /declare ${timerName} timer outer ${timerSetting}
     }
     
-    /if (${Debug}) /echo <== CreateTimer -| created ${timerName} [${${timerName}}]
+    /if (${Debug} || ${Debug_Common}) /echo <== CreateTimer -| created ${timerName} [${${timerName}}]
 /return
 
 Sub CheckTimerExpired(timerName)
-    /if (${Debug}) /echo |- CheckTimerExpired ==>
+    /if (${Debug} || ${Debug_Common}) /echo |- CheckTimerExpired ==>
     
     /declare isExpried bool local FALSE
     /if (!${Defined[${timerName}]} || ${${timerName}} <= 0) {
@@ -122,8 +127,8 @@ Sub CheckTimerExpired(timerName)
         /if (${Defined[${timerName}]} && ${${timerName}} <= 0) /deletevar ${timerName}
     }
     
-    /if (${Debug}) /echo |- ${timerName} [${${timerName}}] expired: ${isExpried}
-    /if (${Debug}) /echo <== CheckTimerExpired -|
+    /if (${Debug} || ${Debug_Common}) /echo |- ${timerName} [${${timerName}}] expired: ${isExpried}
+    /if (${Debug} || ${Debug_Common}) /echo <== CheckTimerExpired -|
 /return ${isExpried}
 
 
@@ -131,13 +136,13 @@ Sub CheckTimerExpired(timerName)
 | # Use MQ2MoveUtils /moveto function, to move to destination.
 | ################################################################################	
 Sub MoveToLoc(int yLoc, int xLoc, int timeToWait, int arrivalDist)
-    /if (${Debug}) /echo |- MoveToLoc ==>
+    /if (${Debug} || ${Debug_Common}) /echo |- MoveToLoc ==>
     
     /if (!${Bool[${arrivalDist}]}) /varset arrivalDist 10
     /if (!${Bool[${timeToWait}]}) /varset timeToWait 30
     
     /declare moveTimer timer local ${timeToWait}
-    /if (${Debug})  /echo MoveToLoc ${yLoc},${xLoc},${timeToWait},${arrivalDist}
+    /if (${Debug} || ${Debug_Common})  /echo MoveToLoc ${yLoc},${xLoc},${timeToWait},${arrivalDist}
 
     /if (${Math.Distance[${yLoc},${xLoc}]}<=${arrivalDist}) {
         /goto :endMoveToLoc
@@ -156,23 +161,23 @@ Sub MoveToLoc(int yLoc, int xLoc, int timeToWait, int arrivalDist)
     /moveto off
 
     :endMoveToLoc
-    /if (${Debug}) /echo <== MoveToLoc -|
+    /if (${Debug} || ${Debug_Common}) /echo <== MoveToLoc -|
 /return
 
 Sub DoCommonEvents
-    /if (${Debug}) /echo |- DoCommonEvents ==>
+    /if (${Debug} || ${Debug_Common}) /echo |- DoCommonEvents ==>
 
     /call Wait4Rez_Background_Events
 
     | /call CheckNPCInRange
     | /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
-    | /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
+    | /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
     | /if (${hasNpcInCamp}) /goto :endDoClearCampEvents
     
     /call DoLootEvents
 
     :endDoClearCampEvents
-    /if (${Debug}) /echo <== DoCommonEvents -|
+    /if (${Debug} || ${Debug_Common}) /echo <== DoCommonEvents -|
 /return
 
 
@@ -181,7 +186,7 @@ Sub DoCommonEvents
 | # Alerts the user, and ends the macro, if there is no free inventory space available
 | #####################################################################################	
 Sub ClearCursor
-    /if (${Debug}) /echo |- ClearCursor ==>
+    /if (${Debug} || ${Debug_Common}) /echo |- ClearCursor ==>
 
 	/declare i int local 1
     :check_cursor
@@ -200,14 +205,14 @@ Sub ClearCursor
         /goto :check_cursor
     }
 
-    /if (${Debug}) /echo <== ClearCursor -|
+    /if (${Debug} || ${Debug_Common}) /echo <== ClearCursor -|
 /return
 
 | #####################################################################################
 | # Type string by chrs 										
 | #####################################################################################	
 Sub TypeChrs(string inputString)
-    /if (${Debug}) /echo |- TypeChrs ==>
+    /if (${Debug} || ${Debug_Common}) /echo |- TypeChrs ==>
 
     /declare char       string local
     /declare loopctr    int local
@@ -220,5 +225,5 @@ Sub TypeChrs(string inputString)
         }
         /next loopctr
 
-    /if (${Debug}) /echo <== TypeChrs -|
+    /if (${Debug} || ${Debug_Common}) /echo <== TypeChrs -|
 /return
