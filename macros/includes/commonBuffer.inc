@@ -64,7 +64,7 @@ Sub DoBuffs
         /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
         /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
         /if (${hasNpcInCamp}) {
-            /echo ${hasNpcInCamp} ${campRadius}
+            /if (${Debug}) /echo ${hasNpcInCamp} ${campRadius}
             /goto :endDoBuffs
         }
     }
