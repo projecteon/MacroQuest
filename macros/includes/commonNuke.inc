@@ -89,7 +89,7 @@ Sub DoNuke
     /if (${Select[${Target.Body},Undead]} && ${Me.Gem[${undeadNuke}]}) {
         /call TryNukeTarget "${undeadNuke}"
     } else {
-        /call TryNukeTarget ${${useNuke}}
+        /call TryNukeTarget "${${useNuke}}"
     }
     
     :endDoNuke
