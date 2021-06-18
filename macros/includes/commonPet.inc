@@ -111,7 +111,7 @@ Sub SummonPet
 
     /if (!${Bool[${Me.Pet.ID}]} && !${Bool[${Me.Casting}]} && ${Me.SpellReady[${petSpell}]} && ${Me.CurrentMana} > ${Spell[${petSpell}].Mana}) {
         /if (${Bool[${petFocusItem}]} && ${Bool[${FindItem[=${petFocusItem}]}]} && ${FindItem[=${petFocusItem}].ItemSlot} >=23) {
-            /declare currentMainHand string local ${Me.Inventory[mainhand]} | 13 - mainhand
+            /declare currentMainHand string local ${Me.Inventory[mainhand]} 
             /exchange "${petFocusItem}" mainhand
             /delay 1s ${Me.Inventory[mainhand].Name.Equal[${petFocusItem}]}
         }
