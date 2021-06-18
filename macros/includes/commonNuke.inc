@@ -32,7 +32,6 @@ Sub InitNukeIni(string fileName)
     }
 
     /if (${Ini[${fileName},${nukeOptions},Magic].Length}) {
-        /echo ${Ini[${fileName},${nukeOptions},Magic]}
         /varset Magic ${Ini[${fileName},${nukeOptions},Magic]}       
         /echo ${Magic}
     }
