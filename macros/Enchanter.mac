@@ -13,9 +13,6 @@
 
 Sub Main
     /declare enchanterIniFileName   string  local "ini/${MacroQuest.Server}/Enchanter_${Me.CleanName}.ini"
-    /declare autoMezz               int     outer 1
-    /declare mezzRadius             int     outer 100
-    /declare mezzSpell              string  outer "Dazzle"
 
     /call InitEnchanterIni ${enchanterIniFileName}
     /if (${Macro.Return} == 0) {
@@ -44,7 +41,8 @@ Sub Main
 /return
 
 sub DoMezz
-    /if (${Debug}) /echo |- DoMezz ==>
+    /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz ==>
+
     /if (${autoMezz}) {
         /declare canMezzMob     bool local TRUE
         /declare retry          int local
@@ -55,10 +53,10 @@ sub DoMezz
 
         /if (!${mezTargetCount} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana}) /goto :endDoMezz
 
-        /if (${Debug}) /echo |- DoMezz - # of mezz targets: ${mezTargetCount}
+        /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz - # of mezz targets: ${mezTargetCount}
         /for i 1 to ${mezTargetCount}
             /varset mezTarg ${NearestSpawn[${i},npc los targetable radius ${mezzRadius}].ID}
-            /if (${Debug}) /echo |- DoMezz - mezz target: ${mezTarg}
+            /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz - mezz target: ${mezTarg}
             /if (${mezTarg}!=${maTargetId}) {
                 /call CheckCanMezzMob ${mezTarg}
                 /varset canMezzMob ${Macro.Return}
@@ -85,11 +83,11 @@ sub DoMezz
     }
 
     :endDoMezz
-    /if (${Debug}) /echo <== DoMezz -|
+    /if (${Debug} || ${Debug_Mezz}) /echo <== DoMezz -|
 /return
 
 Sub CheckCanMezzMob(int targetId)
-    /if (${Debug}) /echo |- CheckCanMezzMob ==>
+    /if (${Debug} || ${Debug_Mezz}) /echo |- CheckCanMezzMob ==>
 
     /declare canMezzMob bool    local TRUE   
     /declare targetName string  local ${Spawn[${targetId}].Name}
@@ -106,7 +104,7 @@ Sub CheckCanMezzMob(int targetId)
        }
     } 
 
-    /if (${Debug}) /echo <== CheckCanMezzMob -|
+    /if (${Debug} || ${Debug_Mezz}) /echo <== CheckCanMezzMob -|
 /return ${canMezzMob}
 
 Sub CancelMezz
@@ -117,6 +115,10 @@ Sub CancelMezz
 Sub InitEnchanterIni(string iniFileName)
     /declare mesmerizeSettingsFileName  string  outer "ini/MesmerizeSettings.ini"
     /declare enchanterOptions           string  outer "EnchanterOptions"
+    /declare autoMezz                   int     outer 1
+    /declare mezzRadius                 int     outer 100
+    /declare mezzSpell                  string  outer "Dazzle"
+    /declare Debug_Mezz                 bool    outer FALSE
     /declare parentInitResult           int     local 1
 
     /if (${Ini[${iniFileName},${enchanterOptions},AutoMezz].Length}) {
@@ -164,5 +166,9 @@ Sub InitEnchanterIni(string iniFileName)
     /if (${Macro.Return} == 0) {
         /varset parentInitResult 0
     }
+
+    /if (${Ini[${iniFileName},Debug,Debug_Mezz].Length}) {
+       /varset Debug_Mezz ${Bool[${Ini[${iniFileName},Debug,Debug_Mezz]}]}     
+    } 
 
 /return ${parentInitResult}
