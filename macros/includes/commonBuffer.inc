@@ -4,7 +4,7 @@
 | ################################################################################	
 Sub InitBufferIni(string iniFileName)
     /declare options            string  local "BuffOptions"
-    /if (!${Defined[maxBuffsPerPerson]})                /declare maxBuffsPerPerson              int     outer 15 
+    /if (!${Defined[maxBuffsPerPerson]})                /declare maxBuffsPerPerson              int     outer 16 
     /if (!${Defined[iniBuffDimensions]})                /declare iniBuffDimensions              int     outer 3 
     /if (!${Defined[buffNameDimension]})                /declare buffNameDimension              int     outer 1 
     /if (!${Defined[minManaDimensions]})                /declare minManaDimensions              int     outer 2 
@@ -172,7 +172,7 @@ Sub CheckNetBotBuffs
                         /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
                     } else {
                         /if (!${Defined[i]}) /declare i int local
-                        /for i 0 to ${maxBuffsPerPerson}
+                        /for i 0 to ${NetBots[${netbotsClient}].Buff.Length}
                             /if (${Bool[${NetBots[${netbotsClient}].Buff[${i}]}]}) {
                                 /if (${NetBots[${netbotsClient}].Buff[${i}].ID} == ${buffId} && ${NetBots[${netbotsClient}].Duration[${i}]} < 5) {
                                     /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
