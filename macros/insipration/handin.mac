@@ -1,0 +1,60 @@
+| QuestTurnin.mac 2016 Incognito - This mac automates mass turnins. In the default case - 'Supply' 
+| quest from Wraithguard Thentil Strongarm in Valdeholm. Change the vars for the quest you are doing 
+| and ensure this mac is a good fit for your particular quest before using.
+
+Sub Main
+	|Modify these for the quest you are doing
+	/declare QuestNPC 		string outer "Wraithguard Thentil Strongarm"
+	/declare QuestTrigger		string outer "Supplies"
+	/declare TurnInItems		string outer "Icefall Ivory Tusk"
+	/declare QuestTurnInCount	int outer 4
+
+	|Internal vars
+	/declare ReportNumTurnIns	int outer 0
+
+	/echo Starting Handins
+	/tar clear
+	/if (!${Math.Calc[${FindItemCount[${TurnInItems}]} / ${QuestTurnInCount}]}>0) {
+		/echo You only have ${FindItemCount[${TurnInItems}]} ${TurnInItems} when you need at least ${QuestTurnInCount}
+	} else {
+		/while (${Math.Calc[${FindItemCount[${TurnInItems}]} / ${QuestTurnInCount}]}>0) {
+			/call QuestTrigger
+			/call QuestTurnIn
+			/varcalc ReportNumTurnIns ${ReportNumTurnIns} + 1
+		}
+		/echo YOU have become better at Handins: ${ReportNumTurnIns}
+	}
+/return
+
+Sub QuestTrigger
+        /if (!${Target.Name.Equal[${QuestNPC}]) /tar ${QuestNPC}
+	/if (${Target.ID} && ${Target.LineOfSight}) {
+		/if (${Target.Distance}>20) /moveto ID ${Target.ID}
+		/say Hail, ${QuestNPC}
+		/delay 5
+		/say ${QuestTrigger}
+		/delay 10
+		/if (${Window[TaskSelectWnd].Open}) {
+			/notify TaskSelectWnd TSEL_AcceptButton leftmouseup
+			/delay 10
+		} else {
+			/echo Task Window Problem - Perhaps you already have this task?
+			/end
+		}
+	} else {
+		/echo Target Problem - Stand next to the quest giver
+		/end
+	}
+/return
+
+Sub QuestTurnIn
+	/declare x int local 1
+	/for x 1 to ${QuestTurnInCount}
+		/Ctrlkey /itemnotify ${FindItem[${TurnInItems}].InvSlot} leftmouseup
+		/delay 5
+		/click left target
+		/delay 5
+	/next x
+	/notify GiveWnd GVW_Give_Button leftmouseup
+	/delay 5
+/return

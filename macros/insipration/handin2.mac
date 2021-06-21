@@ -1,0 +1,65 @@
+| https://www.mmobugs.com/forums/index.php?threads/turnin-macro.15376/
+| https://www.mmobugs.com/forums/index.php?threads/simplify-quest-turn-in.34738/
+| https://www.mmobugs.com/forums/index.php?threads/hand-in-macro-help-request.32770/
+
+#turbo 40
+#Event Exp             "You gain#*#experience#*#"
+Sub Main
+/declare  ReportExp          bool	outer	TRUE
+/declare  LDExp              float      outer   ${Me.PctGroupLeaderExp}
+/declare  AAExp              float      outer   ${Me.PctAAExp}
+/declare  Exp                float      outer   ${Me.PctExp}
+/declare Kills int outer 0
+/declare kCount int outer 0
+
+/declare l0 int local
+/declare turnin string outer ITEMNAME
+/declare handinNPC string outer NPCNAME
+
+
+
+/target npc ${handinNPC}
+
+:Loop
+/if (${FindItemCount[=${turnin}]}<4) /goto :Done
+
+/for l0 0 to 3
+   /ctrl /itemnotify ${FindItem[=${turnin}].InvSlot} leftmouseup
+   /delay 20 ${Cursor.ID}
+   /delay 0
+   /if (${l0}==0) {
+      /click left target
+      /delay 20 ${Window[GiveWnd].Open}
+      /delay 0
+   } else {
+      /notify GiveWnd GVW_MyItemSlot${l0} leftmouseup
+      /delay 20 !${Cursor.ID}
+      /delay 0
+   }
+/if (!${FindItemCount[=${turnin}]}) /goto :Done
+/next l0
+
+/notify GiveWnd GVW_Give_Button leftmouseup
+/delay 20 !${Window[GiveWnd].Open}
+/delay 0
+/doevents
+
+/goto :Loop
+
+:Done
+/delay 0
+/notify GiveWnd GVW_Give_Button leftmouseup
+/echo out of chips
+/end
+/return
+
+Sub Event_Exp(string Line)
+  |- Experience calculation and reporting
+ /if (${ReportExp}) /echo ** XP-Delta: REG (${Math.Calc[${Me.PctExp}-${Exp}]}%), AA (${Math.Calc[${Me.PctAAExp}-${AAExp}]}%), LDR (${Math.Calc[${Me.PctGroupLeaderExp}-${LDExp}]}%)
+  /varset LDExp ${Me.PctGroupLeaderExp}
+  /varset AAExp ${Me.PctAAExp}
+  /varset Exp ${Me.PctExp}  
+  /varcalc kCount ${kCount}+1
+  /echo ${kCount} Handins - ${Int[${Math.Calc[${Macro.RunTime}/60]}]} Min, ${Int[${Math.Calc[${Macro.RunTime}-${Int[${Math.Calc[${Macro.RunTime}/60]}]}*60]}]} Sec.
+ 
+/return
