@@ -46,37 +46,68 @@ Sub Main
 sub DoMezz
     /if (${Debug}) /echo |- DoMezz ==>
     /if (${autoMezz}) {
-        /declare retry int local
-        /declare i int local 0
-        /declare mezTarg int local
-        /declare maTargetId int local ${NetBots[${mainAssist}].TargetID}
+        /declare canMezzMob     bool local TRUE
+        /declare retry          int local
+        /declare i              int local 0
+        /declare mezTarg        int local
+        /declare maTargetId     int local ${NetBots[${mainAssist}].TargetID}
+        /declare mezTargetCount int local ${SpawnCount[npc los targetable radius ${mezzRadius}]}
 
-        /if (!${SpawnCount[npc los targetable radius ${mezzRadius}]} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana}) /return
+        /if (!${mezTargetCount} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana}) /goto :endDoMezz
 
-        /if (${Debug}) /echo |- DoMezz - # of mezz targets: ${SpawnCount[npc los targetable radius ${mezzRadius}]}
-        /for i 1 to ${SpawnCount[npc los targetable radius ${mezzRadius}]}
+        /if (${Debug}) /echo |- DoMezz - # of mezz targets: ${mezTargetCount}
+        /for i 1 to ${mezTargetCount}
             /varset mezTarg ${NearestSpawn[${i},npc los targetable radius ${mezzRadius}].ID}
             /if (${Debug}) /echo |- DoMezz - mezz target: ${mezTarg}
             /if (${mezTarg}!=${maTargetId}) {
-                /target id ${mezTarg}
-                /delay 2s ${Target.ID}==${mezTarg}
-                /if (!${Target.ID} || ${Target.ID}!=${mezTarg}) {
-                    /if (${Debug}) /echo <== DoMezz -| - wrong target
-                    /return
-                }
+                /call CheckCanMezzMob ${mezTarg}
+                /varset canMezzMob ${Macro.Return}
+                /if (${canMezzMob}) {
+                    /call EnsureTarget ${mezTarg}
 
-                /if (!${Cast.Ready[${mezzSpell}]}) /delay 3s ${Cast.Ready[${mezzSpell}]}
+                    /if (!${Cast.Ready[${mezzSpell}]}) /delay 3s ${Cast.Ready[${mezzSpell}]}
 
-                /if (${SpellTimer[${mezTarg},any,${mezzSpell}]} < 8 && ${Cast.Ready[${mezzSpell}]} && ${Target.Distance} < ${Spell[${mezzSpell}].Range}) {
-                    /call cast "${mezzSpell}" gem${Me.Gem[${mezzSpell}]} 0 CancelMezz 3
-                    /bca ${Target.Name} " mezzed!"
+                    /if (${SpellTimer[${mezTarg},any,${mezzSpell}]} < 8 && ${Cast.Ready[${mezzSpell}]} && ${Target.Distance} < ${Spell[${mezzSpell}].Range}) {
+                        /call cast "${mezzSpell}" gem${Me.Gem[${mezzSpell}]} 0 CancelMezz 3
+                        /if (${castReturn.Equal[CAST_IMMUNE]}) {
+                            /declare targetName string  local ${Spawn[${targetId}].Name}
+                            /bca "Mezz immune - " ${Target.Name}
+                            /ini "${mesmerizeSettingsFileName}" "Immune" "${targetName}" "TRUE"
+                        } else /if (${castReturn.Equal[CAST_RESISTED]}) {
+                            /bca "Mezz resited, retrying next run - " ${Target.Name}
+                        } else {
+                            /bca ${Target.Name} " mezzed!"
+                        }
+                    }
                 }
             }
             /next i
     }
+
+    :endDoMezz
     /if (${Debug}) /echo <== DoMezz -|
 /return
 
+Sub CheckCanMezzMob(int targetId)
+    /if (${Debug}) /echo |- CheckCanMezzMob ==>
+
+    /declare canMezzMob bool    local TRUE   
+    /declare targetName string  local ${Spawn[${targetId}].Name}
+
+    /if (${Ini[${mesmerizeSettingsFileName},"Immune",${targetName}].Length}) {
+        /if (${Bool[${Ini["MesmerizeSettings.ini","Immune",${targetName}]}]}) {
+            /varset canMezzMob FALSE
+        }
+    } 
+
+    /if (!${canMezzMob} && ${Ini[${mesmerizeSettingsFileName},"NeverMezz",${targetName}].Length}) {
+       /if (${Bool[${Ini[${mesmerizeSettingsFileName},"NeverMezz",${targetName}]}]}) {
+            /varset canMezzMob FALSE
+       }
+    } 
+
+    /if (${Debug}) /echo <== CheckCanMezzMob -|
+/return ${canMezzMob}
 
 Sub CancelMezz
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
@@ -84,8 +115,9 @@ Sub CancelMezz
 /return
 
 Sub InitEnchanterIni(string iniFileName)
-    /declare enchanterOptions   string  outer "EnchanterOptions"
-    /declare parentInitResult   int     local 1
+    /declare mesmerizeSettingsFileName  string  outer "ini/MesmerizeSettings.ini"
+    /declare enchanterOptions           string  outer "EnchanterOptions"
+    /declare parentInitResult           int     local 1
 
     /if (${Ini[${iniFileName},${enchanterOptions},AutoMezz].Length}) {
        /varset autoMezz ${Ini[${iniFileName},${enchanterOptions},AutoMezz]}     
