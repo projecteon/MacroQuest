@@ -18,6 +18,8 @@ Sub Main
 
     :RogueLoop
         /call Wait4Rez_Background_Events
+        /if (${Stick.Status.Equal[ON]}) /goto :RogueLoop
+
         /call DoKill
         /call DoCommonEvents
         /goto :RogueLoop

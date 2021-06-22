@@ -27,6 +27,7 @@ Sub Main
     :EnchanterLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :EnchanterLoop
+        /if (${Stick.Status.Equal[ON]}) /goto :EnchanterLoop
         
         /call DoMezz
         /call DoDeBuffs        
