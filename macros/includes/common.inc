@@ -59,11 +59,14 @@ Sub CheckNPCInRange(int radiusCheck)
     /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange ==>
 
 	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local ${campRadius}
-	
-    /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${radiusCheck}
 	/if (!${Defined[npcCount]})  /declare npcCount int local ${SpawnCount[npc los radius ${radiusCheck}]}
-    /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${npcCount}
-	/if (${npcCount} < 1) {
+    
+    /if (${Debug} || ${Debug_Common}) {
+        /echo |- radiusCheck > ${radiusCheck}
+        /echo |- npcCount > ${npcCount}
+    } 
+	
+    /if (${npcCount} < 1) {
         /if (${Debug} || ${Debug_Common}) /echo <== CheckNPCInRange -|
 		/return 0
 	} 
