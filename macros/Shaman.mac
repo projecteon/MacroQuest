@@ -24,6 +24,7 @@ Sub Main
     :ShamanLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :ShamanLoop
+        /if (${Stick.Status.Equal[ON]}) /goto :ShamanLoop
         
         /call CheckHeals
         /if (${Macro.Return} == 1) /goto :ShamanLoop

@@ -26,6 +26,7 @@ Sub Main
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :RangerLoop        
         | /if (${Me.Attacking}) /goto :RangerLoop
+        /if (${Stick.Status.Equal[ON]}) /goto :RangerLoop
 
         /call DoBuffs
         | /call DoNuke

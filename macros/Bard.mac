@@ -19,7 +19,8 @@ Sub Main
     :BardLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :BardLoop
-        
+        /if (${Stick.Status.Equal[ON]}) /goto :BardLoop
+
         /call DoKill
         /call DoCommonEvents
         /goto :BardLoop

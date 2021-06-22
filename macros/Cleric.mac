@@ -22,6 +22,7 @@ Sub Main
     :ClericLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :ClericLoop
+        /if (${Stick.Status.Equal[ON]}) /goto :ClericLoop
 
         /call DoHeal
         | /if (${Macro.Return} == 1) /goto :ClericLoop

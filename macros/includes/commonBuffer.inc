@@ -81,9 +81,8 @@ Sub CheckSelfBuffs
     /if (${Debug}) /echo  |- CheckSelfBuffs ==>
     
     /if (!${Defined[SelfBuffs]}) {
-        /if (${Debug}) /echo No SelfBuffs defined.
-        /if (${Debug}) /echo <== CheckSelfBuffs -|
-        /return
+        /if (${Debug}) /echo No SelfBuffs defined.        
+        /goto :endCheckSelfBuffs
     }
     
     /declare buffSpell string local
@@ -96,6 +95,7 @@ Sub CheckSelfBuffs
         }
     /next k 
 
+    :endCheckSelfBuffs
     /if (${Debug}) /echo <== CheckSelfBuffs -|
 /return
 
@@ -104,14 +104,12 @@ Sub CheckGroupBuffs
     
     /if (!${Defined[Buffs]}) {
         /if (${Debug} || ${Debug_Group_Buffs}) /echo No Buffs defined.
-        /if (${Debug} || ${Debug_Group_Buffs}) /echo <== CheckGroupBuffs -|
-        /return
+        /goto :endCheckGroupBuffs
     }
     
     /if (!${Group.Members}) {
         /if (${Debug} || ${Debug_Group_Buffs}) /echo Not enough in a group. 
-        /if (${Debug} || ${Debug_Group_Buffs}) /echo <== CheckGroupBuffs -|
-        /return
+        /goto :endCheckGroupBuffs
     }
 
     /declare buffSpell string local
@@ -135,6 +133,7 @@ Sub CheckGroupBuffs
         /next k 
     }
 
+    :endCheckGroupBuffs
     /if (${Debug} || ${Debug_Group_Buffs}) /echo <== CheckGroupBuffs -|
 /return
 
@@ -143,14 +142,12 @@ Sub CheckNetBotBuffs
     
     /if (!${Defined[Buffs]}) {
         /if (${Debug} || ${Debug_NetBots_Buffs}) /echo No Buffs defined.
-        /if (${Debug} || ${Debug_NetBots_Buffs}) /echo <== CheckNetBotBuffs -|
-        /return
+        /goto :endCheckNetBotBuffs
     }
     
     /if (${NetBots.Counts} < 2) {
         /if (${Debug} || ${Debug_NetBots_Buffs}) /echo Not enough Nebots clients, current: ${NetBots.Counts} 
-        /if (${Debug} || ${Debug_NetBots_Buffs}) /echo <== CheckNetBotBuffs -|
-        /return
+        /goto :endCheckNetBotBuffs
     }
     
     /declare buffSpell string local
@@ -187,6 +184,7 @@ Sub CheckNetBotBuffs
         /next k 
     }
 
+    :endCheckNetBotBuffs
     /if (${Debug} || ${Debug_NetBots_Buffs}) /echo <== CheckNetBotBuffs -|
 /return
 
@@ -206,7 +204,7 @@ Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
 
     /if (!${Defined[DontStop]}) /declare DontStop bool local FALSE
     /if (${Me.Casting.ID}) {
-        /return
+        /goto :endCastBuff
     }
 
 	|- Is spell ready?
@@ -216,13 +214,13 @@ Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
 			/delay 1s
 			/if (${Group.Members}) /gsay !!! NO MANA TO BUFF ${buffTargetName} !!!
 			/bca !!! NO MANA TO BUFF ${buffTargetName} !!!
-			/return
+            /goto :endCastBuff
 		} else {			
             /if (${Target.ID} != ${buffTargetId}) {
                 /target id ${buffTargetId}
                 /delay 2s ${Target.ID} == ${buffTargetId}
                 /if (${Target.ID} != ${buffTargetId}) {
-                    /return
+                    /goto :endCastBuff
                 }
             }
 
@@ -238,6 +236,9 @@ Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
 			}
 		}
 	}
+
+    :endCastBuff
+    /if (${Debug}) /echo <== CastBuff
 /return
 
 | #################################################

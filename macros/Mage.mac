@@ -25,6 +25,7 @@ Sub Main
     :MageLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :MageLoop
+        /if (${Stick.Status.Equal[ON]}) /goto :MageLoop
         
         /call CheckManaStatus
         /call TryMedidate
