@@ -174,7 +174,7 @@ Sub DoCommonEvents
     /call Wait4Rez_Background_Events
 
     /doevents ClickIt
-    
+
     /call CheckNPCInRange
     /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
     /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
@@ -244,7 +244,7 @@ Sub TypeChrs(string inputString)
 SUB EVENT_ClickIt(line, chatSender, eventParams)  
     /if (${Debug} || ${Debug_Common}) /echo |- EVENT_ClickIt ==>
 
-    /call IniArray "ini\doors.ini"  "${Zone.ShortName}" "${Zone.ShortName}#" 1 doorList
+    /call IniArray "data\doors.ini"  "${Zone.ShortName}" "${Zone.ShortName}#" 1 doorList
 
     /if (!${Defined[doorList]}) {
         /if (${Debug} || ${Debug_Common}) /echo No door list defined for zone <${Zone.Name}>
