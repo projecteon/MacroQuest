@@ -1,3 +1,4 @@
+#include ini.inc
 #include includes\commonLoot.inc
 
 Sub InitGenralIni(string iniFileName)
@@ -172,10 +173,12 @@ Sub DoCommonEvents
 
     /call Wait4Rez_Background_Events
 
-    | /call CheckNPCInRange
-    | /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
-    | /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
-    | /if (${hasNpcInCamp}) /goto :endDoClearCampEvents
+    /doevents ClickIt
+    
+    /call CheckNPCInRange
+    /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
+    /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
+    /if (${hasNpcInCamp}) /goto :endDoClearCampEvents
     
     /call DoLootEvents
 
@@ -229,4 +232,76 @@ Sub TypeChrs(string inputString)
         /next loopctr
 
     /if (${Debug} || ${Debug_Common}) /echo <== TypeChrs -|
+/return
+
+
+| #####################################################################################
+| # Moves to a given location, and clicks the nearest door object. 										
+| #####################################################################################	
+#EVENT ClickIt "<#1#> Click It#2#"
+#EVENT ClickIt "#1# tells the group, 'Click It#2#'"
+#EVENT ClickIt "#1# tell your party, 'Click It#2#'"
+SUB EVENT_ClickIt(line, chatSender, eventParams)  
+    /if (${Debug} || ${Debug_Common}) /echo |- EVENT_ClickIt ==>
+
+    /call IniArray "ini\doors.ini"  "${Zone.ShortName}" "${Zone.ShortName}#" 1 doorList
+
+    /if (!${Defined[doorList]}) {
+        /if (${Debug} || ${Debug_Common}) /echo No door list defined for zone <${Zone.Name}>
+        /goto :endClickIt
+    }
+        
+    /if (${Debug} || ${Debug_Common}) /echo Number of doors in zone <${Zone.Name}> is <${doorList.Size}>
+
+
+    /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
+    
+    /declare i                  int     local
+    /declare closestDoorID      int     local 0
+    /declare closestDoorDist    float   local 0
+    
+    |find the closest door to me
+    /for i 1 to ${doorList.Size}
+        /squelch /doortarget id ${doorList[${i}].Arg[1,,]}
+        /if ((${closestDoorDist}==0 || ${DoorTarget.Distance} < ${closestDoorDist}) && ${DoorTarget.DistanceZ} < 125 && ${DoorTarget.Distance} < 400) {
+            /varset closestDoorDist ${DoorTarget.Distance}
+            /varset closestDoorID ${doorList[${i}].Arg[1,,]}
+        }
+    /next i
+
+    /if (!${Bool[${closestDoorID}]}) {
+        /if (${Debug} || ${Debug_Common}) /echo Unable to find a valid door within range for zone <${Zone.Name}>
+        /goto :endClickIt
+    }
+
+    /squelch /doortarget id ${closestDoorID}
+    /if (${DoorTarget.Distance} > 20) /call MoveToLoc ${DoorTarget.Y} ${DoorTarget.X} 50 15
+    /if (${DoorTarget.Distance} > 35) {
+        /if (${Debug} || ${Debug_Common}) /echo Aborting ClickIt: I could not moveto < 20 units of ${DoorTarget.Name} within 5s
+        /moveto off
+        /goto :endClickIt
+    }
+
+    
+    |add starting loc vs final loc for intrazone click
+    /declare startingLoc ${Me.Loc}
+    /declare clickDelay     int     local ${Math.Calc[${Math.Rand[${Me.ID}]}%7|1]}
+    /declare currentZone    int     local ${Zone.ID}
+    /declare clickTimer     timer   local 5s
+
+    :retryClickDoor
+    /delay ${clickDelay}
+    /squelch /doortarget id ${closestDoorID}
+    /squelch /click left door
+    /if (${currentZone}==${Zone.ID} && ${Math.Distance[${startingLoc}]} < 10) {
+        /if (${clickTimer}) {
+            /goto :retryClickDoor
+        } else {
+            /if (${Debug} || ${Debug_Common}) /echo I have failed to click Door ${Switch.ID} ${DoorTarget.Name}
+            /goto :endClickIt
+        }
+    }
+
+    :endClickIt
+    /if (${Debug} || ${Debug_Common}) /echo <== EVENT_ClickIt -|
 /return
