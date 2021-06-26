@@ -137,7 +137,7 @@ Sub Wait4Rez(functionCall)
 
         /delay 30
         |Loot corpse-------------------------------------------------------|
-        /docommand ${ChatToggle} Looting...
+        | /docommand ${ChatToggle} Looting...
 	:Looting
         /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez -| Attempting to loot my corpse.
         
@@ -172,7 +172,7 @@ Sub Wait4Rez(functionCall)
                 /delay 2s !${Spawn[${Me}'s].ID}
                 /if (${Spawn[${Me}'s].ID}) /goto :Looting
             }
-            /docommand ${ChatToggle} Ready to die again!
+            | /docommand ${ChatToggle} Ready to die again!
         }
 	
     /doevents flush
