@@ -158,7 +158,7 @@ Sub CheckNetBotBuffs
     /declare x int local
     /for k 1 to ${Math.Calc[${Buffs.Size}/${iniBuffDimensions}]} {
         /varset buffSpell ${Buffs[${k},${buffNameDimension}]}
-        /call CanCastBuff "${buffSpell}" ${Buffs[${k},${minManaDimensions}]}   
+        /call CheckCanCastBuff "${buffSpell}" ${Buffs[${k},${minManaDimensions}]}   
         /varset buffId ${Spell[${buffSpell}].ID}
         /if (${Macro.Return} == 1 && ${Spell[${buffSpell}].TargetType.Equal[Single]}) {
             /varset classRestrictions ${Buffs[${k},${buffClassRestrictionsDimension}]}
@@ -188,21 +188,20 @@ Sub CheckNetBotBuffs
     /if (${Debug} || ${Debug_NetBots_Buffs}) /echo <== CheckNetBotBuffs -|
 /return
 
-Sub CanCastBuff(string buffSpell, int minMana)
-    /if (${Debug}) /echo  |- CanCastBuff ==> ${buffSpell} ${minMana}
+Sub CheckCanCastBuff(string buffSpell, int minMana)
+    /if (${Debug}) /echo  |- CheckCanCastBuff ==> ${buffSpell} ${minMana}
     
     /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || !${Cast.Ready[${buffSpell}]} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
-        /if (${Debug}) /echo <== CanCastBuff 0 -|
+        /if (${Debug}) /echo <== CheckCanCastBuff 0 -|
         /return 0
     }
 
-    /if (${Debug}) /echo <== CanCastBuff 1 -|
+    /if (${Debug}) /echo <== CheckCanCastBuff 1 -|
 /return 1
 
 Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
     /if (${Debug}) /echo  |- CastBuff ==> ${buffSpell} -> ${buffTargetName}
 
-    /if (!${Defined[DontStop]}) /declare DontStop bool local FALSE
     /if (${Me.Casting.ID}) {
         /goto :endCastBuff
     }
@@ -217,8 +216,7 @@ Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
             /goto :endCastBuff
 		} else {			
             /if (${Target.ID} != ${buffTargetId}) {
-                /target id ${buffTargetId}
-                /delay 2s ${Target.ID} == ${buffTargetId}
+                /call EnsureTarget ${buffTargetId}
                 /if (${Target.ID} != ${buffTargetId}) {
                     /goto :endCastBuff
                 }
@@ -229,6 +227,7 @@ Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
                 /if (${Me.Sitting}) {
                     /stand
                 }
+                
 				/if (${Group.Members}) /gsay <<< ${buffSpell} -> ${buffTargetName} >>>			
 				/bca <<< ${buffSpell} -> ${buffTargetName} >>>
 				/call cast "${buffSpell}" gem${Me.Gem[${buffSpell}]} 0 CancelBuff
