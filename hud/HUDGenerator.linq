@@ -129,8 +129,19 @@ var group2 = new List<(string netbot, bool petuser)>() {
 	,("Osiris", true)
 };
 
+var group3 = new List<string>() {
+	"Sheperd"
+	,"Soundgarden"
+	,"Renaissance"
+	,"Tyrion"
+	,"Milamber"
+	,"Inara"
+};
+
 Console.WriteLine(macroHeader);
 GenerateGroupHud(group1);
 initalYAxis = initalYAxis + group1.Count() * 15 + 30;
 GenerateGroupHud(group2);
+initalYAxis = initalYAxis + group1.Count() * 15 + 30;
+GenerateGroupHud(group3);
 Console.WriteLine("; <===============================================================|");
