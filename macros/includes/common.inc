@@ -1,4 +1,4 @@
-#include ini.inc
+#include includes\ini.inc
 #include includes\commonLoot.inc
 
 Sub InitGenralIni(string iniFileName)
