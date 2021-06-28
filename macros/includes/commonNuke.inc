@@ -43,7 +43,7 @@ Sub InitNukeIni(string fileName)
             /varset nukeInitResult 0
         }
     } else {
-        /ini "${fileName}" "${nukeOptions}" "NukeType" "${useNuke}"        
+        /ini "${fileName}" "${nukeOptions}" "UseNuke" "${useNuke}"        
         /varset nukeInitResult 0
     }
 

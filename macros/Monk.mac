@@ -1,0 +1,41 @@
+#include includes\ini.inc
+#include includes\common.inc
+#include includes\commonMelee.inc
+#include includes\wait4rez.inc
+#turbo 40
+
+Sub Main
+    /declare monkIniFileName        string  outer "ini/${MacroQuest.Server}/Monk_${Me.CleanName}.ini"
+
+    /call InitMonkIni ${monkIniFileName}
+    /if (${Macro.Return} == 0) {
+        /echo "Bootstrapped INI file, please update variables in: ${monkIniFileName}"
+        /endmacro
+    }
+
+    /echo "Monk rock'n'rolling!"
+    /bca "Monk rock'n'rolling!"
+
+    :MonkLoop
+        /call Wait4Rez_Background_Events
+        /if (${Me.Invis}) /goto :MonkLoop
+        /if (${Stick.Status.Equal[ON]}) /goto :MonkLoop
+
+        /call DoKill
+        /call DoCommonEvents
+        /goto :MonkLoop
+/return
+
+Sub InitMonkIni(string iniFileName, string mainAssist)
+    /declare monkOptions       string  outer "MonkOptions"
+    /declare parentInitResult  int     local 1
+
+    /call InitGenralIni "${iniFileName}"
+    /varset parentInitResult ${Macro.Return}
+    
+    /call InitWait4Rez "${iniFileName}"
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
+    
+/return ${parentInitResult}
