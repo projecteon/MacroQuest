@@ -14,19 +14,64 @@ Sub Main
     | https://www.redguides.com/community/threads/lockpick-mac.12231/
     | https://wiki.project1999.com/Skill_Pick_Lock
 
+    | Lockpicks id - 13010
+
+    /if (${FindItemCount[=Lockpicks]}<1) {
+        /echo No Lockpicks set found.
+        /goto :done
+    }
+
+    /if (!${Bool[${Me.Skill[Pick Lock]}]}) {
+        /echo You do not have the skill: Pick Lock
+        /goto :done
+    }
+
+    /if (${Me.Skill[Pick Lock]} == ${Skill[Pick Lock].SkillCap} ) {
+        /echo You maxed the skill: Pick Lock
+        /goto :done
+    }
+
+    /if (!${Zone.Name.Equal[Befallen]}) {
+        /echo This macro only works in Befallen.
+        /goto :done
+    }
+
+    /if (!${Me.Invis}) {
+        /call TryDoAbility "Hide"
+        /call TryDoAbility "Sneak"
+    }
+
+    /if (!${Me.Invis}) {
+        /echo Could not Hide
+        /goto :done
+    }
+
+    | First locked door in befallen, need min skill of 16 before starting
+    | befallen#1=10,-83.41,-267.94,-13.99,DOOR1
+
+    /squelch /doortarget id 10
+    /if (${DoorTarget.Distance} > 20) /call MoveToLoc ${DoorTarget.Y} ${DoorTarget.X} 50 15
+    /if (${DoorTarget.Distance} > 35) {
+        /if (${Debug} || ${Debug_Common}) /echo Aborting Lockpick training: I could not moveto < 20 units of ${DoorTarget.Name} within 5s
+        /moveto off
+        /goto :done
+    }
+
+    | Lockpicks - 13010
+    /itemnotify ${FindItem[=Lockpicks].InvSlot} leftmouseup
+    /delay 2s ${Cursor.ID.Equal[Lockpicks]}
+    /if (${Cursor.ID.NotEqual[Lockpicks]}) /goto :done
 
     :trainloop
-        /if (!${Bool[${Me.Skill[Pick Lock]}]}) {
-            /echo You do not have the skill: Pick Lock
-            /endmac
-        }
+        
 
         /if (${Me.Skill[Pick Lock]} == ${Skill[Pick Lock].SkillCap} ) {
             /echo You maxed the skill: Pick Lock
-            /endmac
+            /goto :done
         }
 
-        /click left
+        /squelch /click left door
+        | /click left
 
         | /keypress U
         | /keypress USE
@@ -34,4 +79,24 @@ Sub Main
 
         /goto :trainloop
 
+    :done
+    /beep
+    /echo "Ended lockpicks training macro."
 /return
+
+sub TryDoAbility(string ability) 
+    /if (!${Bool[${Me.Skill[${ability}]}]}) {
+        /echo You do not have the skill: ${ability}
+        /return FALSE
+    }
+
+    /if (!${Bool[${Me.Ability[${ability}]}]}) {
+        /echo Ability is not mapped to action button: ${ability}
+        /return FALSE
+    }
+
+    /if (${Bool[${Me.AbilityReady[${ability}]}]}) {
+        /doability "${ability}"
+        /delay 2
+    } 
+/return TRUE
