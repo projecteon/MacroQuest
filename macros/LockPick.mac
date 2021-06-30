@@ -5,8 +5,6 @@
 | #include includes\commonPet.inc
 | #include includes\commonNuke.inc
 
-#turbo
-
 Sub Main
 
     | https://www.redguides.com/community/threads/spell-skill-up-macro.9117/
