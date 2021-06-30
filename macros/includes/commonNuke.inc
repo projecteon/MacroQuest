@@ -3,7 +3,6 @@
 
 #include includes\spell_routines.inc
 #include includes\commonCaster.inc
-#turbo
 
 Sub InitNukeIni(string fileName)
     /if (!${Defined[nukeOptions]})  		/declare nukeOptions        string  outer "NukeOptions"
@@ -33,7 +32,6 @@ Sub InitNukeIni(string fileName)
 
     /if (${Ini[${fileName},${nukeOptions},Magic].Length}) {
         /varset Magic ${Ini[${fileName},${nukeOptions},Magic]}       
-        /echo ${Magic}
     }
 
     /if (${Ini[${fileName},${nukeOptions},UseNuke].Length}) {
