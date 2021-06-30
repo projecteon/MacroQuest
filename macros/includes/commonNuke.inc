@@ -123,7 +123,7 @@ Sub CancelNuke(int spellId)
 | ################################################################################
 | # Change type of nuke
 | ################################################################################
-#Event ChangeNukeLineup "<#1#> nuke lineup #1#"
+#Event ChangeNukeLineup "<#*#> nuke lineup #1#"
 #Event ChangeNukeLineup "#*#[MQ2] nuke lineup #1#"
 Sub Event_ChangeNukeLineup(eventText, lineup)
     /if (${Debug} || ${Debug_Nuke}) /echo |- Event_ChangeNukeLineup ==>
