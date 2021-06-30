@@ -5,8 +5,6 @@
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
 
-#turbo
-
 Sub Main(string Search)
     /declare testIniFileName        string  local "ini/${MacroQuest.Server}/Test_${Me.CleanName}.ini"
     /if (!${Defined[iniBuffDimensions]})                /declare iniBuffDimensions              int     outer 3 
