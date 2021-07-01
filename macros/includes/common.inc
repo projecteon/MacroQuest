@@ -1,16 +1,18 @@
+#include includes\commonItems.inc
 #include includes\commonLoot.inc
 
 Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
-    /if (!${Defined[mainAssist]})  	    /declare mainAssist     string	outer 
-    /if (!${Defined[mainTank]})  	    /declare mainTank       string	outer 
-    /if (!${Defined[assistPct]})  	    /declare assistPct      int	    outer 95 
-    /if (!${Defined[campRadius]})  	    /declare campRadius     int	    outer 100 
-    /if (!${Defined[Debug]})  		    /declare Debug       	bool  	outer FALSE 
-    /if (!${Defined[Debug_Common]})	    /declare Debug_Common  	bool  	outer FALSE 
+    /if (!${Defined[numInventorySlots]})  	/declare numInventorySlots  int	outer 8
+    /if (!${Defined[mainAssist]})  	        /declare mainAssist         string	outer 
+    /if (!${Defined[mainTank]})  	        /declare mainTank           string	outer 
+    /if (!${Defined[assistPct]})  	        /declare assistPct          int	    outer 95 
+    /if (!${Defined[campRadius]})  	        /declare campRadius         int	    outer 100 
+    /if (!${Defined[Debug]})  		        /declare Debug       	    bool  	outer FALSE 
+    /if (!${Defined[Debug_Common]})	        /declare Debug_Common  	    bool  	outer FALSE 
     | sea furious are |32, but so are guards... needs more testing
-    /if (!${Defined[aggroAnimation]})   /declare aggroAnimation string  outer |5|8|12|17|18|32|42|44|80|106|129|144|
-    /declare initResult                                         int     local 1
+    /if (!${Defined[aggroAnimation]})       /declare aggroAnimation     string  outer |5|8|12|17|18|32|42|44|80|106|129|144|
+    /declare initResult                                                 int     local 1
 
     | Use main assist setting to check if ini file is created
     /if (${Ini[${iniFileName},${options},MainAssist].Length}) {
@@ -177,6 +179,7 @@ Sub DoCommonEvents
     | /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
     | /if (${hasNpcInCamp}) /goto :endDoClearCampEvents
     
+    /call DoItemEvents
     /call DoLootEvents
 
     :endDoClearCampEvents

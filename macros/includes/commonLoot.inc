@@ -520,7 +520,7 @@ Sub Event_SellItems
 		
 	/if (${Window[MerchantWnd].Open}) {
 		/keypress OPEN_INV_BAGS
-		/call SellItems 8
+		/call SellItems ${numInventorySlots}
 
 		| Close merchant.
 		/if (${Window[MerchantWnd].Open}) /call CloseMerchant
