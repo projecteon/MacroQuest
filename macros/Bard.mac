@@ -33,6 +33,9 @@ Sub InitBardIni(string iniFileName, string mainAssist)
     /call InitGenralIni "${iniFileName}"
     /varset parentInitResult ${Macro.Return}
     
+    /call InitMeleeIni "${iniFileName}"
+    /varset parentInitResult ${Macro.Return}
+    
     /call InitWait4Rez "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset parentInitResult 0

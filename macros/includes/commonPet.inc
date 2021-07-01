@@ -1,3 +1,5 @@
+| https://everquest.fanra.info/wiki/Pet_commands
+
 Sub InitPetIni(string iniFileName)
     /declare petOptions         string  local "PetOptions"
     /declare petInitResult      int     local 1
@@ -9,34 +11,32 @@ Sub InitPetIni(string iniFileName)
     /declare currentPetTargetId int     outer 0
     /declare Debug_Pet          bool    outer FALSE
 
-    /if (${Ini[${iniFileName},${petOptions},"Pet Spell"].Length}) {
-        /varset petSpell ${Ini[${iniFileName},${petOptions},"Pet Spell"]}
+    /if (${Ini[${iniFileName},${petOptions},"UsePet"].Length}) {
+        /declare usePet string local ${Ini[${iniFileName},${petOptions},"UsePet"]}
+        /call Event_SetActivePetSpell "" ${usePet}
+        /varset petInitResult ${Macro.Return}
     } else {
-        /ini "${iniFileName}" "${petOptions}" "Pet Spell" "${petSpell}"
+        /ini "${iniFileName}" "${petOptions}" "UsePet" "PetSectionName"
+        /ini "${iniFileName}" "PetSectionName" "Pet-Spell" "${petSpell}"
+        /ini "${iniFileName}" "PetSectionName" "Pet-Focus-Item" "${petFocusItem}"
     }
 
-    /if (${Ini[${iniFileName},${petOptions},"Pet Focus Item"].Length}) {
-        /varset petFocusItem ${Ini[${iniFileName},${petOptions},"Pet Focus Item"]}
+    /if (${Ini[${iniFileName},${petOptions},"Pet-AssistPct"].Length}) {
+        /varset petAssistPct ${Ini[${iniFileName},${petOptions},"Pet-AssistPct"]}
     } else {
-        /ini "${iniFileName}" "${petOptions}" "Pet Focus Item" "${petFocusItem}"
+        /ini "${iniFileName}" "${petOptions}" "Pet-AssistPct" "${petAssistPct}"
     }
 
-    /if (${Ini[${iniFileName},${petOptions},"Pet AssistPct"].Length}) {
-        /varset petAssistPct ${Ini[${iniFileName},${petOptions},"Pet AssistPct"]}
+    /if (${Ini[${iniFileName},${petOptions},"Pet-Weapons-Spell"].Length}) {
+        /varset petWeaponsSpell ${Ini[${iniFileName},${petOptions},"Pet-Weapons-Spell"]}
     } else {
-        /ini "${iniFileName}" "${petOptions}" "Pet AssistPct" "${petAssistPct}"
+        /ini "${iniFileName}" "${petOptions}" "Pet-Weapons-Spell" "${petWeaponsSpell}"
     }
 
-    /if (${Ini[${iniFileName},${petOptions},"Pet Weapons Spell"].Length}) {
-        /varset petWeaponsSpell ${Ini[${iniFileName},${petOptions},"Pet Weapons Spell"]}
+    /if (${Ini[${iniFileName},${petOptions},"Pet-Taunt"].Length}) {
+        /varset petTaunt ${Bool[${Ini[${iniFileName},${petOptions},"Pet-Taunt"]}]}
     } else {
-        /ini "${iniFileName}" "${petOptions}" "Pet Weapons Spell" "${petWeaponsSpell}"
-    }
-
-    /if (${Ini[${iniFileName},${petOptions},"Pet Taunt"].Length}) {
-        /varset petTaunt ${Bool[${Ini[${iniFileName},${petOptions},"Pet Taunt"]}]}
-    } else {
-        /ini "${iniFileName}" "${petOptions}" "Pet Taunt" "${petTaunt}"
+        /ini "${iniFileName}" "${petOptions}" "Pet-Taunt" "${petTaunt}"
     }
 
     /if (${Ini[${iniFileName},Debug,Debug_Pet].Length}) {
@@ -191,13 +191,63 @@ Sub WeaponizePet(int petID)
     :endWeaponizePet
 
     /if (${Debug} || ${Debug_Pet}) /echo <== WeaponizePet -|
-/RETURN
+/Return
 
-Sub MakePetIni(string fileName)
-    |- Build the INI file
-    /echo Building Pet INI file.....
+| ################################################################################
+| # Set active pet summon spell
+| ################################################################################
+#Event SetActivePetSpell "<#*#> set active pet spell #1#"
+#Event SetActivePetSpell "#*#[MQ2] set active pet spell #1#"
+Sub Event_SetActivePetSpell(eventText, newPetSection)
+    /if (${Debug} || ${Debug_Pet}) /echo |- SetActivePet ==> 
 
-    | /ini "${fileName}" "${petOptions}" "AttackPct" "${assistPct}"
+    /declare setPetSpellResult  int     local 1
+    /declare iniFileName        string  local "ini/${MacroQuest.Server}/Mage_${Me.CleanName}.ini"
+
+    /if (${Ini[${iniFileName},${newPetSection},"Pet-Spell"].Length}) {
+        /varset petSpell ${Ini[${iniFileName},${newPetSection},"Pet-Spell"]}
+        /if (${Debug} || ${Debug_Pet}) /echo Active pet spell: ${petSpell}
+    } else {
+        /varset setPetSpellResult 0
+    }
+
+    /if (${setPetSpellResult} == 1 && ${Ini[${iniFileName},${newPetSection},"Pet-Focus-Item"].Length}) {
+        /varset petFocusItem ${Ini[${iniFileName},${newPetSection},"Pet-Focus-Item"]}
+        /if (${Debug} || ${Debug_Pet}) /echo Active pet docus item: ${petFocusItem}
+    }
+    
+    /if (${setPetSpellResult} == 0) {
+        /beep
+        /echo Pet spell section <${newPetSection}> with a valid <Pet-Spell> was not found in ${iniFileName}.
+    }
+
+    /if (!${Me.Book[${petSpell}]}) {
+        /beep
+        /echo You do not know the spell <${petSpell}>.
+    }
+
+    /if (!${Bool[${FindItem[=${petFocusItem}]}]}) {
+        /beep
+        /echo You do not have the focus item <${petFocusItem}> on your character.
+    }
+
+    /if (${Debug} || ${Debug_Pet}) /echo <== SetActivePet -|
+/return ${setPetSpellResult}
+
+| ################################################################################
+| # Disband pet event
+| ################################################################################
+#Event DisbandYourPet "<#1#> disband your pet#*#"
+#Event DisbandYourPet "#*#[MQ2] disband your pet#*#"
+Sub Event_DisbandYourPet
+    /if (${Debug} || ${Debug_Pet}) /echo |- Event_DisbandYourPet ==>
+
+    /if (${Me.Pet.ID}) {
+        /if (${Debug} || ${Debug_Pet}) /echo Telling {Pet} to get lost!
+        /pet get lost
+    }
+    
+    /if (${Debug} || ${Debug_Pet}) /echo <== Event_DisbandYourPet -|
 /return
 
 | ################################################################################
@@ -216,10 +266,10 @@ Sub Event_SummonYourPet
 | ################################################################################
 | # Weaponize pet event
 | ################################################################################
-#EVENT WeaponizeThePet "<#1#> weaponize the pet:#1##*#"
-#EVENT WeaponizeThePet "<#1#> weaponize the pet:#1##*#"
-#Event WeaponizeThePet "#*#[MQ2] weaponize the pet:#1##*#"
-#Event WeaponizeThePet "#*#[MQ2] weaponize your pet#1##*#"
+#EVENT WeaponizeThePet "<#1#> weaponize the pet:#1#"
+#EVENT WeaponizeThePet "<#1#> weaponize your pet#*#"
+#Event WeaponizeThePet "#*#[MQ2] weaponize the pet:#1#"
+#Event WeaponizeThePet "#*#[MQ2] weaponize your pet#*#"
 Sub Event_WeaponizeThePet(eventText, int petID)
     /if (${Debug} || ${Debug_Pet}) /echo |- Event_WeaponizeThePet ==>
 
@@ -229,6 +279,8 @@ Sub Event_WeaponizeThePet(eventText, int petID)
 /return
 
 Sub DoPetEvents
+    /doevents SetActivePetSpell
     /doevents SummonYourPet
     /doevents WeaponizeThePet
+    /doevents DisbandYourPet
 /return

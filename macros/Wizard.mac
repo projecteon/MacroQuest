@@ -40,9 +40,8 @@ Sub DoHarvest
     
     /if (${autoHarvest} && ${Defined[harvestSpell]} && ${Cast.Ready[${harvestSpell}]} && ${Me.Gem[${harvestSpell}]}) {
         /call CheckNPCInRange
-        /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}  
-
-        /declare manaFromMax int local ${Math.Calc[${Me.MaxMana}-${Me.CurrentMana}]}
+        /declare hasNpcInCamp   bool    local ${Bool[${Macro.Return}]}  
+        /declare manaFromMax    int     local ${Math.Calc[${Me.MaxMana}-${Me.CurrentMana}]}
 
         /if (${Debug} || ${Debug_Wizard}) {
             /echo "hasNpcInCamp: " ${hasNpcInCamp}

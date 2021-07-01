@@ -2,7 +2,7 @@
 | http://mqemulator.net/forum2/viewtopic.php?t=794
 
 #include includes\spell_routines.inc
-#turbo
+#turbo 40
 
 Sub Main
     /declare iniFileName        string  local "${MacroName}_${EverQuest.Server}_${Me.CleanName}.ini"

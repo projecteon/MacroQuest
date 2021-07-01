@@ -41,6 +41,9 @@ Sub InitRangerIni(string iniFileName)
     /call InitGenralIni "${iniFileName}"
     /varset parentInitResult ${Macro.Return}
     
+    /call InitMeleeIni "${iniFileName}"
+    /varset parentInitResult ${Macro.Return}
+    
     /call InitBufferIni "${iniFileName}"
     /if (${Macro.Return} == 0) {
         /varset parentInitResult 0
