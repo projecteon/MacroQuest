@@ -122,7 +122,7 @@ Sub CheckGroupBuffs
         /if (${Macro.Return} == 1 && ${Spell[${buffSpell}].TargetType.Equal[Single]}) {
             /varset classRestrictions ${Buffs[${k},${buffClassRestrictionsDimension}]}
             /for x 1 to ${Group.Members} {      
-                /if (${Spawn[${Group.Member[${x}]}].ID} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
+                /if (${Spawn[pc = ${Group.Member[${x}]}].ID} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${Group.Member[${x}].Class.ShortName},${classRestrictions}]})) {
                     /if (${SpellTimer[${Group.Member[${x}].ID},any,${buffSpell}]} < 5) {
                         /call CastBuff "${buffSpell}" ${Group.Member[${x}].ID} "${Group.Member[${x}].Name}"
                     } 
@@ -164,7 +164,7 @@ Sub CheckNetBotBuffs
             /varset classRestrictions ${Buffs[${k},${buffClassRestrictionsDimension}]}
             /for x 1 to ${NetBots.Counts} {
                 /varset netbotsClient "${NetBots.Client[${x}]}"
-                /if (${Spawn[${NetBots[${netbotsClient}].Name}].ID} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${NetBots[${netbotsClient}].Class.ShortName},${classRestrictions}]})) {
+                /if (${NetBots[${netbotsClient}].InZone} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${NetBots[${netbotsClient}].Class.ShortName},${classRestrictions}]})) {
                     /if (!${NetBots[${netbotsClient}].Buff.Find[${buffId} ]}) {
                         /if (${Debug} || ${Debug_NetBots_Buffs}) /echo Buff missing, recasting
                         /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
