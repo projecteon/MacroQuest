@@ -7,6 +7,7 @@
 #include includes\commonCaster.inc
 #include includes\commonBuffer.inc
 #include includes\commonPet.inc
+#include includes\commonMelee.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
 #turbo 40
