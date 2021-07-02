@@ -49,8 +49,8 @@ Sub InitNukeIni(string fileName)
        /varset minNukeMana ${Ini[${fileName},${nukeOptions},MinMana]}       
     } 
 
-    /if (${Ini[${iniFileName},Debug,Debug_Nuke].Length}) {
-       /varset Debug_Nuke ${Bool[${Ini[${iniFileName},Debug,Debug_Nuke]}]}     
+    /if (${Ini[${fileName},Debug,Debug_Nuke].Length}) {
+       /varset Debug_Nuke ${Bool[${Ini[${fileName},Debug,Debug_Nuke]}]}     
     } 
 /return ${nukeInitResult}
 
@@ -126,11 +126,11 @@ Sub CancelNuke(int spellId)
 #Event ChangeNukeLineup "<#*#> nuke lineup #1#"
 #Event ChangeNukeLineup "#*#[MQ2] nuke lineup #1#"
 Sub Event_ChangeNukeLineup(eventText, lineup)
-    /if (${Debug} || ${Debug_Nuke}) /echo |- Event_ChangeNukeLineup ==>
+    /if (${Debug} || ${Debug_Nuke}) /echo |- Event_ChangeNukeLineup ==> 
 
-    /if (${Defined[${lineup}]} && ${Defined[${${lineup}}]} &&${Bool[${${lineup}}]} && ${Me.Gem[${${lineup}}]}) {
+    /if (${Defined[${lineup}]} && ${Bool[${${lineup}}]} && ${Bool[${Me.Gem[${${lineup}}]}]}) {
         /varset useNuke ${lineup}
-        /if (${Debug} || ${Debug_Nuke}) /echo Nuke set to '${lineup}'
+        /bca Nuke lineup set to <${lineup}> using <${${lineup}}>
     }
     
     /if (${Debug} || ${Debug_Nuke}) /echo <== Event_ChangeNukeLineup -|
