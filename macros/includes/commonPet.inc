@@ -202,7 +202,7 @@ Sub Event_SetActivePetSpell(eventText, newPetSection)
     /if (${Debug} || ${Debug_Pet}) /echo |- SetActivePet ==> 
 
     /declare setPetSpellResult  int     local 1
-    /declare iniFileName        string  local "ini/${MacroQuest.Server}/Mage_${Me.CleanName}.ini"
+    /declare iniFileName        string  local "ini/${MacroQuest.Server}/${Macro.Name.Token[1,.]}_${Me.CleanName}.ini"
 
     /if (${Ini[${iniFileName},${newPetSection},"Pet-Spell"].Length}) {
         /varset petSpell ${Ini[${iniFileName},${newPetSection},"Pet-Spell"]}
@@ -226,7 +226,7 @@ Sub Event_SetActivePetSpell(eventText, newPetSection)
         /echo You do not know the spell <${petSpell}>.
     }
 
-    /if (!${Bool[${FindItem[=${petFocusItem}]}]}) {
+    /if (${Bool[${petFocusItem}]} && !${Bool[${FindItem[=${petFocusItem}]}]}) {
         /beep
         /echo You do not have the focus item <${petFocusItem}> on your character.
     }
