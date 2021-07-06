@@ -112,25 +112,18 @@ Sub CheckMainTankHeal(string healSpell, int healPct)
 
     /if (!${Defined[mainTank]}) {
         /if (${Debug} || ${Debug_Heals}) /echo |- No main tank defined
-        /if (${Debug} || ${Debug_Heals}) /echo <== CheckMaintankHeal -|
-        /return
+        /goto :endCheckMainTankHeal
     }
 
-    /if (${NetBots[${mainTank}].ID} && (!${NetBots[${mainTank}].InZone} || ${NetBots[${mainTank}].PctHPs} > ${healPct} || ${Spawn[${NetBots[${mainTank}].ID}].Distance} > ${healDist})) {
-        /if (${Debug} || ${Debug_Heals}) /echo <== CheckMaintankHeal -|
-        /return        
+    /if (!${NetBots[${mainTank}].InZone}) {
+        /goto :endCheckMainTankHeal
+    }
+    
+    /if (${NetBots[${netbotsClient}].PctHPs} <= ${healPct}) { 
+        /call CastHeal "${healSpell}" ${NetBots[${netbotsClient}].ID} ${mainTank}
     }
 
-    /target pc ${mainTank}
-    /delay 2s ${Target.Name.Equal[${mainTank}]}
-
-    |- Check their hitpoints and cast if required
-    /if (${Target.Name.Equal[${mainTank}]}) {
-        /if (${Target.PctHPs} <= ${mainTankHealPct}) { 
-            /call CastHeal "${healSpell}" ${Target.ID} ${mainTank}
-        }
-    }
-
+    :endCheckMainTankHeal
     /if (${Debug} || ${Debug_Heals}) /echo <== CheckMaintankHeal -|
 /return
 
