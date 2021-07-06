@@ -34,7 +34,7 @@ Sub FindItemsOnToon(string chatSender, string itemToFind, int numberOfInventoryS
         }
         /if (${Me.Inventory[pack${i}].Container}) {
             /for c 1 to ${Me.Inventory[pack${i}].Container} {
-                /if (${Me.Inventory[pack${i}].Item[${c}].Name.Find[${itemToFind}]}) {
+                /if (${Me.Inventory[pack${i}].Item[${c}].Name.Find[${itemToFind}]}) {                    
                     /bct ${chatSender} ${Me.Inventory[pack${i}].Item[${c}]}(${Me.Inventory[pack${i}].Item[${c}].Stack})-> [${Me.Inventory[pack${i}]}-> InvSlot[${i}]-> PackSlot[${c}]]
                 }
                 | /for a 0 to ${Me.Inventory[pack${i}].Item[${c}].Augs}
@@ -58,7 +58,7 @@ Sub FindItemsInToonBank(string chatSender, string itemToFind)
     /declare c int local
     /declare a int local
   
-    /for i 1 to 26
+    /for i 1 to 16
         /if (${Me.Bank[${i}].Name.Find[${itemToFind}]}) {
             /bct ${chatSender} ${Me.Bank[${i}]}(${Me.Bank[${i}].Stack}) ->[BankSlot[${i}]]
         }
