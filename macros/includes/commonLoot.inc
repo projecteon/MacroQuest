@@ -449,6 +449,7 @@ Sub SellItem(int inventorySlot, int packSlot)
 | ################################################################################
 | # Set item on cursor for selling
 | ################################################################################
+#Event SetCursorItemForSelling "<#*#> mark item for selling#*#"
 #Event SetCursorItemForSelling "#*#[MQ2] mark item for selling#*#"
 Sub Event_SetCursorItemForSelling
     /if (${Debug} || ${Debug_Sell}) /echo |- Event_SetCursorItemForSelling ==>
@@ -468,6 +469,7 @@ Sub Event_SetCursorItemForSelling
             /if (${Debug}) /echo |- "${Cursor} (${Cursor.ID})" --> "${lootSetting}"
 
             /ini ${lootSettingsIniFileName} "Items" "${Cursor} (${Cursor.ID})" "${lootSetting}"
+            /bc Marked <${Cursor} (${Cursor.ID})> for selling
         }
     }
     
@@ -475,7 +477,7 @@ Sub Event_SetCursorItemForSelling
 /return
 
 | ################################################################################
-| # Set item on cursor for selling
+| # Set item on cursor for destroying
 | ################################################################################
 #Event SetCursorItemForDestroy "<#*#> mark item for destroy#*#"
 #Event SetCursorItemForDestroy "#*#[MQ2] mark item for destroy#*#"
@@ -497,6 +499,7 @@ Sub Event_SetCursorItemForDestroy
             /if (${Debug}) /echo |- "${Cursor} (${Cursor.ID})" --> "${lootSetting}"
 
             /ini ${lootSettingsIniFileName} "Items" "${Cursor} (${Cursor.ID})" "${lootSetting}"
+            /bc Marked <${Cursor} (${Cursor.ID})> for destroying
         }
     }
     
