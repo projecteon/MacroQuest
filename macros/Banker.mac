@@ -1,0 +1,11 @@
+#include includes\commonItems.inc
+#turbo 40
+
+Sub Main
+    /if (!${Defined[numInventorySlots]})    /declare numInventorySlots  int	    outer 8    
+    /if (!${Defined[Debug]})	            /declare Debug     	        bool    outer FALSE 
+
+    :BankerLoop
+        /call DoItemEvents
+        /goto :BankerLoop
+/return
