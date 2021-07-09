@@ -36,6 +36,9 @@ Sub Main(string ability)
             /autoinv
         }
 
-        /goto :trainloop
+        /if (${Me.Feigning}) {
+            /stand
+        }
 
+        /goto :trainloop
 /return
