@@ -119,8 +119,8 @@ Sub CheckMainTankHeal(string healSpell, int healPct)
         /goto :endCheckMainTankHeal
     }
     
-    /if (${NetBots[${netbotsClient}].PctHPs} <= ${healPct}) { 
-        /call CastHeal "${healSpell}" ${NetBots[${netbotsClient}].ID} ${mainTank}
+    /if (${NetBots[${mainTank}].PctHPs} <= ${healPct}) { 
+        /call CastHeal "${healSpell}" ${NetBots[${mainTank}].ID} ${mainTank}
     }
 
     :endCheckMainTankHeal
