@@ -5,7 +5,6 @@
 |--------------------------------------------------------|
 #EVENT FindItems "<#1#> Find Item #2#"
 Sub EVENT_FindItems(line, chatSender, itemToFind)
-    /varset Debug TRUE
     /if (${Debug} || ${Debug_Common}) /echo |- EVENT_FindItems ==>
     /if (${Debug} || ${Debug_Common}) /echo "${chatSender}" "${itemToFind}"
 
@@ -23,7 +22,6 @@ Sub EVENT_FindItems(line, chatSender, itemToFind)
     /call FindItemsInToonBank "${chatSender}" "${itemToFind}"
 
     /if (${Debug} || ${Debug_Common}) /echo <== EVENT_FindItems -|
-    /varset Debug FALSE
 /return
 
 Sub FindItemsOnToon(string chatSender, string itemToFind, int numberOfInventorySlots)
