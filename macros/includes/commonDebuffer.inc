@@ -89,8 +89,16 @@ Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
         /stand
     }
 
-    /call cast "${debuffSpell}" gem${Me.Gem[${debuffSpell}]} 0 CancelDebuff
-    /bca ${Target.Name} debuffed with ${debuffSpell}
+    /call cast "${debuffSpell}" gem${Me.Gem[${debuffSpell}]} 0 CancelDebuff 3
+    /if (${castReturn.Equal[CAST_IMMUNE]}) {
+        /declare targetName string  local ${Spawn[${targetId}].Name}
+        /bca ${debuffSpell} " immune - " ${Target.Name}
+        | /ini "${mesmerizeSettingsFileName}" "Immune" "${targetName}" "TRUE"
+    } else /if (${castReturn.Equal[CAST_RESISTED]}) {
+        /bca ${debuffSpell} " resited 3 times, retrying next run - " ${Target.Name}
+    } else {
+        /bca ${Target.Name} debuffed with ${debuffSpell}
+    }
     
     /if (${Debug} || ${Debug_DeBuffs}) /echo <== TryDoDebuff -|
 /return 1

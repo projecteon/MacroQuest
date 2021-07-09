@@ -73,7 +73,7 @@ sub DoMezz
                             /bca "Mezz immune - " ${Target.Name}
                             /ini "${mesmerizeSettingsFileName}" "Immune" "${targetName}" "TRUE"
                         } else /if (${castReturn.Equal[CAST_RESISTED]}) {
-                            /bca "Mezz resited, retrying next run - " ${Target.Name}
+                            /bca "Mezz resited 3 times, retrying next run - " ${Target.Name}
                         } else {
                             /bca ${Target.Name} " mezzed!"
                         }
