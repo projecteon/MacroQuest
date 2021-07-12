@@ -1,0 +1,20 @@
+#turbo 
+
+Sub Main 
+   /echo Language Macro Starting 
+
+   /declare lang int local
+
+   :Langloop 
+ 
+   /for lang 1 to 25
+
+	/language ${lang}
+         
+        /gsay You are learning a new language!
+
+  /next lang
+
+  /goto :Langloop 
+
+/return
