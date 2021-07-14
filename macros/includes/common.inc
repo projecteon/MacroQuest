@@ -4,12 +4,12 @@
 
 Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
-    /if (!${Defined[numInventorySlots]})  	/declare numInventorySlots  int	outer 8
+    /if (!${Defined[numInventorySlots]})  	/declare numInventorySlots  int	    outer 8
     /if (!${Defined[mainAssist]})  	        /declare mainAssist         string	outer 
-    /if (!${Defined[mainTank]})  	          /declare mainTank           string	outer 
+    /if (!${Defined[mainTank]})  	        /declare mainTank           string	outer 
     /if (!${Defined[assistPct]})  	        /declare assistPct          int	    outer 95 
     /if (!${Defined[campRadius]})  	        /declare campRadius         int	    outer 100 
-    /if (!${Defined[Debug]})  		          /declare Debug       	      bool  	outer FALSE 
+    /if (!${Defined[Debug]})  		        /declare Debug       	    bool  	outer FALSE 
     /if (!${Defined[Debug_Common]})	        /declare Debug_Common  	    bool  	outer FALSE 
     | sea furious are |32, but so are guards... needs more testing
     /if (!${Defined[aggroAnimation]})       /declare aggroAnimation     string  outer |5|8|12|17|18|32|42|44|80|106|129|144|
