@@ -96,7 +96,7 @@ Sub IniArray2(string iniFile, string section, string keyName, arrayName)
         /for k 1 to ${Math.Calc[${keys.Count[|]}+1]}
             /varset key ${keys.Arg[${k},|]}
             /if (${key.Left[-2].Equal[${keyName}]} || ${key.Left[-1].Equal[${keyName}]}) {
-                /if (${Debug}) /echo |- ${key} > [${numberOfValidKeys}] > ${Ini[${iniFile},${section},${key}]}
+                /if (${Debug}) /echo |- ${key} > ${arrayName}[${numberOfValidKeys}] > ${Ini[${iniFile},${section},${key}]}
                 /varset ${arrayName}[${numberOfValidKeys}] ${Ini[${iniFile},${section},${key}]}
                 /varcalc numberOfValidKeys ${numberOfValidKeys}+1
             } 

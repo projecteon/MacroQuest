@@ -23,16 +23,16 @@ Sub InitGenralIni(string iniFileName)
        /varset Debug_Common ${Bool[${Ini[${iniFileName},Debug,Debug_Common]}]}     
     } 
 
-    /call IniArray2 "${iniFileName}" ${options} "MainAssist#" 1 MainAssists
-    /call IniArray2 "${iniFileName}" ${options} "MainTank#" 1 MainTanks
+    /call IniArray2 "${iniFileName}" ${options} "MainAssist#" MainAssists
+    /call IniArray2 "${iniFileName}" ${options} "MainTank#" MainTanks
 
     /if (!${Defined[MainAssists]} || ${MainAssists.Size} < 1) {     
-        /echo No main assists defined!
+        /echo No main assists defined! - <${MainAssists}> - <${MainAssists.Size}>
         /varset initResult 0   
     }   
 
     /if (!${Defined[MainTanks]} || ${MainTanks.Size} < 1) {     
-        /echo No main tanks defined!
+        /echo No main tanks defined! - <${MainTanks}> - <${MainTanks.Size}>
         /varset initResult 0   
     }   
 
