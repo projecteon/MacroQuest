@@ -15,18 +15,31 @@ Sub InitGenralIni(string iniFileName)
     /if (!${Defined[aggroAnimation]})       /declare aggroAnimation     string  outer |5|8|12|17|18|32|42|44|80|106|129|144|
     /declare initResult                                                 int     local 1
 
+    /call IniArray "${iniFileName}" ${options} "MainAssist#" 1 MainAssists
+    /call IniArray "${iniFileName}" ${options} "MainTank#" 1 MainTanks
+
+    /if (!${Defined[MainAssists]} || ${MainAssists.Length} < 1) {     
+        /echo No main assists defined!
+        /varset initResult 0   
+    }   
+
+    /if (!${Defined[MainTanks]} || ${MainTanks.Length} < 1) {     
+        /echo No main tanks defined!
+        /varset initResult 0   
+    }   
+
     | Use main assist setting to check if ini file is created
-    /if (${Ini[${iniFileName},${options},MainAssist].Length}) {
-        /varset mainAssist "${Ini[${iniFileName},${options},MainAssist]}"    
+    /if (${Ini[${iniFileName},${options},"MainAssist#1"].Length}) {
+        /varset mainAssist "${Ini[${iniFileName},${options},"MainAssist#1"]}"    
     } else {
-        /ini "${iniFileName}" "${options}" "MainAssist" "${mainAssist}"      
+        /ini "${iniFileName}" "${options}" "MainAssist#1" "${mainAssist}"      
         /varset initResult 0   
     }
     
-    /if (${Ini[${iniFileName},${options},MainTank].Length}) {
-        /varset mainTank "${Ini[${iniFileName},${options},MainTank]}"    
+    /if (${Ini[${iniFileName},${options},"MainTank#1"].Length}) {
+        /varset mainTank "${Ini[${iniFileName},${options},"MainTank#1"]}"    
     } else {
-        /ini "${iniFileName}" "${options}" "MainTank" "${mainTank}"     
+        /ini "${iniFileName}" "${options}" "MainTank#1" "${mainTank}"     
         /varset initResult 0   
     }    				    				
     
@@ -51,9 +64,63 @@ Sub InitGenralIni(string iniFileName)
     } 
     
     /squelch /alias /followme /bc follow me
+    /squelch /alias /movetome /bc move to me
 
     /call InitLoot
 /return ${initResult}
+
+
+| ################################################################################
+| # Get prioritized Main Assist that is in zone
+| ################################################################################	
+Sub GetMainAssist
+    /if (${Debug}) /echo  |- GetMainAssist ==>
+    
+    /if (!${Defined[MainAssist]}) {
+        /if (${Debug}) /echo No MainAssist defined.        
+        /goto :endGetMainAssist
+    }
+    
+    /declare currentMainAssist string local
+    /declare mainAssist string local
+    /declare k  int local
+    /for k 1 to ${MainAssist.Size}
+        /varset mainTank ${MainAssist[${k}]}
+        /if (${NetBots.Client[${mainAssist}].ID} && ${NetBots.Client[${mainAssist}].InZone}) {
+            /varset currentMainAssist ${mainAssist}     
+            /goto :endGetMainAssist
+        }
+    /next k 
+
+    :endGetMainAssist
+    /if (${Debug}) /echo <== GetMainAssist -|
+/return ${currentMainAssist}
+
+| ################################################################################
+| # Get prioritized Main Tank that is in zone
+| ################################################################################	
+Sub GetMainTank
+    /if (${Debug}) /echo  |- GetMainTank ==>
+    
+    /if (!${Defined[MainTanks]}) {
+        /if (${Debug}) /echo No MainTanks defined.        
+        /goto :endGetMainTank
+    }
+    
+    /declare currentMainTank string local
+    /declare mainTank string local
+    /declare k  int local
+    /for k 1 to ${MainTanks.Size}
+        /varset mainTank ${MainTanks[${k}]}
+        /if (${NetBots.Client[${mainTank}].ID} && ${NetBots.Client[${mainTank}].InZone}) {
+            /varset currentMainTank ${mainTank}       
+            /goto :endGetMainTank
+        }
+    /next k 
+
+    :endGetMainTank
+    /if (${Debug}) /echo <== GetMainTank -|
+/return ${currentMainTank}
 
 
 | ################################################################################
@@ -172,12 +239,31 @@ Sub MoveToLoc(int yLoc, int xLoc, int timeToWait, int arrivalDist)
     /if (${Debug} || ${Debug_Common}) /echo <== MoveToLoc -|
 /return
 
+#EVENT MoveToMe "<#1#> move to me"
+Sub Event_MoveToMe(string line, string sender)
+    /if (${Debug} || ${Debug_Common}) /echo |- Event_MoveToMe ==>
+    
+    /if (!${Defined[${sender}]} || !${NetBots.Client[${sender}].ID}) {
+        /if (${Debug} || ${Debug_Common}) /echo No valid <sender> of message: ${sender}
+        /goto :endMoveToMe
+    }
+    
+    /if (!${NetBots.Client[${sender}].InZone}) {
+        /if (${Debug} || ${Debug_Common}) /echo ${sender} not in zone.
+        /goto :endMoveToMe
+    }
+    
+    /squelch /call MoveToLoc ${Me.Y} ${Me.X}
+
+    :endMoveToMe
+    /if (${Debug} || ${Debug_Common}) /echo <== Event_MoveToMe -|
+/return
 
 #EVENT FollowMe "<#1#> follow me"
 Sub Event_FollowMe(string line, string sender)
     /if (${Debug} || ${Debug_Common}) /echo |- FollowMe ==>
     
-    /if (!${Defined[${sender}]} || !${NetBots.Client[${sender}]}) {
+    /if (!${Defined[${sender}]} || !${NetBots.Client[${sender}].ID}) {
         /if (${Debug} || ${Debug_Common}) /echo No valid <sender> of message: ${sender}
         /goto :endFollowMe
     }
@@ -320,6 +406,7 @@ Sub DoCommonEvents
 
     /doevents ClickIt
     /doevents FollowMe
+    /doevents MoveToMe
 
     /call CheckNPCInRange
     /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
