@@ -49,7 +49,7 @@ Sub DoHarvest
         }        
 
         /if ((!${hasNpcInCamp} && ${manaFromMax} > 350) || ${Me.PctMana} < 2) {
-            /if (${Debug}) /echo |- DoHarvest > casting ${harvestSpell}
+            /if (${Debug} || ${Debug_Wizard}) /echo |- DoHarvest > casting ${harvestSpell}
             /call cast "${harvestSpell}"
         }
     }
