@@ -49,6 +49,8 @@ Sub InitGenralIni(string iniFileName)
     /if (${Ini[${iniFileName},Debug,Debug_Common].Length}) {
        /varset Debug_Common ${Bool[${Ini[${iniFileName},Debug,Debug_Common]}]}     
     } 
+    
+    /squelch /alias /followme /bc follow me
 
     /call InitLoot
 /return ${initResult}
@@ -170,25 +172,27 @@ Sub MoveToLoc(int yLoc, int xLoc, int timeToWait, int arrivalDist)
     /if (${Debug} || ${Debug_Common}) /echo <== MoveToLoc -|
 /return
 
-Sub DoCommonEvents
-    /if (${Debug} || ${Debug_Common}) /echo |- DoCommonEvents ==>
 
-    /call Wait4Rez_Background_Events
-
-    /doevents ClickIt
-
-    /call CheckNPCInRange
-    /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
-    /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
-    /if (${hasNpcInCamp}) /goto :endDoClearCampEvents
+#EVENT FollowMe "<#1#> follow me"
+Sub Event_FollowMe(string line, string sender)
+    /if (${Debug} || ${Debug_Common}) /echo |- FollowMe ==>
     
-    /call DoItemEvents
-    /call DoLootEvents
+    /if (!${Defined[${sender}]} || !${NetBots.Client[${sender}]}) {
+        /if (${Debug} || ${Debug_Common}) /echo No valid <sender> of message: ${sender}
+        /goto :endFollowMe
+    }
+    
+    /if (!${NetBots.Client[${sender}].InZone}) {
+        /if (${Debug} || ${Debug_Common}) /echo ${sender} not in zone.
+        /goto :endFollowMe
+    }
+    
+    /squelch /makecamp off
+    /squelch /stick id ${NetBots.Client[${sender}].ID} uw 15
 
-    :endDoClearCampEvents
-    /if (${Debug} || ${Debug_Common}) /echo <== DoCommonEvents -|
+    :endFollowMe
+    /if (${Debug} || ${Debug_Common}) /echo <== FollowMe -|
 /return
-
 
 | #####################################################################################
 | # Auto inventories items from your cursor. 										
@@ -307,4 +311,24 @@ SUB EVENT_ClickIt(line, chatSender, eventParams)
 
     :endClickIt
     /if (${Debug} || ${Debug_Common}) /echo <== EVENT_ClickIt -|
+/return
+
+Sub DoCommonEvents
+    /if (${Debug} || ${Debug_Common}) /echo |- DoCommonEvents ==>
+
+    /call Wait4Rez_Background_Events
+
+    /doevents ClickIt
+    /doevents FollowMe
+
+    /call CheckNPCInRange
+    /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
+    /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
+    /if (${hasNpcInCamp}) /goto :endDoClearCampEvents
+    
+    /call DoItemEvents
+    /call DoLootEvents
+
+    :endDoClearCampEvents
+    /if (${Debug} || ${Debug_Common}) /echo <== DoCommonEvents -|
 /return
