@@ -500,6 +500,9 @@ Sub Event_SetCursorItemForDestroy
 
             /ini ${lootSettingsIniFileName} "Items" "${Cursor} (${Cursor.ID})" "${lootSetting}"
             /bc Marked <${Cursor} (${Cursor.ID})> for destroying
+        } else {
+            /bc Could NOT mark <${Cursor} (${Cursor.ID})> for destroying
+            /beep
         }
     }
     
