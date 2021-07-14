@@ -583,8 +583,6 @@ Sub InitLoot
     /squelch /alias /setdestroyitem /echo mark item for destroy
     /squelch /alias /sellitems /echo sell items to vendor
     /squelch /alias /doloot /echo loot nearest corpse
-
-
 /return
 
 Sub DoLootEvents
