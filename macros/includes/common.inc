@@ -14,16 +14,24 @@ Sub InitGenralIni(string iniFileName)
     | sea furious are |32, but so are guards... needs more testing
     /if (!${Defined[aggroAnimation]})       /declare aggroAnimation     string  outer |5|8|12|17|18|32|42|44|80|106|129|144|
     /declare initResult                                                 int     local 1
+ 
+    /if (${Ini[${iniFileName},Debug,Debug].Length}) {
+       /varset Debug ${Bool[${Ini[${iniFileName},Debug,Debug]}]}     
+    }  
 
-    /call IniArray "${iniFileName}" ${options} "MainAssist#" 1 MainAssists
-    /call IniArray "${iniFileName}" ${options} "MainTank#" 1 MainTanks
+    /if (${Ini[${iniFileName},Debug,Debug_Common].Length}) {
+       /varset Debug_Common ${Bool[${Ini[${iniFileName},Debug,Debug_Common]}]}     
+    } 
 
-    /if (!${Defined[MainAssists]} || ${MainAssists.Length} < 1) {     
+    /call IniArray2 "${iniFileName}" ${options} "MainAssist#" 1 MainAssists
+    /call IniArray2 "${iniFileName}" ${options} "MainTank#" 1 MainTanks
+
+    /if (!${Defined[MainAssists]} || ${MainAssists.Size} < 1) {     
         /echo No main assists defined!
         /varset initResult 0   
     }   
 
-    /if (!${Defined[MainTanks]} || ${MainTanks.Length} < 1) {     
+    /if (!${Defined[MainTanks]} || ${MainTanks.Size} < 1) {     
         /echo No main tanks defined!
         /varset initResult 0   
     }   
@@ -53,14 +61,6 @@ Sub InitGenralIni(string iniFileName)
         /varset campRadius ${Ini[${iniFileName},${options},CampRadius]}    
     } else {
         /ini "${iniFileName}" "${options}" "CampRadius" "${campRadius}"      
-    }  
-
-    /if (${Ini[${iniFileName},Debug,Debug].Length}) {
-       /varset Debug ${Bool[${Ini[${iniFileName},Debug,Debug]}]}     
-    }  
-
-    /if (${Ini[${iniFileName},Debug,Debug_Common].Length}) {
-       /varset Debug_Common ${Bool[${Ini[${iniFileName},Debug,Debug_Common]}]}     
     } 
     
     /squelch /alias /followme /bc follow me
