@@ -44,12 +44,12 @@ Sub Main
 Sub DoCannibalize
     /if (${Debug}) /echo |- DoCannibalize ==>
 
-    /if (${Me.Gem[${cannibalizeSpell}]} && !${Me.Invis} && ${Me.PctHPs}>65 && !${Me.Casting.ID} && ${Me.PctMana}<80) {
+    /if (${Me.Gem[${cannibalizeSpell}]} && !${Me.Invis} && ${Me.PctHPs} > 65 && !${Me.Casting.ID} && ${Me.PctMana} < 80) {
         
         /call CheckNPCInRange
         /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
         
-        /if (!${hasNpcInCamp}) {
+        /if (!${hasNpcInCamp} || ${Me.PctMana} < 4) {
             /call cast "${cannibalizeSpell}" gem${Me.Gem[${cannibalizeSpell}]} 0
         }
     }
