@@ -248,7 +248,7 @@ Sub CancelHeal(int spellId)
     /if (${Target.Name.Equal[${mainTank}]} && ${Spell[${mainTankHeal}].ID}==${spellId} && ${Bool[${mainTankEmergencyHeal}]} && ${Me.Gem[${mainTankEmergencyHeal}]}) {
         /if (${Target.PctHPs} <= ${mainTankEmergencyHealPct} && ${mainTankEmergencyHeal.NotEqual[${mainTankHeal}]}) { 
             /call Interrupt
-            /call CastHeal "${mainTankEmergencyHeal}" ${Target.ID} ${mainTank}
+            /call CastHeal ${mainTankEmergencyHeal} ${Target.ID} ${mainTank}
         }
     }
 
