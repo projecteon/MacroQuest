@@ -246,7 +246,7 @@ Sub iniHeal(string INIFile, string section, string key, array)
 
 Sub CancelHeal(int spellId)
     /if (${Target.Name.Equal[${mainTank}]} && ${Spell[${mainTankHeal}].ID}==${spellId} && ${Bool[${mainTankEmergencyHeal}]} && ${Me.Gem[${mainTankEmergencyHeal}]}) {
-        /if (${Target.PctHPs} <= ${mainTankEmergencyHealPct} && ${mainTankEmergencyHeal.NotEqual[${mainTankHeal}]}) { 
+        /if (${Target.PctHPs} <= ${mainTankEmergencyHealPct} && ${mainTankEmergencyHeal.NotEqual[${mainTankHeal}]} && ${castEndTime} > ${Spell[${mainTankEmergencyHeal}].MyCastTime}) { 
             /call Interrupt
             /call CastHeal ${mainTankEmergencyHeal} ${Target.ID} ${mainTank}
         }
