@@ -6,7 +6,6 @@ Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
     /if (!${Defined[numInventorySlots]})  	/declare numInventorySlots  int	    outer 8
     /if (!${Defined[mainAssist]})  	        /declare mainAssist         string	outer 
-    /if (!${Defined[mainTank]})  	        /declare mainTank           string	outer 
     /if (!${Defined[assistPct]})  	        /declare assistPct          int	    outer 95 
     /if (!${Defined[campRadius]})  	        /declare campRadius         int	    outer 100 
     /if (!${Defined[Debug]})  		        /declare Debug       	    bool  	outer FALSE 
@@ -44,13 +43,6 @@ Sub InitGenralIni(string iniFileName)
         /varset initResult 0   
     }
     
-    /if (${Ini[${iniFileName},${options},"MainTank#1"].Length}) {
-        /varset mainTank "${Ini[${iniFileName},${options},"MainTank#1"]}"    
-    } else {
-        /ini "${iniFileName}" "${options}" "MainTank#1" "${mainTank}"     
-        /varset initResult 0   
-    }    				    				
-    
     /if (${Ini[${iniFileName},${options},AssistPct].Length}) {
         /varset assistPct ${Ini[${iniFileName},${options},AssistPct]}    
     } else {
@@ -86,7 +78,7 @@ Sub GetMainAssist
     /declare k  int local
     /for k 1 to ${MainAssist.Size}
         /varset mainTank ${MainAssist[${k}]}
-        /if (${NetBots.Client[${mainAssist}].ID} && ${NetBots.Client[${mainAssist}].InZone}) {
+        /if (${NetBots[${mainAssist}].ID} && ${NetBots[${mainAssist}].InZone}) {
             /varset currentMainAssist ${mainAssist}     
             /goto :endGetMainAssist
         }
@@ -112,7 +104,7 @@ Sub GetMainTank
     /declare k  int local
     /for k 1 to ${MainTanks.Size}
         /varset mainTank ${MainTanks[${k}]}
-        /if (${NetBots.Client[${mainTank}].ID} && ${NetBots.Client[${mainTank}].InZone}) {
+        /if (${NetBots[${mainTank}].ID} && ${NetBots[${mainTank}].InZone}) {
             /varset currentMainTank ${mainTank}       
             /goto :endGetMainTank
         }
