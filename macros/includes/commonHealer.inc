@@ -109,18 +109,21 @@ Sub CheckHeals
 
 Sub CheckMainTankHeal(string healSpell, int healPct)
     /if (${Debug} || ${Debug_Heals}) /echo |- CheckMaintankHeal ==>
+    
+    /call GetMainTank
+    /declare mainTankToHeal string	local ${Macro.Return}
 
-    /if (!${Defined[mainTank]}) {
+    /if (${mainTankToHeal.Equal[NULL]}) {
         /if (${Debug} || ${Debug_Heals}) /echo |- No main tank defined
         /goto :endCheckMainTankHeal
     }
 
-    /if (!${NetBots[${mainTank}].InZone}) {
+    /if (!${NetBots[${mainTankToHeal}].InZone}) {
         /goto :endCheckMainTankHeal
     }
     
-    /if (${NetBots[${mainTank}].PctHPs} <= ${healPct}) { 
-        /call CastHeal "${healSpell}" ${NetBots[${mainTank}].ID} ${mainTank}
+    /if (${NetBots[${mainTankToHeal}].PctHPs} <= ${healPct}) { 
+        /call CastHeal "${healSpell}" ${NetBots[${mainTankToHeal}].ID} ${mainTankToHeal}
     }
 
     :endCheckMainTankHeal
@@ -245,10 +248,10 @@ Sub iniHeal(string INIFile, string section, string key, array)
 /return
 
 Sub CancelHeal(int spellId)
-    /if (${Target.Name.Equal[${mainTank}]} && ${Spell[${mainTankHeal}].ID}==${spellId} && ${Bool[${mainTankEmergencyHeal}]} && ${Me.Gem[${mainTankEmergencyHeal}]}) {
+    /if (${Spell[${mainTankHeal}].ID}==${spellId} && ${Bool[${mainTankEmergencyHeal}]} && ${Me.Gem[${mainTankEmergencyHeal}]}) {
         /if (${Target.PctHPs} <= ${mainTankEmergencyHealPct} && ${mainTankEmergencyHeal.NotEqual[${mainTankHeal}]} && ${castEndTime} > ${Spell[${mainTankEmergencyHeal}].MyCastTime}) { 
             /call Interrupt
-            /call CastHeal ${mainTankEmergencyHeal} ${Target.ID} ${mainTank}
+            /call CastHeal ${mainTankEmergencyHeal} ${Target.ID} ${Target.Name}
         }
     }
 
