@@ -26,7 +26,7 @@ Sub Main
         /goto :BardLoop
 /return
 
-Sub InitBardIni(string iniFileName, string mainAssist)
+Sub InitBardIni(string iniFileName)
     /declare bardOptions       string  outer "BardOptions"
     /declare parentInitResult  int     local 1
 

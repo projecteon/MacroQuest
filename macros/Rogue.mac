@@ -25,7 +25,7 @@ Sub Main
         /goto :RogueLoop
 /return
 
-Sub InitRogueIni(string iniFileName, string mainAssist)
+Sub InitRogueIni(string iniFileName)
     /declare rogueOptions       string  outer "RogueOptions"
     /declare parentInitResult   int     local 1
 

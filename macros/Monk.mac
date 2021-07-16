@@ -26,7 +26,7 @@ Sub Main
         /goto :MonkLoop
 /return
 
-Sub InitMonkIni(string iniFileName, string mainAssist)
+Sub InitMonkIni(string iniFileName)
     /declare monkOptions       string  outer "MonkOptions"
     /declare parentInitResult  int     local 1
 
@@ -34,7 +34,9 @@ Sub InitMonkIni(string iniFileName, string mainAssist)
     /varset parentInitResult ${Macro.Return}
     
     /call InitMeleeIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
+    /if (${Macro.Return} == 0) {
+        /varset parentInitResult 0
+    }
     
     /call InitWait4Rez "${iniFileName}"
     /if (${Macro.Return} == 0) {
