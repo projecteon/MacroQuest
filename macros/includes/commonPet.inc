@@ -60,6 +60,14 @@ Sub DoPet
         /goto :endDoPet
     }
 
+    /call GetMainAssist
+    /declare mainAssist string	local ${Macro.Return}
+
+    /if (${mainAssist.Equal[NULL]}) {
+        /if (${Debug} || ${Debug_Heals}) /echo |- No main assist defined
+        /goto :endDoPet
+    }
+
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
         /if (${Debug} || ${Debug_Pet}) /echo <== DoPet -|

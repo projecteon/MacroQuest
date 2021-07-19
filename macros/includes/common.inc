@@ -5,7 +5,6 @@
 Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
     /if (!${Defined[numInventorySlots]})  	/declare numInventorySlots  int	    outer 8
-    /if (!${Defined[mainAssist]})  	        /declare mainAssist         string	outer 
     /if (!${Defined[assistPct]})  	        /declare assistPct          int	    outer 95 
     /if (!${Defined[campRadius]})  	        /declare campRadius         int	    outer 100 
     /if (!${Defined[Debug]})  		        /declare Debug       	    bool  	outer FALSE 
@@ -34,14 +33,6 @@ Sub InitGenralIni(string iniFileName)
         /echo No main tanks defined! - <${MainTanks}> - <${MainTanks.Size}>
         /varset initResult 0   
     }   
-
-    | Use main assist setting to check if ini file is created
-    /if (${Ini[${iniFileName},${options},"MainAssist#1"].Length}) {
-        /varset mainAssist "${Ini[${iniFileName},${options},"MainAssist#1"]}"    
-    } else {
-        /ini "${iniFileName}" "${options}" "MainAssist#1" "${mainAssist}"      
-        /varset initResult 0   
-    }
     
     /if (${Ini[${iniFileName},${options},AssistPct].Length}) {
         /varset assistPct ${Ini[${iniFileName},${options},AssistPct]}    

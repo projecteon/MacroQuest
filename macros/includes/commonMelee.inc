@@ -15,6 +15,14 @@ Sub DoKill
         /if (${Debug} || ${Debug_Melee}) /echo |- Melee <${Melee.Enable}> or Attacking <${NetBots[${Me}].Attacking}>
         /goto :endDoKill
     }
+
+    /call GetMainAssist
+    /declare mainAssist string	local ${Macro.Return}
+
+    /if (${mainAssist.Equal[NULL]}) {
+        /if (${Debug} || ${Debug_Heals}) /echo |- No main assist defined
+        /goto :endDoKill
+    }
     
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
 
@@ -68,6 +76,14 @@ Sub DoMelee
     /if (${Debug} || ${Debug_Melee}) /echo |- DoMelee ==>	
 
 	/if (${Me.Combat}) {
+        /goto :endDoMelee
+    }
+
+    /call GetMainAssist
+    /declare mainAssist string	local ${Macro.Return}
+
+    /if (${mainAssist.Equal[NULL]}) {
+        /if (${Debug} || ${Debug_Heals}) /echo |- No main assist defined
         /goto :endDoMelee
     }
 

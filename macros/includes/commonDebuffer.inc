@@ -52,6 +52,15 @@ Sub CheckDeBuffs
 Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime)
     /if (${Debug} || ${Debug_DeBuffs}) /echo |- TryDoDebuff ==>
 
+    /call GetMainAssist
+    /declare mainAssist string	local ${Macro.Return}
+
+    /if (${mainAssist.Equal[NULL]}) {
+        /if (${Debug} || ${Debug_Heals}) /echo |- No main assist defined
+        /if (${Debug} || ${Debug_DeBuffs}) /echo <== TryDoDebuff -|
+        /return 0
+    }
+
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
         /if (${Debug} || ${Debug_DeBuffs}) /echo <== TryDoDebuff -|

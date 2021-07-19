@@ -62,6 +62,14 @@ Sub DoNuke
         /goto :endDoNuke
     }
 
+    /call GetMainAssist
+    /declare mainAssist string	local ${Macro.Return}
+
+    /if (${mainAssist.Equal[NULL]}) {
+        /if (${Debug} || ${Debug_Heals}) /echo |- No main assist defined
+        /goto :endDoNuke
+    }
+
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
         /if (${Debug} || ${Debug_Nuke}) /echo |- No MA target
