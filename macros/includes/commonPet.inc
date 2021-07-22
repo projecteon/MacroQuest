@@ -153,7 +153,6 @@ Sub WeaponizePet(int petID)
     }
 
     /if (!${Me.Gem[${petWeaponsSpell}]}) {
-        /echo !!! SPELL NOT MEMORIZED <<${petWeaponsSpell}>> !!!
         /bca !!! SPELL NOT MEMORIZED <<${petWeaponsSpell}>> !!!
         /goto :endWeaponizePet
     }
@@ -164,11 +163,15 @@ Sub WeaponizePet(int petID)
         /varset petID ${Me.Pet.ID} 
     }
 
-    
-
+    | check is of <pcpet> in spawn filter
     /if (!${petID} && !${Spawn[pet id ${petID}].ID}) {  
-        /echo No pet to weaponize, missing pet id ${petID} ${Spawn[pet id ${petID}].ID}
-        /bca No pet to weaponize, missing pet id
+        /bca No pet to weaponize, missing pet id: <${petID}>
+        /goto :endWeaponizePet       
+    }
+
+    | check is of <pcpet> in spawn filter
+    /if (!${petID} && !${Spawn[pcpet radius 100 id ${petID}].LineOfSight}) {  
+        /bca Pet outside range or line of sight: <${petID}> <${Spawn[pet id ${petID}]}> 
         /goto :endWeaponizePet       
     }
 
