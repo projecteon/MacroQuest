@@ -169,6 +169,10 @@ Sub CheckHealNetBots(string healSpell, int healPct)
         /return
     }
 
+    /declare lowestMemberName   string  local 
+    /declare lowestMemberId     int     local 0
+    /declare lowestMemberPctHPs int     local 100
+
     /declare isExpired bool local false
     /declare netbotsClient string local
     /declare x int local
@@ -178,12 +182,20 @@ Sub CheckHealNetBots(string healSpell, int healPct)
             /call CheckTimerExpired "${netbotsClient}_nbh_timer"            
             /varset isExpired ${Macro.Return}
             /if (${isExpired}) {
-                /if (${Debug} || ${Debug_Heals}) /echo |- CheckHealNetBots > ${NetBots[${netbotsClient}].Name} > ${NetBots[${netbotsClient}].PctHPs}
-                /call CastHeal "${healSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
-                /call CreateTimer "${netbotsClient}_nbh_timer" 30
+                /if (${NetBots[${netbotsClient}].PctHPs} < ${lowestMemberPctHPs}) {
+                    /varset lowestMemberName "${NetBots[${netbotsClient}].Name}"
+                    /varset lowestMemberId ${NetBots[${netbotsClient}].ID}
+                    /varset lowestMemberPctHPs ${NetBots[${netbotsClient}].PctHPs}
+                }
             }
         }
         /next x
+    }
+
+    /if (${lowestMemberId}>0 && ${lowestMemberPctHPs} <= ${healPct}) {
+        /if (${Debug} || ${Debug_Heals}) /echo |- CheckHealNetBots > ${lowestMemberName} > ${lowestMemberPctHPs}
+        /call CreateTimer "${lowestMemberName}_nbh_timer" 30
+        /call CastHeal "${healSpell}" ${lowestMemberId} ${lowestMemberName}
     }
 
     /if (${Debug} || ${Debug_Heals}) /echo <== CheckHealNetBots -|
