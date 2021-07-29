@@ -20,8 +20,12 @@ Sub Main
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :WarriorLoop
         /if (${Stick.Status.Equal[ON]}) /goto :WarriorLoop
-        
-        /call DoKill
+            
+        /if (!${Melee.Combat}) {
+            /call DoKill
+        }
+
+        /call DoTankEvents
         /call DoCommonEvents
         /goto :WarriorLoop
 /return
