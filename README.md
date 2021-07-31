@@ -80,3 +80,16 @@
 * https://www.redguides.com/community/resources/mq2hud.133/
 * http://mqemulator.net/forum2/viewtopic.php?t=659
 * https://github.com/bdennin/IP/blob/master/MQ2HUD.ini
+
+```
+|-- This is specifically for TS items in a bag
+Sub PickUpItemFromBag(ItemName)
+    /declare Slot int local ${FindItem[=${ItemName}].ItemSlot}
+    /declare Slot2 int local ${FindItem[=${ItemName}].ItemSlot2}
+    /if (${Slot}<23) /return    || Top level inventory item 
+    /if (${Slot2}==-1) /return    || Top level bag
+    /ctrl /itemnotify in pack${Math.Calc[${Slot}-22].Int} ${Math.Calc[${Slot2}+1]} leftmouseup
+/return
+
+/itemnotify #${FindItem[=9 lb. Saltwater Tuna].ID} leftmouseup
+```
