@@ -1,0 +1,14 @@
+#turbo 40
+
+Sub Main
+    :EnchantBarLoop
+        /if (${Cursor.ID}) {
+            /autoinventory
+        }
+
+        /if (${Bool[${FindItemCount[=Electrum Bar]}]} && !${Bool[${Me.Casting}]} && ${Cast.Ready["Enchant Electrum"]}) {
+            /cast "Enchant Electrum"
+        }
+
+        /goto :EnchantBarLoop
+/return
