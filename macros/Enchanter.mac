@@ -45,6 +45,9 @@ sub DoMezz
     /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz ==>
 
     /if (${autoMezz}) {
+        /call GetMainAssist
+        /declare mainAssist string	local ${Macro.Return}
+
         /declare canMezzMob     bool local TRUE
         /declare retry          int local
         /declare i              int local 0
@@ -61,12 +64,12 @@ sub DoMezz
             /if (${mezTarg}!=${maTargetId}) {
                 /call CheckCanMezzMob ${mezTarg}
                 /varset canMezzMob ${Macro.Return}
-                /if (${canMezzMob}) {
+                /if (${canMezzMob} && ${SpellTimer[${mezTarg},any,${mezzSpell}]} < 8) {
                     /call EnsureTarget ${mezTarg}
 
                     /if (!${Cast.Ready[${mezzSpell}]}) /delay 3s ${Cast.Ready[${mezzSpell}]}
 
-                    /if (${SpellTimer[${mezTarg},any,${mezzSpell}]} < 8 && ${Cast.Ready[${mezzSpell}]} && ${Target.Distance} < ${Spell[${mezzSpell}].Range}) {
+                    /if (${Cast.Ready[${mezzSpell}]} && ${Target.Distance} < ${Spell[${mezzSpell}].Range}) {
                         /call cast "${mezzSpell}" gem${Me.Gem[${mezzSpell}]} 0 CancelMezz 3
                         /if (${castReturn.Equal[CAST_IMMUNE]}) {
                             /declare targetName string  local ${Spawn[${targetId}].Name}
@@ -75,7 +78,7 @@ sub DoMezz
                         } else /if (${castReturn.Equal[CAST_RESISTED]}) {
                             /bca "Mezz resited 3 times, retrying next run - " ${Target.Name}
                         } else {
-                            /bca ${Target.Name} " mezzed!"
+                            /bca ${Target.Name} " mezzed for " ${SpellTimer[${mezTarg},any,${mezzSpell}]}
                         }
                     }
                 }
