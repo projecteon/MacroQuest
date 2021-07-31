@@ -90,4 +90,6 @@ Sub PickUpItemFromBag(ItemName)
     /if (${Slot2}==-1) /return    || Top level bag
     /ctrl /itemnotify in pack${Math.Calc[${Slot}-22].Int} ${Math.Calc[${Slot2}+1]} leftmouseup
 /return
+
+/itemnotify #${FindItem[=9 lb. Saltwater Tuna].ID} leftmouseup
 ```
