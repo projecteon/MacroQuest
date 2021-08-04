@@ -57,8 +57,8 @@ Sub Main
 
     | Lockpicks - 13010
     /itemnotify ${FindItem[=Lockpicks].InvSlot} leftmouseup
-    /delay 2s ${Cursor.ID.Equal[Lockpicks]}
-    /if (${Cursor.ID.NotEqual[Lockpicks]}) /goto :done
+    /delay 2s ${Cursor.Name.Equal[Lockpicks]}
+    /if (${Cursor.Name.NotEqual[Lockpicks]}) /goto :done
 
     :trainloop
         
