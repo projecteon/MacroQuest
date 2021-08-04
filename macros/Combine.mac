@@ -1,12 +1,18 @@
+#include includes\common.inc
 #turbo 40
 
 Sub Main    
     /squelch /alias /autocombine /echo Auto Combine
 
-    /declare Debug bool local FALSE
+    /declare Debug 		bool outer FALSE
+    /declare Debug_Sell bool outer FALSE
+
+    /declare lootSettingsIniFileName string outer "ini/${MacroQuest.Server}/Loot Settings.ini"
+    /if (!${Defined[numInventorySlots]})  	/declare numInventorySlots  int	    outer 8
 
     :CombineLoop
         /call DoCombineEvents
+		/call DoLootEvents
         /goto :CombineLoop
 /return
 

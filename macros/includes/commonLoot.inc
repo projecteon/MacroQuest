@@ -413,16 +413,14 @@ Sub SellItem(int inventorySlot, int packSlot)
             /echo ERROR: Failed to select [${itemToSell}], skipping.
         }
     } else {
-        | Attempt tos ell the item
+        | Attempt to sell the item
         /varset retryTimer 30
         /echo Selling [${itemToSell}].
         
         :SellItem
-        /if (${Debug} || ${Debug_Sell}) /echo |- SellItem -| :SellItem
+        /if (${Debug} || ${Debug_Sell}) /echo |- SellItem -| :SellItem -> ${retryTimer}
         /notify MerchantWnd MW_Sell_Button leftmouseup
         /delay ${retryTimer} ${Window[QuantityWnd].Open} || ((${Defined[packSlot]} && !${Bool[${Me.Inventory[pack${inventorySlot}].Item[${packSlot}]}]}) || (!${Defined[packSlot]} && !${Bool[${Me.Inventory[pack${inventorySlot}].Item}]}))
-
-        
 
         | Close the quantity window
         /if (${Window[QuantityWnd].Open}) {
@@ -432,13 +430,19 @@ Sub SellItem(int inventorySlot, int packSlot)
         }
 
         | If the item is still in my inventory
-        /if (${Defined[packSlot]} && ${Bool[${Me.Inventory[pack${inventorySlot}].Item[${packSlot}]}]} && ${retryTimer}) {
-            /goto :SellItem
-        } else /if (!${Defined[packSlot]} && ${Bool[${Me.Inventory[pack${inventorySlot}].Item}]} && ${retryTimer}) {
-            /goto :SellItem
-        } else {
-            /echo ERROR: Failed to sell [${itemToSell}], skipping.
-        }
+        /if (${Defined[packSlot]} && ${Bool[${Me.Inventory[pack${inventorySlot}].Item[${packSlot}]}]}) {
+            /if (${retryTimer}) {
+                /goto :SellItem
+            } else {
+                /echo ERROR: Failed to sell [${itemToSell}], skipping.
+            }
+        } else /if (!${Defined[packSlot]} && ${Bool[${Me.Inventory[pack${inventorySlot}].Item}]}) {
+            /if (${retryTimer}) {
+                /goto :SellItem
+            } else {
+                /echo ERROR: Failed to sell [${itemToSell}], skipping.
+            }
+        } 
     }
 
 

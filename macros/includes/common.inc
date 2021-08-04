@@ -59,16 +59,16 @@ Sub InitGenralIni(string iniFileName)
 Sub GetMainAssist
     /if (${Debug}) /echo  |- GetMainAssist ==>
     
-    /if (!${Defined[MainAssist]}) {
-        /if (${Debug}) /echo No MainAssist defined.        
+    /if (!${Defined[MainAssists]}) {
+        /if (${Debug}) /echo No MainAssists defined.        
         /goto :endGetMainAssist
     }
     
     /declare currentMainAssist string local
     /declare mainAssist string local
     /declare k  int local
-    /for k 1 to ${MainAssist.Size}
-        /varset mainTank ${MainAssist[${k}]}
+    /for k 1 to ${MainAssists.Size}
+        /varset mainAssist ${MainAssists[${k}]}
         /if (${NetBots[${mainAssist}].ID} && ${NetBots[${mainAssist}].InZone}) {
             /varset currentMainAssist ${mainAssist}     
             /goto :endGetMainAssist
