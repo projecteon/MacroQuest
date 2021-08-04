@@ -42,6 +42,8 @@ Sub InitPetIni(string iniFileName)
     /if (${Ini[${iniFileName},Debug,Debug_Pet].Length}) {
        /varset Debug_Pet ${Bool[${Ini[${iniFileName},Debug,Debug_Pet]}]}     
     } 
+    
+    /call IniArray2 "${iniFileName}" ${petOptions} "Buff#" SelfPetBuffs
 
 /return 1
 
@@ -105,7 +107,6 @@ Sub SummonPet
     /if (${Debug} || ${Debug_Pet}) /echo |- SummonPet
 
     /if (!${Me.Gem[${petSpell}]}) {
-        /echo !!! SPELL NOT MEMORIZED <<${petSpell}>> !!!
         /bca !!! SPELL NOT MEMORIZED <<${petSpell}>> !!!
         /goto :endSummonPet
     }
@@ -204,6 +205,33 @@ Sub WeaponizePet(int petID)
     /if (${Debug} || ${Debug_Pet}) /echo <== WeaponizePet -|
 /Return
 
+Sub BuffPet
+    /if (${Debug} || ${Debug_Pet}) /echo |- BuffPet ==> 
+    
+    /if (!${Defined[SelfPetBuffs]}) {
+        /if (${Debug} || ${Debug_Pet}) /echo No SelfPetBuffs defined.
+        /goto :endBuffPet
+    }
+    
+    /declare buffSpell string local
+    /declare buffId int local
+    /declare k  int local
+    /for k 1 to ${SelfPetBuffs.Size}
+        /varset buffSpell ${SelfPetBuffs[${k}]}
+        /if (${Me.CurrentMana} < ${Spell[${buffSpell}].Mana}) {
+            /goto :endBuffPet
+        }
+
+        /if (!${Bool[${Me.PetBuff[${buffSpell}]}]}) {
+            /call EnsureTarget ${Me.Pet.ID}
+            /call cast "${buffSpell}" gem${Me.Gem[${buffSpell}]} 3     
+        }
+    /next k 
+
+    :endBuffPet
+    /if (${Debug} || ${Debug_Pet}) /echo <== BuffPet -|
+/return
+
 | ################################################################################
 | # Set active pet summon spell
 | ################################################################################
@@ -275,12 +303,33 @@ Sub Event_SummonYourPet
 /return
 
 | ################################################################################
+| # Summon pet event
+| ################################################################################
+#Event SummonYourPet "[#*#] ask for pet weapons from #1#"
+Sub Event_BegForWeapons(eventText, string weaponSummoner)
+    /if (${Debug} || ${Debug_Pet}) /echo |- Event_BegForWeapons ==>
+
+    /if (!${Bool[${Me.Pet.ID}]}) /goto :endBegForWeapons
+
+    /if (${NetBots[${weaponSummoner}].InZone}) {
+        /bct ${weaponSummoner} "weaponize the pet:"${Me.Pet.ID}
+    } else {
+        /bca "Cannot ask " ${weaponSummoner} " for pet weapons"
+    }
+    
+    :endBegForWeapons
+    /if (${Debug} || ${Debug_Pet}) /echo <== Event_BegForWeapons -|
+/return
+
+| ################################################################################
 | # Weaponize pet event
 | ################################################################################
 #EVENT WeaponizeThePet "<#1#> weaponize the pet:#1#"
 #EVENT WeaponizeThePet "<#1#> weaponize your pet#*#"
 #Event WeaponizeThePet "#*#[MQ2] weaponize the pet:#1#"
 #Event WeaponizeThePet "#*#[MQ2] weaponize your pet#*#"
+#Event WeaponizeThePet "[#*#] weaponize the pet:#1#"
+#Event WeaponizeThePet "[#*#] weaponize your pet#*#"
 Sub Event_WeaponizeThePet(eventText, int petID)
     /if (${Debug} || ${Debug_Pet}) /echo |- Event_WeaponizeThePet ==>
 

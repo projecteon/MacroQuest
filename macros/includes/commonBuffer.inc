@@ -191,6 +191,47 @@ Sub CheckNetBotBuffs
     /if (${Debug} || ${Debug_NetBots_Buffs}) /echo <== CheckNetBotBuffs -|
 /return
 
+Sub CheckPetBuffs
+    /if (${Debug} || ${Debug_Buffs}) /echo  |- CheckPetBuffs ==>
+    
+    /if (!${Defined[PetBuffs]}) {
+        /if (${Debug} || ${Debug_Buffs}) /echo No PetBuffs defined.
+        /goto :endCheckPetBuffs
+    }
+    
+    /if (${NetBots.Counts} < 2) {
+        /if (${Debug} || ${Debug_Buffs}) /echo Not enough Nebots clients, current: ${NetBots.Counts} 
+        /goto :endCheckPetBuffs
+    }
+    
+    /declare buffSpell string local
+    /declare buffId int local
+    /declare netbotsClient string local
+    /declare k  int local
+    /declare x int local
+    /for k 1 to ${PetBuffs.Size} {
+        /varset buffSpell ${PetBuffs[${k}]}
+        /varset buffId ${Spell[${buffSpell}].ID}
+        /if (${Macro.Return} == 1 && ${Spell[${buffSpell}].TargetType.Equal[Single]}) {
+            /for x 1 to ${NetBots.Counts} {
+                /varset netbotsClient "${NetBots.Client[${x}]}"
+                /if (${NetBots[${netbotsClient}].InZone} && ${NetBots[${netbotsClient}].PetID}) {
+                    /if (!${NetBots[${netbotsClient}].Buff.Find[${buffId} ]}) {
+                        /if (${Debug} || ${Debug_Buffs}) /echo Pet buff missing, recasting
+                        /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].PetID} "${NetBots[${netbotsClient}].PetName}"
+                    } 
+                }
+                /next x
+            }
+        }
+        /next k 
+    }
+
+
+    :endCheckPetBuffs
+    /if (${Debug} || ${Debug_Buffs}) /echo <== CheckPetBuffs -|
+/return
+
 Sub CheckCanCastBuff(string buffSpell, int minMana)
     /if (${Debug}) /echo  |- CheckCanCastBuff ==> ${buffSpell} ${minMana}
     
