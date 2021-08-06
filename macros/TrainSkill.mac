@@ -27,9 +27,14 @@ Sub Main(string ability)
             /endmac
         }
 
+        /if (${Me.Sneaking}) {
+                /doability Sneak  
+
+        }
+
         /if (${Bool[${Me.AbilityReady[${ability}]}]}) {
             /doability "${ability}"
-            /delay 2
+            /delay 2       
         } 
 
         /if (${Bool[${Cursor.ID}]}) {
