@@ -12,6 +12,7 @@ Sub InitBufferIni(string iniFileName)
     /if (!${Defined[iniSelfBuffDimensions]})            /declare iniSelfBuffDimensions          int     outer 2
     /if (!${Defined[doBuffGroup]})                      /declare doBuffGroup                    bool    outer false 
     /if (!${Defined[doBuffNetBots]})                    /declare doBuffNetBots                  bool    outer false 
+    /if (!${Defined[doBuffPets]})                       /declare doBuffPets                     bool    outer false 
     /if (!${Defined[doBuffsWithNpcInCamp]})             /declare doBuffsWithNpcInCamp           bool    outer FALSE 
     /if (!${Defined[Debug_Group_Buffs]})                /declare Debug_Group_Buffs              bool    outer FALSE
     /if (!${Defined[Debug_NetBots_Buffs]})              /declare Debug_NetBots_Buffs            bool    outer FALSE
@@ -28,6 +29,12 @@ Sub InitBufferIni(string iniFileName)
         /ini "${iniFileName}" "${options}" "DoBuffNetBots" "${doBuffNetBots}"
     }
 
+    /if (${Ini[${iniFileName},${options},DoBuffPets].Length}) {
+       /varset doBuffPets ${Bool[${Ini[${iniFileName},${options},DoBuffPets]}]}
+    } else {
+        /ini "${iniFileName}" "${options}" "DoBuffPets" "${doBuffPets}"
+    }
+
     /if (${Ini[${iniFileName},${options},DoBuffsWithNpcInCamp].Length}) {
        /varset doBuffsWithNpcInCamp ${Bool[${Ini[${iniFileName},${options},DoBuffsWithNpcInCamp]}]}
     } else {
@@ -36,6 +43,7 @@ Sub InitBufferIni(string iniFileName)
 
     /call IniArray "${iniFileName}" "Buffs" "Buff" ${iniBuffDimensions} Buffs
     /call IniArray "${iniFileName}" "SelfBuffs" "SelfBuff" ${iniSelfBuffDimensions} SelfBuffs
+    /call IniArray2 "${iniFileName}" "PetBuffs" "Buff" PetBuffs
 
     /if (${Buffs.Size} < 1) {
         /varset doBuffGroup false
@@ -72,6 +80,7 @@ Sub DoBuffs
     /call CheckSelfBuffs
     /if (${doBuffGroup}) /call CheckGroupBuffs
     /if (${doBuffNetBots}) /call CheckNetBotBuffs
+    /if (${doBuffPets}) /call CheckPetBuffs
 
     :endDoBuffs
     /if (${Debug}) /echo <== DoBuffs -|
@@ -212,13 +221,13 @@ Sub CheckPetBuffs
     /for k 1 to ${PetBuffs.Size} {
         /varset buffSpell ${PetBuffs[${k}]}
         /varset buffId ${Spell[${buffSpell}].ID}
-        /if (${Macro.Return} == 1 && ${Spell[${buffSpell}].TargetType.Equal[Single]}) {
+        /if (${Spell[${buffSpell}].TargetType.Equal[Single]}) {
             /for x 1 to ${NetBots.Counts} {
                 /varset netbotsClient "${NetBots.Client[${x}]}"
                 /if (${NetBots[${netbotsClient}].InZone} && ${NetBots[${netbotsClient}].PetID}) {
-                    /if (!${NetBots[${netbotsClient}].Buff.Find[${buffId} ]}) {
+                    /if (!${NetBots[${netbotsClient}].PetBuff.Find[${buffId} ]}) {
                         /if (${Debug} || ${Debug_Buffs}) /echo Pet buff missing, recasting
-                        /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].PetID} "${NetBots[${netbotsClient}].PetName}"
+                        /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].PetID} "${netbotsClient}'s' Pet"
                     } 
                 }
                 /next x
