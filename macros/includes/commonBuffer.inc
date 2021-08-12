@@ -55,18 +55,11 @@ Sub InitBufferIni(string iniFileName)
 Sub DoBuffs
     /if (${Debug}) /echo |- DoBuffs ==>
     
-    /if (${Stick.Status.Equal[ON]}) {
-        /goto :endDoBuffs
-    }
-
     /if (!${doBuffsWithNpcInCamp}) {
         /call CheckNPCInRange
         /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
         /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
-        /if (${hasNpcInCamp}) {
-            /if (${Debug}) /echo ${hasNpcInCamp} ${campRadius}
-            /goto :endDoBuffs
-        }
+        /if (${hasNpcInCamp}) /goto :endDoBuffs
     }
 
     /call CheckSelfBuffs
@@ -90,7 +83,7 @@ Sub CheckSelfBuffs
     /for k 1 to ${Math.Calc[${SelfBuffs.Size}/${iniSelfBuffDimensions}]}
         /varset buffSpell ${SelfBuffs[${k},${buffNameDimension}]}
         /call CheckCanCastBuff "${buffSpell}" ${SelfBuffs[${k},${minManaDimensions}]}         
-        /if (${Macro.Return} == 1 && (!${Me.Buff[${buffSpell}].ID} || ${Me.Buff[${buffSpell}].Duration} < 10)) {
+        /if (${Macro.Return} == 1 && !${Me.Buff[${buffSpell}].ID}) {
             /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
         }
     /next k 
