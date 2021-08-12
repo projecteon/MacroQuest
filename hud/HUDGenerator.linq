@@ -70,7 +70,7 @@ int AppendXPHUD(StringBuilder stringbuilder, string netbot, int xAxis, int yAxis
 }
 
 int AppendDistanceHUD(StringBuilder stringbuilder, string netbot, int xAxis, int yAxis) {// HP
-	stringbuilder.AppendLine($"{netbot}_Dist=3,{xAxis},{yAxis},102,153,153,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}}&&${{NetBots[{netbot}].InZone}}&&${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}}=<200,D:${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}},]}}");
+	stringbuilder.AppendLine($"{netbot}_Dist=3,{xAxis},{yAxis},102,153,153,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}}&&${{NetBots[{netbot}].InZone}}&&${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}}<=200,D:${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}},]}}");
 	stringbuilder.AppendLine($"{netbot}_DistWarn=3,{xAxis},{yAxis},255,204,0,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}},${{If[${{NetBots[{netbot}].InZone}}&&${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}}>200&&${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}}<=500,D:${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}},]}},]}}");
 	stringbuilder.AppendLine($"{netbot}_DistErr=3,{xAxis},{yAxis},255,102,0,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}},${{If[${{NetBots[{netbot}].InZone}}&&${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}}>500,D:${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}},]}},]}}");
 	stringbuilder.AppendLine($"{netbot}_DistDiffZone=3,{xAxis},{yAxis},255,102,0,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}},${{If[${{NetBots[{netbot}].InZone}},,Z:${{Zone[${{NetBots[{netbot}].Zone}}].ShortName}}]}},]}}");
