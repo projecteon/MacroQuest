@@ -87,7 +87,7 @@ Sub DoNuke
     }
 
     /call EnsureTarget ${targetId}
-    /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
+    /if (!${Target.ID} || ${Target.ID}!=${targetId}) {
         /if (${Debug} || ${Debug_Nuke}) /echo |- Invalid target
         /goto :endDoNuke
     }

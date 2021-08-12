@@ -38,19 +38,12 @@ Sub Main
 Sub DoHarvest
     /if (${Debug} || ${Debug_Wizard}) /echo |- DoHarvest ==>
     
-    /if (${Debug} || ${Debug_Wizard}) /echo ${autoHarvest} && ${Defined[harvestSpell]} && ${Cast.Ready[${harvestSpell}]} && ${Me.Gem[${harvestSpell}]}
     /if (${autoHarvest} && ${Defined[harvestSpell]} && ${Cast.Ready[${harvestSpell}]} && ${Me.Gem[${harvestSpell}]}) {
         /call CheckNPCInRange
         /declare hasNpcInCamp   bool    local ${Bool[${Macro.Return}]}  
         /declare manaFromMax    int     local ${Math.Calc[${Me.MaxMana}-${Me.CurrentMana}]}
 
-        /if (${Debug} || ${Debug_Wizard}) {
-            /echo "hasNpcInCamp: " ${hasNpcInCamp}
-            /echo "manaFromMax: " ${manaFromMax}
-        }        
-
         /if ((!${hasNpcInCamp} && ${manaFromMax} > 350) || ${Me.PctMana} < 2) {
-            /if (${Debug} || ${Debug_Wizard}) /echo |- DoHarvest > casting ${harvestSpell}
             /call cast "${harvestSpell}"
         }
     }
