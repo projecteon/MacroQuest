@@ -1,4 +1,4 @@
-string macroHeader = @"[TheNetBots] 
+string macroHeader = @"[Elements] 
 ; |====================================== Target Class and lvl ===>
 TargetName=3,15,285,000,255,000,${If[${Target.ID},${Target.CleanName},]}
 ; <===============================================================|
@@ -13,6 +13,7 @@ TargetDist_Text=3,15,315,000,255,255,${If[${Target.Name.NotEqual[""NULL""]},Dist
 TargetDist_Info=3,65,315,000,255,000,${Target.Distance3D}
 ; <===============================================================|
 
+[TheNetBots] 
 ; |=========================================== NetBots ===>
 ";
 
@@ -69,8 +70,10 @@ int AppendXPHUD(StringBuilder stringbuilder, string netbot, int xAxis, int yAxis
 }
 
 int AppendDistanceHUD(StringBuilder stringbuilder, string netbot, int xAxis, int yAxis) {// HP
-	stringbuilder.AppendLine($"{netbot}_Dist=3,{xAxis},{yAxis},102,153,153,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}}&&${{NetBots[{netbot}].Zone}}==${{Zone.ID}},D:${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}},]}}");
-	stringbuilder.AppendLine($"{netbot}_DistInf=3,{xAxis},{yAxis},102,153,153,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}}&&${{NetBots[{netbot}].Zone}}!=${{Zone.ID}},D: ∞,]}}");
+	stringbuilder.AppendLine($"{netbot}_Dist=3,{xAxis},{yAxis},102,153,153,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}}&&${{NetBots[{netbot}].Zone}}==${{Zone.ID}}&&${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}}=<200,D:${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}},]}}");
+	stringbuilder.AppendLine($"{netbot}_DistWarn=3,{xAxis},{yAxis},255,204,0,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}},${{If[${{NetBots[{netbot}].Zone}}==${{Zone.ID}}&&${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}}>200&&${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}}<=500,D:${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}},]}},]}}");
+	stringbuilder.AppendLine($"{netbot}_DistErr=3,{xAxis},{yAxis},255,102,0,${{If[${{NetBots[{netbot}].ID}}&&${{NetBots[{netbot}].ID}}!=${{Me.ID}},${{If[${{NetBots[{netbot}].Zone}}==${{Zone.ID}}&&${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}}>500,D:${{Spawn[id ${{NetBots[{netbot}].ID}} ].Distance3D}},]}},]}}");
+	//stringbuilder.AppendLine($"{netbot}_DistDiffZone=3,{xAxis},{yAxis},255,102,0,${{If[${{NetBots[{netbot}].ID}},${{If[${{NetBots[{netbot}].Zone}}!=${{Zone.ID}},Z:${{Zone[${{NetBots[{netbot}].Zone}}].ShortName}},]}},]}}");
 	return xAxis + 50;
 }
 
