@@ -55,10 +55,13 @@ Sub DoPet
         /goto :endDoPet
     }
 
+    /call BuffPet
+
     /if (${currentPetTargetId} > 0 && (${Spawn[${currentPetTargetId}].Type.Equal[Corpse]} || !${SpawnCount[id ${currentPetTargetId}]})) {
         /pet back off
         /varset currentPetTargetId 0
     } else /if (${currentPetTargetId} > 0) {
+        /if (${Debug} || ${Debug_Pet}) /echo |- Current pet target id ${currentPetTargetId} ${Spawn[id ${currentPetTargetId}]}
         /goto :endDoPet
     }
 
@@ -72,7 +75,7 @@ Sub DoPet
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId}) {
-        /if (${Debug} || ${Debug_Pet}) /echo <== DoPet -|
+        /if (${Debug} || ${Debug_Pet}) /echo |- No MA target
         /goto :endDoPet
     }
 
@@ -95,6 +98,9 @@ Sub DoPet
 
     /varset currentPetTargetId ${targetId}
     /pet back off
+    /delay 5
+    /pet attack
+    /delay 5
     /pet attack
     
     :endDoPet
