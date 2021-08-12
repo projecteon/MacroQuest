@@ -1,6 +1,4 @@
-<Query Kind="Statements" />
-
-string macroHeader = @"[Leader] 
+string macroHeader = @"[TheNetBots] 
 ; |====================================== Target Class and lvl ===>
 TargetName=3,15,285,000,255,000,${If[${Target.ID},${Target.CleanName},]}
 ; <===============================================================|
@@ -30,7 +28,7 @@ string GenerateHud((string netbot, bool petuser) groupMember, int counter) {
 	
 	// Name
 	stringbuilder.AppendLine($"{netbot}_Name=3,{xAxis},{yAxis},000,255,0,${{If[${{NetBots[{netbot}].ID}},{netbot}, ]}}");
-	xAxis += 50;
+	xAxis += 70;
 	
 	// Level
 	stringbuilder.AppendLine($"{netbot}_Level=3,{xAxis},{yAxis},000,255,0,${{If[${{NetBots[{netbot}].ID}},${{NetBots[{netbot}].Level}}, ]}}");
@@ -119,7 +117,6 @@ var group1 = new List<(string netbot, bool petuser)>() {
 	,("Tedd", true)
 };
 
-
 var group2 = new List<(string netbot, bool petuser)>() {
 	("Regis", false)
 	,("Aredhel", false)
@@ -129,19 +126,30 @@ var group2 = new List<(string netbot, bool petuser)>() {
 	,("Osiris", true)
 };
 
-var group3 = new List<string>() {
-	"Sheperd"
-	,"Soundgarden"
-	,"Renaissance"
-	,"Tyrion"
-	,"Milamber"
-	,"Inara"
+var group3 = new List<(string netbot, bool petuser)>() {
+	("Sheperd", false)
+	,("Renaissance", false)
+	,("Soundgarden", false)
+	,("Inara", false)
+	,("Milamber", false)
+	,("Tyrion", false)
+};
+
+var group4 = new List<(string netbot, bool petuser)>() {
+	("Lolth", false)
+	,("Vierna", false)
+	,("Eilistraee", false)
+	,("Valsharess", false)
+	,("Araushnee", false)
+	,("Genesis", false)
 };
 
 Console.WriteLine(macroHeader);
 GenerateGroupHud(group1);
-initalYAxis = initalYAxis + group1.Count() * 15 + 30;
+initalYAxis = initalYAxis + group1.Count() * 15 + 20;
 GenerateGroupHud(group2);
-initalYAxis = initalYAxis + group1.Count() * 15 + 30;
+initalYAxis = initalYAxis + group2.Count() * 15 + 20;
 GenerateGroupHud(group3);
+initalYAxis = initalYAxis + group3.Count() * 15 + 20;
+GenerateGroupHud(group4);
 Console.WriteLine("; <===============================================================|");
