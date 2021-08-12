@@ -106,7 +106,8 @@ Sub DoNuke
 Sub TryNukeTarget(string nuke)
     /if (${Debug} || ${Debug_Nuke}) /echo |- TryNukeTarget ==>
 
-    /if (!${Cast.Ready[${nuke}]} || ${Me.CurrentMana} < ${Spell[${nuke}].Mana} || ${Target.Distance} > ${Spell[${nuke}].Range}) {
+    /if (!${Cast.Ready[${nuke}]} || ${Me.CurrentMana} < ${Spell[${nuke}].Mana} || (${Spell[${nuke}].Range} > 0 && ${Target.Distance} > ${Spell[${nuke}].Range})) {
+        /if (${Debug} || ${Debug_Nuke}) /echo Failed trying to nuke: !${Cast.Ready[${nuke}]} || ${Me.CurrentMana} < ${Spell[${nuke}].Mana} || ${Target.Distance} > ${Spell[${nuke}].Range}
         /goto :endTryNukeTarget
     }
 
