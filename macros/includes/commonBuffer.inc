@@ -17,6 +17,10 @@ Sub InitBufferIni(string iniFileName)
     /if (!${Defined[Debug_Group_Buffs]})                /declare Debug_Group_Buffs              bool    outer FALSE
     /if (!${Defined[Debug_NetBots_Buffs]})              /declare Debug_NetBots_Buffs            bool    outer FALSE
 
+
+    /if (!${Defined[noLevitateZones]})                  /declare noLevitateZones                string  outer "airplane"
+    /if (!${Defined[inDoorZone]})                       /declare inDoorZone                     string  outer "befallen blackburrow gukbottom guktop neriaka neriakb neriakc paw permafrost qcat runnyeye soldunga soldungb soltemple akanon kaladima kaladimb kedge"
+
     /if (${Ini[${iniFileName},${options},DoBuffGroup].Length}) {
        /varset doBuffGroup ${Bool[${Ini[${iniFileName},${options},DoBuffGroup]}]}     
     } else {
@@ -92,7 +96,7 @@ Sub CheckSelfBuffs
     /for k 1 to ${Math.Calc[${SelfBuffs.Size}/${iniSelfBuffDimensions}]}
         /varset buffSpell ${SelfBuffs[${k},${buffNameDimension}]}
         /call CheckCanCastBuff "${buffSpell}" ${SelfBuffs[${k},${minManaDimensions}]}         
-        /if (${Macro.Return} == 1 && !${Me.Buff[${buffSpell}].ID}) {
+        /if (${Macro.Return} == 1 && !${Me.Buff[${buffSpell}].ID} && ${Spell[${buffSpell}].Stacks}) {
             /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
         }
     /next k 
@@ -167,15 +171,14 @@ Sub CheckNetBotBuffs
             /for x 1 to ${NetBots.Counts} {
                 /varset netbotsClient "${NetBots.Client[${x}]}"
                 /if (${NetBots[${netbotsClient}].InZone} && (!${Defined[classRestrictions]} || ${classRestrictions.Equal[NULL]} || ${Select[${NetBots[${netbotsClient}].Class.ShortName},${classRestrictions}]})) {
-                    /if (!${NetBots[${netbotsClient}].Buff.Find[${buffId} ]}) {
+                    /if (!${NetBots[${netbotsClient}].Buff.Find[${buffId} ]} && ${NetBots[${netbotsClient}].Stacks[${buffId}]}) {
                         /if (${Debug} || ${Debug_NetBots_Buffs}) /echo Buff missing, recasting
                         /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
                     } 
-                    | else {
                     |     /if (!${Defined[i]}) /declare i int local
                     |     /for i 0 to ${NetBots[${netbotsClient}].Buff.Length}
                     |         /if (${Bool[${NetBots[${netbotsClient}].Buff[${i}]}]}) {
-                    |             /if (${NetBots[${netbotsClient}].Buff[${i}].ID} == ${buffId} && ${NetBots[${netbotsClient}].Duration[${i}]} < 5) {
+                    |             /if (${NetBots[${netbotsClient}].Buff[${i}].ID} == ${buffId} && ${NetBots[${netbotsClient}].Duration[${i}]} < 2) {
                     |                 /if (${Debug} || ${Debug_NetBots_Buffs}) /echo Bufftimer low, recasting : ${NetBots[${netbotsClient}].Buff[${i}]} - ${NetBots[${netbotsClient}].Duration[${i}]}
                     |                 /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
                     |             }
@@ -239,6 +242,16 @@ Sub CheckCanCastBuff(string buffSpell, int minMana)
     
     /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || !${Cast.Ready[${buffSpell}]} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
         /if (${Debug}) /echo <== CheckCanCastBuff 0 -|
+        /return 0
+    }
+
+    /if (${Select[${buffSpell},Spirit of Wolf,Spirit of Eagle,Flight of Eagles]} && ${Select[${Zone.ShortName}, ${inDoorZone}]}) {
+        /if (${Debug}) /echo <== CheckCanCastBuff 0 > cant cast indoor -|
+        /return 0
+    }
+
+    /if (${Select[${buffSpell},Spirit of Eagle,Flight of Eagles,Levitate,Levitation,Dead Man Floating,Dead Men Floating]} && ${Select[${Zone.ShortName}, ${noLevitateZones}]}) {
+        /if (${Debug}) /echo <== CheckCanCastBuff 0 > cant cast levitate -|
         /return 0
     }
 
