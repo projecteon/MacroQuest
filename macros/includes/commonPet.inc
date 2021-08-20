@@ -224,7 +224,7 @@ Sub BuffPet
     /declare k  int local
     /for k 1 to ${SelfPetBuffs.Size}
         /varset buffSpell ${SelfPetBuffs[${k}]}
-        /if (${Me.CurrentMana} < ${Spell[${buffSpell}].Mana}) {
+        /if (${Me.CurrentMana} < ${Spell[${buffSpell}].Mana} || !${Spell[${buffSpell}].StacksPet}) {
             /goto :endBuffPet
         }
 
