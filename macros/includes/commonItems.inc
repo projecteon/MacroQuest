@@ -68,15 +68,15 @@ Sub FindItemsInToonBank(string chatSender, string itemToFind)
     /for i 1 to 16 {
         /if (${Debug} || ${Debug_Common}) /echo Start [BankSlot[${i}]]
         /if (${Debug} || ${Debug_Common}) /delay 5
-        /if (${Me.Bank[bank${i}].Name.Find[${itemToFind}]}) {
-            /bct ${chatSender} ${Me.Bank[bank${i}]}(${Me.Bank[bank${i}].Stack}) -> [BankSlot[${i}]]
+        /if (${Me.Bank[${i}].Name.Find[${itemToFind}]}) {
+            /bct ${chatSender} ${Me.Bank[${i}]}(${Me.Bank[${i}].Stack}) -> [BankSlot[${i}]]
         }
 
-        /if (${Me.Bank[bank${i}].Container}) {
-            /if (${Debug} || ${Debug_Common}) /echo [BankSlot[${i}]] -> Container[${Me.Bank[bank${i}].Container}]
-            /for c 1 to ${Me.Bank[bank${i}].Container} {
-                /if (${Me.Bank[bank${i}].Item[${c}].Name.Find[${itemToFind}]}) {
-                    /bct ${chatSender} ${Me.Bank[bank${i}].Item[${c}]}(${Me.Bank[bank${i}].Item[${c}].Stack})-> [${Me.Bank[bank${i}]} -> BankSlot[${i}]-> PackSlot[${c}]]
+        /if (${Me.Bank[${i}].Container}) {
+            /if (${Debug} || ${Debug_Common}) /echo [BankSlot[${i}]] -> Container[${Me.Bank[${i}].Container}]
+            /for c 1 to ${Me.Bank[${i}].Container} {
+                /if (${Me.Bank[${i}].Item[${c}].Name.Find[${itemToFind}]}) {
+                    /bct ${chatSender} ${Me.Bank[${i}].Item[${c}]}(${Me.Bank[${i}].Item[${c}].Stack})-> [${Me.Bank[${i}]} -> BankSlot[${i}]-> PackSlot[${c}]]
                 }
                 /if (${Debug} || ${Debug_Common}) /echo Done BankSlot[${i}] -> PackSlot[${c}]]
                 /if (${Debug} || ${Debug_Common}) /delay 5
