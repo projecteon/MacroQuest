@@ -16,7 +16,7 @@ Sub InitSpell
 /return
 
 Sub IniSpellArray(string iniFile, string section, string keyName, arrayName)
-    /if (${Debug}) /echo |- IniArray ==>
+    /if (${Debug}) /echo |- IniSpellArray ==>
 
     /declare keys       string  local
     /declare k          int     local
@@ -28,7 +28,7 @@ Sub IniSpellArray(string iniFile, string section, string keyName, arrayName)
     /if (${Debug}) /echo |- ${iniFile} > ${section} > ${keys}
     /if (${keys.Equal[NULL]}) {
         /if (${Debug}) /echo <keys> is NULL, exiting.
-        /goto :endIniArray
+        /goto :endIniSpellArray
     }
 
     :TrimKeys
@@ -41,7 +41,7 @@ Sub IniSpellArray(string iniFile, string section, string keyName, arrayName)
 
         /if (${numberOfKeys} < 1) {
             /if (${Debug}) /echo No keys found, exiting.
-            /goto :endIniArray
+            /goto :endIniSpellArray
         }
 
         /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
@@ -63,8 +63,8 @@ Sub IniSpellArray(string iniFile, string section, string keyName, arrayName)
             /next s
         /next k
 
-    :endIniArray
-    /if (${Debug}) /echo <== IniArray
+    :endIniSpellArray
+    /if (${Debug}) /echo <== IniSpellArray
 /return
 
 Sub getValue(string iniValue, string key)
