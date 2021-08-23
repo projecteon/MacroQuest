@@ -21,8 +21,39 @@ Sub Main
         /if (${Stick.Status.Equal[ON]}) /goto :RogueLoop
 
         /call DoKill
+        | /call DoMelee DoBackStab
         /call DoCommonEvents
         /goto :RogueLoop
+/return
+
+Sub DoBackStab
+    /if (${Debug} || ${Debug_Melee}) /echo |- DoBackStab ==>	
+	
+    /if (${Math.Abs[${Me.Heading.Degrees}-${Target.Heading.Degrees}]} < 45) {
+        | /call DoRogueStrike
+        /if (${Me.AbilityReady[Backstab]}) {
+            /doability Backstab
+        }
+    }
+
+    /if (${Debug} || ${Debug_Melee}) /echo <== DoBackStab -|
+/return
+
+Sub DoRogueStrike
+    /if (${Debug} || ${Debug_Melee}) /echo |- DoRogueStrike ==>	
+
+	/if (${Me.Endurance} > ${strikeDiscEndCost} && ${Me.PctEndurance} >= ${strikeDiscMinEnd} && ${Me.CombatAbilityReady[${strikeDisc}]} && ${Me.AbilityReady[Backstab]} && !${Me.ActiveDisc.ID} && ${Me.Invis} && ${Me.Sneaking}) {
+		| Use 'Assassin's Strike' type disc.
+		/delay 1
+		/disc ${strikeDisc}
+		/delay 5 ${Bool[${Me.ActiveDisc.ID}]}
+		/delay 3
+		/doability Backstab
+		/delay 1
+		/attack on
+	}
+
+    /if (${Debug} || ${Debug_Melee}) /echo <== DoRogueStrike -|
 /return
 
 Sub InitRogueIni(string iniFileName)
