@@ -5,13 +5,12 @@ Sub InitSpell
     /if (!${Defined[spellMinManaProp]})             /declare spellMinManaProp           int     outer 3 
     /if (!${Defined[spellClassRestrictionProp]})    /declare spellClassRestrictionProp  int     outer 4 
 
-    /if (!${Defined[SpellProps]}) {
-		/declare SpellProps[${spellPropsDimenstions}] string outer 0
-        | Dont set spellPropName, its default value and cannot be named
-		| /varset SpellProps[${spellNameProp}] CastName
-		/varset SpellProps[${spellGem}] Gem
-		/varset SpellProps[${spellMinManaProp}] MinMana
-		/varset SpellProps[${spellClassRestrictionProp}] Classes
+    /if (!${Defined[spellProps]}) {
+		/declare spellProps[${spellPropsDimenstions}] string outer
+		/varset spellProps[${spellNameProp}] CastName
+		/varset spellProps[${spellGem}] Gem
+		/varset spellProps[${spellMinManaProp}] MinMana
+		/varset spellProps[${spellClassRestrictionProp}] Classes
 	}
 /return
 
@@ -31,10 +30,10 @@ Sub IniSpellArray(string iniFile, string section, string keyName, arrayName)
         /goto :endIniSpellArray
     }
 
-    :TrimKeys
+    :trimKeys
         /if (${keys.Right[1].Equal[|]}) /varset keys ${keys.Left[${Math.Calc[${keys.Length}-1]}]}
         
-        /if (${keys.Right[1].Equal[|]}) /goto :TrimKeys
+        /if (${keys.Right[1].Equal[|]}) /goto :trimKeys
 
         /declare numberOfKeys int local ${Math.Calc[${keys.Count[|]}+1]}
         /if (${Debug}) /echo |- numberOfKeys > ${numberOfKeys}
@@ -52,9 +51,9 @@ Sub IniSpellArray(string iniFile, string section, string keyName, arrayName)
         /for k 1 to ${Math.Calc[${keys.Count[|]}+1]}
             /varset key ${keys.Arg[${k},|]}
             /for s 1 to ${spellPropsDimenstions}
-                /if (${Debug}) /echo |- parsing ${Ini[${iniFile},${section},${key}]} >  ${SpellProps[${s}]}
+                /if (${Debug}) /echo |- parsing ${Ini[${iniFile},${section},${key}]} > spellProps[${s}] > ${spellProps[${s}]}
 
-                /call getValue ${Ini[${iniFile},${section},${key}]} ${SpellProps[${s}]}
+                /call getValue "${Ini[${iniFile},${section},${key}]}" ${s}
                 /varset value ${Macro.Return}
                 
                 /if (${Debug}) /echo |- ${key} > [${k},${s}] > ${value}
@@ -67,16 +66,20 @@ Sub IniSpellArray(string iniFile, string section, string keyName, arrayName)
     /if (${Debug}) /echo <== IniSpellArray
 /return
 
-Sub getValue(string iniValue, string key)
+Sub getValue(string iniValue, int spellKeyIndex)
     /if (!${Bool[${iniValue}]}) /return
-
-    /declare numSubValues               int     local ${Math.Calc[${iniValue.Count[/]}+1]}
-    /declare subValue                   string  local
-    /declare k                          int     local
     
-    /for k 1 to ${numSubValues}
-        /if (!${Defined[key]} || !${Bool[${key}]}) /return ${iniValue.Arg[${k},/]}
+    | First key is always spell name, and has no prefix
+    /if (${spellKeyIndex} <= 1) /return ${iniValue.Arg[1,/]}
 
+    | if outside range, default to NULL
+    /if (${spellKeyIndex} > ${spellPropsDimenstions}) /return
+
+    /declare numSubValues   int     local ${Math.Calc[${iniValue.Count[/]}+1]}
+    /declare subValue       string  local
+    /declare k              int     local
+    /declare key            string  local ${spellProps[${spellKeyIndex}]}
+    /for k 2 to ${numSubValues}
         /varset subValue ${iniValue.Arg[${k},/]}
         /if (${subValue.Arg[1,|].Equal[${key}]}) /return ${subValue.Arg[2,|]}
     /next k
