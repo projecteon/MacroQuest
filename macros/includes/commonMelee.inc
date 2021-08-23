@@ -72,7 +72,7 @@ Sub DoKill
     /if (${Debug} || ${Debug_Melee}) /echo <== DoKill -|
 /return
 
-Sub DoMelee    
+Sub DoMelee(meleeAbilitySub)    
     /if (${Debug} || ${Debug_Melee}) /echo |- DoMelee ==>	
 
 	/if (${Me.Combat}) {
@@ -89,7 +89,7 @@ Sub DoMelee
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId} || ${Bool[${Spawn[id ${targetId}].Type.Equal[Corpse]}]}) {
-        /attack off
+        /if (${Me.Combat}) /attack off
         /goto :endDoMelee
     }
     
@@ -112,31 +112,11 @@ Sub DoMelee
     /if (${Target.Distance} <= ${Stick.Distance}) {
         /if (!${Me.Combat}) /attack on
 
-        /if (${Math.Abs[${Me.Heading.Degrees}-${Target.Heading.Degrees}]} < 45) {
-            | /call doRogueStrike
-            /if (${Me.AbilityReady[Backstab]}) {
-		        /doability Backstab
-            }
+        /if (Defined[${meleeAbilitySub}]) {
+            /call ${meleeAbilitySub}
         }
     }
 
     :endDoMelee
     /if (${Debug} || ${Debug_Melee}) /echo <== DoMelee -|
-/return
-
-Sub DoRogueStrike
-    /if (${Debug} || ${Debug_Melee}) /echo |- DoRogueStrike ==>	
-
-	/if (${Me.Endurance} > ${strikeDiscEndCost} && ${Me.PctEndurance} >= ${strikeDiscMinEnd} && ${Me.CombatAbilityReady[${strikeDisc}]} && ${Me.AbilityReady[Backstab]} && !${Me.ActiveDisc.ID} && ${Me.Invis} && ${Me.Sneaking}) {
-		| Use 'Assassin's Strike' type disc.
-		/delay 1
-		/disc ${strikeDisc}
-		/delay 5 ${Bool[${Me.ActiveDisc.ID}]}
-		/delay 3
-		/doability Backstab
-		/delay 1
-		/attack on
-	}
-
-    /if (${Debug} || ${Debug_Melee}) /echo <== DoRogueStrike -|
 /return
