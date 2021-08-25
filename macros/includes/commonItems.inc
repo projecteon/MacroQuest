@@ -15,12 +15,10 @@ Sub EVENT_FindItems(line, chatSender, itemToFind)
     
     | Find items in toon bank
     | FindItemBankCount crashes on some chrs, dunno why
-    | /if (${FindItemBankCount[${itemToFind}]}) {
-    |     /call FindItemsInToonBank "${chatSender}" "${itemToFind}"
-    | }
+    /if (${FindItemBankCount[${itemToFind}]}) {
+        /call FindItemsInToonBank "${chatSender}" "${itemToFind}"
+    }
     
-    /call FindItemsInToonBank "${chatSender}" "${itemToFind}"
-
     /if (${Debug} || ${Debug_Common}) /echo <== EVENT_FindItems -|
 /return
 
