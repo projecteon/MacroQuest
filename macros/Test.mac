@@ -4,6 +4,7 @@
 #include includes\commonBuffer.inc
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
+#include includes\commonSpell.inc
 
 Sub Main(string Search)
     /declare testIniFileName        string  local "ini/${MacroQuest.Server}/Test_${Me.CleanName}.ini"
@@ -43,12 +44,50 @@ Sub Main(string Search)
     | /call CheckTimerExpired "${Me.Name}_nbh_timer"  
     
 
-    /call InitLoot
-    /call Event_SellItems
+    | /call InitLoot
+    | /call Event_SellItems
     | :TestLoop
     |     /doevents
     |     /goto :TestLoop
+
+    
+    | /call dynamicSub checkMezz
+    | /call dynamicSub checkMezz2
+    
+    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff1]}
+    | /echo ${Macro.Return}
+    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff1]} MinMana
+    | /echo ${Macro.Return}
+    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff1]} Classes
+    | /echo ${Macro.Return}
+
+    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff2]}
+    | /echo ${Macro.Return}
+    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff2]} MinMana
+    | /echo ${Macro.Return}
+    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff2]} Classes
+    | /echo ${Macro.Return}
+
+    /varset Debug FALSE
+    /call InitSpell
+    /call IniSpellArray ${testIniFileName} "SelfBuffs" SelfBuffs
+    
+    /declare k                          int     local
+    /declare s                          int     local
+    
+    /for k 1 to 2
+        /for s 1 to ${spellPropsDimenstions}
+                /echo |- [${k},${s}] > ${${arrayName}[${k},${s}]}
+        /next s
+    /next k
+
 /return 
+
+Sub dynamicSub(subToCheck)
+    /if (${Defined[subToCheck]}) {
+        /call ${subToCheck}
+    }
+/return
 
 Sub checkMezz
     /declare mezzRadius       int    local 40
