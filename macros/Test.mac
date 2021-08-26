@@ -14,16 +14,6 @@ Sub Main(string Search)
     
     /if (!${Defined[aggroAnimation]})                   /declare aggroAnimation string  outer |5|8|12|17|18|32|42|44|80|106|129|144|
 
-    | /call iniBuffs ${testIniFileName} "Buffs" "Buff" ${iniBuffDimensions} Buffs
-    | /call iniBuffs ${testIniFileName} "SelfBuffs" "SelfBuff" ${iniSelfBuffDimensions} SelfBuffs
-    | /call iniBuffs2 ${testIniFileName} "Buffs" "Buff" 
-    | /call iniBuffs2 ${testIniFileName} "Buffs" "Self Buff" 
-    | /call iniBuffs2 ${testIniFileName} "Buffs" "Bot Buff"
-    | /call iniBuffs2 ${testIniFileName} "Buffs" "Group Buff"
-
-    | /echo ${Buffs[1,1]} ${Buffs[1,2]} ${Buffs[1,3]}
-    | /echo ${SelfBuffs[1,1]} ${SelfBuffs[1,2]}
- 
 
     | /echo ${SpellTimer[${Target.ID},"Snare"]}
 
@@ -54,20 +44,6 @@ Sub Main(string Search)
     | /call dynamicSub checkMezz
     | /call dynamicSub checkMezz2
     
-    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff1]}
-    | /echo ${Macro.Return}
-    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff1]} MinMana
-    | /echo ${Macro.Return}
-    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff1]} Classes
-    | /echo ${Macro.Return}
-
-    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff2]}
-    | /echo ${Macro.Return}
-    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff2]} MinMana
-    | /echo ${Macro.Return}
-    | /call getValue ${Ini[${testIniFileName},SelfBuffs,SelfBuff2]} Classes
-    | /echo ${Macro.Return}
-
     /varset Debug FALSE
     /call InitSpell
     /call IniSpellArray ${testIniFileName} "SelfBuffs" SelfBuffs
@@ -76,7 +52,7 @@ Sub Main(string Search)
     /declare s                          int     local
     
     /for k 1 to 2
-        /for s 1 to ${spellPropsDimenstions}
+        /for s 1 to ${spellPropsDimentions}
                 /echo |- [${k},${s}] > ${${arrayName}[${k},${s}]}
         /next s
     /next k
@@ -92,33 +68,6 @@ Sub dynamicSub(subToCheck)
 Sub checkMezz
     /declare mezzRadius       int    local 40
     /echo "DoMezz playerstate 4" ${SpawnCount[playerstate 4 radius ${mezzRadius}]}
-/return
-
-
-Sub iniBuffs(string INIFile, string section, string keyName, int arrayDimensions, arrayName)
-    /declare Keys       string  local
-    /declare k          int     local
-    /declare s          int     local
-
-    /varset Keys ${Ini[${INIFile},${section}]}
-    :TrimKeys
-        /if (${Keys.Right[1].Equal[|]}) /varset Keys ${Keys.Left[${Math.Calc[${Keys.Length}-1]}]}
-        
-        /if (${Keys.Right[1].Equal[|]}) /goto :TrimKeys
-
-        /declare numberOfBuffs int local ${Math.Calc[${Keys.Count[|]}+1]}
-        /if (${numberOfBuffs} < 1) /return
-
-        /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
-        /declare ${arrayName}[${numberOfBuffs},${arrayDimensions}] string outer
-
-        /declare key string local
-        /for k 1 to ${Math.Calc[${Keys.Count[|]}+1]}
-            /varset key ${Keys.Arg[${k},|]}
-            /for s 1 to ${arrayDimensions}
-                /varset ${arrayName}[${k},${s}] ${Ini[${INIFile},${section},${key}].Token[${s},/]}
-            /next s
-        /next k
 /return
 
 

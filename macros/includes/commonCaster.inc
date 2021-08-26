@@ -52,7 +52,7 @@ Sub InitCasterIni(string iniFileName)
        /varset Debug_Caster ${Bool[${Ini[${iniFileName},Debug,Debug_Caster]}]}     
     } 
 
-    /squelch /alias /evacute /echo EVACUATE NOW
+    /squelch /alias /evacuate /echo EVACUATE NOW
 /return ${initResult}
 
 Sub CheckManaStatus

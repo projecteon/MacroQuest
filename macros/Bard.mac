@@ -1,5 +1,6 @@
 #include includes\ini.inc
 #include includes\common.inc
+#include includes\commonSpell.inc
 #include includes\commonMelee.inc
 #include includes\wait4rez.inc
 #turbo 40

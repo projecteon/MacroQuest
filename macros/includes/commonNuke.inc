@@ -1,9 +1,5 @@
 | http://mqemulator.net/forum2/viewtopic.php?t=1551
 | http://mqemulator.net/forum2/viewtopic.php?t=794
-
-#include includes\spell_routines.inc
-#include includes\commonCaster.inc
-
 Sub InitNukeIni(string fileName)
     /if (!${Defined[nukeOptions]})  		/declare nukeOptions        string  outer "NukeOptions"
     /if (!${Defined[useNuke]})  		    /declare useNuke                   outer 

@@ -11,6 +11,7 @@ Sub InitDebufferIni(string iniFileName)
     /if (!${Defined[debuffTimeDimension]})     /declare debuffTimeDimension     int     outer 4 
     /if (!${Defined[Debug_DeBuffs]})           /declare Debug_DeBuffs           bool    outer FALSE
 
+    /call InitSpell
     /call IniArray "${iniFileName}" "DeBuffs" "DeBuff" ${debuffDimensions} DeBuffs
 
     /if (${Ini[${iniFileName},Debug,Debug_DeBuffs].Length}) {

@@ -1,16 +1,18 @@
 Sub InitSpell
-    /if (!${Defined[spellPropsDimenstions]})        /declare spellPropsDimenstions      int     outer 4 
+    /if (!${Defined[spellPropsDimentions]})         /declare spellPropsDimentions       int     outer 5
     /if (!${Defined[spellNameProp]})                /declare spellNameProp              int     outer 1 
     /if (!${Defined[spellGem]})                     /declare spellGem                   int     outer 2 
     /if (!${Defined[spellMinManaProp]})             /declare spellMinManaProp           int     outer 3 
     /if (!${Defined[spellClassRestrictionProp]})    /declare spellClassRestrictionProp  int     outer 4 
+    /if (!${Defined[spellMinTargetHpProp]})         /declare spellMinTargetHpProp       int     outer 5
 
     /if (!${Defined[spellProps]}) {
-		/declare spellProps[${spellPropsDimenstions}] string outer
+		/declare spellProps[${spellPropsDimentions}] string outer
 		/varset spellProps[${spellNameProp}] CastName
 		/varset spellProps[${spellGem}] Gem
 		/varset spellProps[${spellMinManaProp}] MinMana
 		/varset spellProps[${spellClassRestrictionProp}] Classes
+		/varset spellProps[${spellMinTargetHpProp}] MinTargetHp
 	}
 /return
 
@@ -44,13 +46,13 @@ Sub IniSpellArray(string iniFile, string section, string keyName, arrayName)
         }
 
         /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
-        /declare ${arrayName}[${numberOfKeys},${spellPropsDimenstions}] string outer
+        /declare ${arrayName}[${numberOfKeys},${spellPropsDimentions}] string outer
 
         /declare value string local
         /declare key string local
         /for k 1 to ${Math.Calc[${keys.Count[|]}+1]}
             /varset key ${keys.Arg[${k},|]}
-            /for s 1 to ${spellPropsDimenstions}
+            /for s 1 to ${spellPropsDimentions}
                 /if (${Debug}) /echo |- parsing ${Ini[${iniFile},${section},${key}]} > spellProps[${s}] > ${spellProps[${s}]}
 
                 /call getValue "${Ini[${iniFile},${section},${key}]}" ${s}
@@ -73,7 +75,7 @@ Sub getValue(string iniValue, int spellKeyIndex)
     /if (${spellKeyIndex} <= 1) /return ${iniValue.Arg[1,/]}
 
     | if outside range, default to NULL
-    /if (${spellKeyIndex} > ${spellPropsDimenstions}) /return
+    /if (${spellKeyIndex} > ${spellPropsDimentions}) /return
 
     /declare numSubValues   int     local ${Math.Calc[${iniValue.Count[/]}+1]}
     /declare subValue       string  local
