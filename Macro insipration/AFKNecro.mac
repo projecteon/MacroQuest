@@ -1,0 +1,1625 @@
+| https://www.redguides.com/community/threads/do-timers-exist-within-mq2.11099/
+
+|
+|	AFKNecro.mac v10.08
+|	     AFK necro DPS macro
+|		by: EQBot_Man    10.8.2004
+|                 Updated by: TheZ 5.26.06
+|
+| Usage: /Macro AFKNecro <Tank Name> <Cast Health> <Stop Casting Health>
+|
+|	<Tank Name>
+|		This is the name of the tank or character whom you will assist for a target
+|	<Cast Health>
+|		This is the Health of the mob at which point your necro will start to cast Nukes.
+|			90h is fine for most plows
+|	<Stop Casting Health>
+|		This is the health of the mob at which you will not start another cast
+|
+|	Examples:
+|		/macro AFKNecro Bigmofo 90 10
+|	    Once running:
+|		/echo help
+|		/echo MA Newtank
+|		/echo sit
+|		/echo switch
+|		/echo dot1
+|		/echo status
+|
+|What this macro does:
+|Constantly assists the set tank name for a target.  Given the options set you will then cast a
+|	curse based spell(off by defualt)(Horror/Dark Nightmare). Then you will proc your miraguls
+|	pants(off by defualt).  Then you will cast an additional DoT(off by defualt)(Blood of
+|	Thule by defualt).  Then you will chain nuke with a nuke(Ancient: Touch of Orshilak by defualt) under
+|	<Cast Health>.  You will stop casting your nuke under <Stop Casting health>.  Depending
+|	on the options set once the macro.  If you get hit you will(by drawing aggro) you will
+|	utilize the AA FD to FD then stand in 15sec.  If you do not have the AA FD, you will
+|	have to scroll down to Event_FD and change it.  You can set lots of options including
+|	Dynamic Mana Control(off by defualt but recommended on).  When the mob gets to
+|	<Stop Casting Health> you will stop chain nuking.|
+|
+|Quick Setup:
+|1.	First read everything above and how your necro is not my necro and some things in necro.inc
+|	and /call kfh and /call for, will fuck you up and follow the directions accordingly(delete
+|	/call kfh and /call for, RIGHT NOW!
+|2.	Replace all the /goto commands with /goto in this macro and in necro.inc
+|3.	Go down to approx line 315 and set your Primary Nuke and SecondaryNuke.  Set your Curse Based
+|	spell(Horror/Dark Nightmare), set your DoT spell
+|4.	Type: /macro AFKNecro <TANK> 90 10, replacing <TANK> with the person to assist.  Once started
+|	type /echo Dynmana, and you are OFF!
+|5.	If you want to add some dots(I would hope so...you are a necro!) type /echo curse, and /echo dot,
+|	and /echo pyor(ONLY if you have miraguls legs on). and you will assist your MA, cast your curse,
+|	cast your dot and chain nuke appropriatly
+|
+|
+|Macro commands for when the macro is running:
+|Important ones:
+|"/echo help" Brings up some help text to display all the things you can type
+|"/echo status" Brings up a list of all the options you have set
+|"/echo switch"  This will change the nuke you use from ${PrimaryNuke} to ${SecondaryNuke}, and switch
+|	back depending on which you have selected when triggered.  To set ${PrimaryNuke} and
+|	${SecondaryNuke} look below in the /varset functions around line 285
+|"/echo DP" Sets the macro to proc the Death Peace AA skill after each Nuke(Nuke, DP, Nuke, DP).
+|	Remember: this is AFTER you've casted your curse based and DoT. You will only cast AA FD
+|	after each NUKE
+|"/echo DynMana" Turnd on/off Dynamic Mana Control.  At the beggining of each fight your mana
+|	consumption is analyzed and a new appropriate <Cast Health> is selected for nuking.  If pulls
+|	are too fast and you have curse based and your selcted DoT going off on every mob, your
+|	<Cast Health> will be very low due to high mana consumptionI'm still working on the best
+|	way to implement this as this varies greatly on the speed of the pulls, your personal
+|	preference of how much mana to have at any given time, your uberness(focus effects, AAs), etc.
+|	This function will keep your mana relatively low, around 40-60.  This is because real
+|	groups have lots of breaks and you can med then.
+|"/echo MA NEW_MA_NAME"  Sets a new MA name. e.i: /echo MA Newbigtank, would set the name Newbigtank
+|	to assist for a target
+|"/echo curse" Turns on/off casting a curse based spell.  You will not start casting until 98h to
+|	prevent casting on something that is going to be mezed.    You will not start a cast
+|	of horror under 85h to prevent wasting mana
+|"/echo dot1" Turns on/off casting an additional dot (defualt is Blood of Thule) at 96h(96 to make sure
+|	if you have a curse spell enabled that it goes off first.  You will not start casting your dot
+|	under 85h, to prevent wasteing mana
+|"/echo dot2" Turns on/off casting an additional dot (defualt is Fang of Death) at 95h(95 to make sure
+|	if you have a curse spell enabled that it goes off first.  You will not start casting your dot
+|	under 85h, to prevent wasteing mana
+|"/echo dot3" Turns on/off casting an additional dot (defualt is Funeral Pyre) at 94h(94 to make sure
+|	if you have a curse spell enabled that it goes off first.  You will not start casting your dot
+|	under 85h, to prevent wasteing mana
+|"/echo dot4" Turns on/off casting an additional dot (defualt is not set) at 93h(93 to make sure
+|	if you have a curse spell enabled that it goes off first.  You will not start casting your dot
+|	under 85h, to prevent wasteing mana
+|
+|The not-so-important commands, only fiddle if you know what you are doing and know what they do:
+|"/echo SA NEW_SA_NAME"  Sets a new SA name. e.i: /echo SA Newbigtank, would set the name Newbigtank
+|	to assist for a target when MA isn't in the zone(i.e. dead)
+|"/echo TA NEW_TA_NAME"  Sets a new TA name. e.i: /echo TA Newbigtank, would set the name Newbigtank
+|	to assist for a target when SA or MA isn't in the zone(i.e dead)
+|"/echo pyro" Turns on/off procing of your miraguls legs after you cast your curse based spell and
+|	before you cast your DoT
+|"/echo Level <Number>"  Sets the max level of mob to cast on. so you don't casting on a raid encounter.
+|	(Defualt is level 70)
+|"/echo lootnpc"  Turns off/on looting of the nearest corpse after a mob has died.  Only works
+|	if you are in the group that killed the mob(duh).
+|"/echo sit" Turns on/off sitting after casting if you are in a zone where you can not use a mount.
+|	Defualt = off
+|"/echo face" Turns on/off Faceing the mob before each cast.  Defualt = off
+|"/echo pethaste"  calls the PetHaste subrountine in necro.inc.  Make sure you check to make sure the
+|	subroutine works for your necro spells/setup.  It probably won't since the subroutine was custom
+|	tailored to my character
+|"/echo makepet"  Calls the MakePet subroutine in necro.inc.  Make sure you check to make sure the
+|	subroutine works for your necro spells/setup.  It probably won't since the subroutine was custom
+|	tailored to my character
+|"/echo fd" Turns on/off FDing if you get hit. (Defualt ON)
+|"/echo StopNuke"  Will turn off nuking.  Use for when you just want to have a couple DoT's
+|"/echo StartNuke" Used after you've used the "StopNuke" command and you want to start nuking again
+|	This will automatically turn on dynamic mana consumption
+|"/echo usemoremana" This will change some options in Dynamic mana control to make your overall mana
+|	percentage lower.   Useful when your group has lots of stupid breaks so you use lots of mana
+|	then med while everyone farts around.
+|
+|Include files needed:
+|	Necro.inc
+|		This has all my personal necro subroutines including procing of my miraguls pants,
+|		putting	on and procing of my clicky splurt shoulders from VT, my sub for making
+|		and hasteing a pet and some other random clickies I have. Check	it out to see if
+|		you want to use them and they are right for your equipment/setup  
+|
+|
+|Plugins needed:
+|	MQ2Exchange
+|		Found only in the VIP forums(you...did donate didn't you?).  You have to have this if
+|		you want to use the pethaste/makepet to exchange equipment
+|	MQ2PlaySound
+|		You need this if you want to hear a sound everytime someone sends you a tell.  It plays
+|		/sound 3 so get it and set it up or delete the EVENT Tell
+|
+|----------------------------------------------------------------------------------------|
+|
+|How to get this thing working for YOUR necro / Troubleshooting:
+|
+|Each time you FD, this macro will do the AA FD done by the command /alt activate 428.  If you do not
+|	have this search for the lines with "/alt activate 428" and change them to /cast "Death Peace"
+|	or whatever.
+|I suggest not using Necro.inc with the automatic making and hasteing of the pet unless you have the
+|	same setup as I do.  Review the two subroutines in necro.inc: PetHaste, and MakePet and see
+|	if they are right for you.  Also..everytime your pet'ss haste runs out it will try to
+|	/call PetHaste. and if you don't have ornate pants..it may fuck	up I don't know.  Delete the
+|	line #Event pethaste "Your pet's Rune of Death#*#" if you are unsure
+|Right as the macro starts you will see "/call khf" and "/call for".  Delete these unless you have
+|	emp rob from ssra, and Time CT belt
+|Make sure you replaced all the /goto commands in this macro and necro.inc with the standard /goto
+|	command
+|Check out the lines at the start of MAINLOOP where it says:
+|	/call khf
+|	/call for
+|	/call fs
+|	/call Lich
+|	/call oom
+|		These funtions Call subroutines to keep buffs I liek to have on while macroing take them
+|	out if you don't want these buffs automatically called
+|_______________________________________________________________________________________________
+|
+|	Note: This macro will try to proc your Koadics Robe of Heightened Focus, and your Belt of Tidal
+|		energy for Form of Rejuvenation.  Most likely youd on't have these.  Delete these two
+|		lines:/call khf, and /call for., SEARCH THIS MACRO AND FUCKING DO IT, I'm serious...you
+|		should stop reading and press F5 or whatever seacrch for those lines and DELETE THEM!  Why
+|		did I delete them before I release this?  Cause I'm not int he business of making other
+|		people macros and everytime I release a new one I don't want to have to remember to delete
+|		them myself...so I wrote out this whole speel about how YOU should do it, not me...right now,
+|		I'll give yo a hint...when I wrote this it was on line 355 and 356! GO!)
+|
+|	Note: If someone asked you for a dmf in a tell, you will attempt to dmf them using the
+|		DMFMeh subroutine in necro.mac
+|	Note: If you die(detected from you being in plane of tranquility)
+|------------------------------------------------------------------------------------------------------
+|++++++++++++++  I didn't write all that shit for nothing, cause I KNOW what everything does...
+|++++++++++++++	If you can't get the macro to work(because it DOES work) send me a PM and I'll try to help
+
+
+#Include Necro1.inc
+#include wait4rez.inc
+
+#Event Deaderer             "#*#Returning to Bind Location#*#"
+#Event GoM "You have been granted a gift of mana!"
+#Event Gone "Your gift of mana fades."
+#Event standing "You must be standing to cast a spell#*#"
+#Event dpson "[MQ2] dps"
+#Event distract "You are too distracted to cast a spell now!"
+#Event getout "[MQ2] run"
+#Event FD "#*#hits you for#*#"
+#Event FD "#*#kicks you for#*#"
+#Event FD "#*#bites you for#*#"
+#Event FD "#*#bashes you for#*#"
+#Event FD "#*#slashes you for#*#"
+#Event FD "#*#pierces you for#*#"
+#Event FD "#*#crushes you for#*#"
+#Event FD "#*#You will not evade me ${Me}!#*#"
+#Event Enrage "#*#has becomed ENRAGED#*#"
+#Event Enrage "#*#is infuriated!#*#"
+#Event EndEnrage "#*#is no longer ENRAGED#*#"
+#Event EndEnrage "#*#is no longer infuriated.#*#"
+#Event mezbreak "#*#awakened by ${Me}#*#"
+#Event follow "[MQ2] follow#*#"
+#Event face "[MQ2] face"
+#Event sit "[MQ2] sit"
+#Event help "[MQ2] help"
+#Event Curse "[MQ2] curse"
+#Event DoT1 "[MQ2] dot1"
+#Event DoT2 "[MQ2] dot2"
+#Event DoT3 "[MQ2] dot3"
+#Event DoT4 "[MQ2] dot4"
+#Event pethaste "[MQ2] pethaste"
+#Event makepet "[MQ2] makepet"
+#Event MAChange "[MQ2] ma #1#"
+#Event SAChange "[MQ2] sa #1#"
+#Event TAChange "[MQ2] ta #1#"
+#Event DP "[MQ2] DP"
+#Event Switch "[MQ2] switch"
+#event slain "#*#has been slain#*#"
+#event EXP "#*#gain experience!#*#"
+#Event Status "[MQ2] status"
+#Event LegProc "[MQ2] pyro"
+#Event tell "#*#tells you, '#*#"
+#Event splurt "[MQ2] splurt"
+#Event DynMana "[MQ2] dynmana"
+#Event MWChange "[MQ2] MW"
+#Event LevelToCast "[MQ2] level #1#"
+#Event Shrink "[MQ2] shrink"
+#Event Rebuff "[MQ2] rebuff"
+#Event LootNPC "[MQ2] lootnpc"
+#Event NecroBot "[MQ2] necrobot"
+#Event Invis "[MQ2] invis"
+#Event FDSwitch "[MQ2] fd"
+#Event HighManaUseBit "[MQ2] usemoremana"
+#Event StopNuke "[MQ2] Stopnuke"
+#Event StartNuke "[MQ2] Startnuke"
+#Event Wait4Rez "[MQ2] Wait4Rez"
+
+Sub Event_dpson
+/echo curse
+/echo dot1
+/echo dot2
+/echo dot3
+/echo dot4
+/echo pyro
+/return
+
+Sub Main
+
+/deletevar StopCastHealth
+/deletevar CastHealth
+|If the following variables exsisted before (ie You are restarting the macro) it will leave
+|	them alone, and the values will transfer when you restart the macro
+/if (!${Defined[MainAssist]}) {
+	/declare MainAssist string global
+	/varset MainAssist ${Param0}
+} else {
+	/varset MainAssist ${Param0}
+}
+
+/if (!${Defined[SecondAssist]}) {
+	/declare SecondAssist string global
+}
+
+/if (!${Defined[TripleAssist]}) {
+	/declare TripleAssist string global
+}
+/if (!${Defined[LevelToCast]}) {
+	/declare LevelToCast int global
+	/varset LevelToCast 70
+}
+
+/if (!${Defined[CurseBit]}) {
+	/declare CurseBit int global
+	/varset CurseBit 0
+}
+
+/if (!${Defined[DoTBit1]}) {
+	/declare DoTBit1 int global
+	/varset DoTBit1 0
+}
+
+/if (!${Defined[DoTBit2]}) {
+	/declare DoTBit2 int global
+	/varset DoTBit3 0
+}
+
+/if (!${Defined[DoTBit3]}) {
+	/declare DoTBit3 int global
+	/varset DoTBit3 0
+}
+
+/if (!${Defined[DoTBit4]}) {
+	/declare DoTBit4 int global
+	/varset DoTBit4 0
+}
+
+/if (!${Defined[FaceBit]}) {
+	/declare FaceBit int global
+	/varset FaceBit 0
+}
+/if (!${Defined[SitBit]}) {
+	/declare SitBit int global
+	/varset SitBit 0
+}
+
+/if (!${Defined[LegProc]}) {
+	/declare LegProc int Global
+	/varset LegProc 0
+}
+/if (!${Defined[MWBit]}) {
+	/declare MWBit int Global
+	/varset MWBit 0
+}
+/if (!${Defined[DynManaBit]}) {
+	/declare DynManaBit int Global
+	/varset DynManaBit 1
+}
+/if (!${Defined[LootNPCBit]}) {
+	/declare LootNPCBit int Global
+	/varset LootNPCBit 0
+}
+/if (!${Defined[CastHealth]}) {
+	/declare CastHealth int Global
+	/varset CastHealth ${Param1}
+}
+/if (!${Defined[StopCastHealth]}) {
+	/declare StopCastHealth int Global
+	/varset StopCastHealth ${Param2}
+}
+/if (!${Defined[DP]}) {
+	/declare DP int Global
+	/varset DP 0
+}
+/if (!${Defined[NecroBotBit]}) {
+	/declare NecroBotBit int Global
+	/varset NecroBotBit 0
+}
+/if (!${Defined[FDBit]}) {
+	/declare FDBit int Global
+	/varset FDBit 1
+}
+/if (!${Defined[HighManaUseBit]}) {
+	/declare HighManaUseBit int Global
+	/varset HighManaUseBit 0
+}
+/deletevar CurseTimer
+/deletevar DoTTimer1
+/deletevar DoTTimer2
+/deletevar DoTTimer3
+/deletevar DoTTimer4
+/deletevar DoTSpell1
+/deletevar DoTSpell2
+/deletevar DoTSpell3
+/deletevar DoTSpell4
+/deletevar CurseSpell
+/deletevar PetAttackTimer
+/deletevar MWTimer
+/deletevar gom
+
+/declare ManaLastDynManaCall int outer
+/declare DynManaTimer timer outer
+/declare BotMaster string outer
+/declare CurseTimer timer global
+/declare MWTimer timer global
+/declare DoTTimer1 timer global
+/declare DoTTimer2 timer global
+/declare DoTTimer3 timer global
+/declare DoTTimer4 timer global
+/declare Pyro timer outer
+/declare DoTSpell1 string global
+/declare DoTSpell2 string global
+/declare DoTSpell3 string global
+/declare DoTSpell4 string global
+/declare CurseSpell string global
+/declare PetAttackTimer timer global
+/declare MakeAPet int outer
+/declare CurrentTarget int outer
+/declare SecondaryNuke string outer
+/declare PrimaryNuke string outer
+/declare MinTargetLevel int outer
+
+/declare gom int global 0
+
+/varset DynManaTimer 0
+/varset CurseTimer 0
+/varset DoTTimer1 0
+/varset DoTTimer2 0
+/varset DoTTimer3 0
+/varset DoTTimer4 0
+/varset Pyro 0
+/varset PetAttackTimer 0
+/varset MinTargetLevel 50
+
+
+|----- Set spell name of the curse based spell you wish to to cast if curse is active
+/varset CurseSpell "Ancient: Curse of Mori"
+
+|---- 0=Don't automatically make a pet.  1=Make a pet if you don't have one----
+/varset MakeAPet 0
+
+|----- Set spell name of the dot to cast if doting is active
+/varset DoTSpell1 "Night Fire"
+
+|----- Set spell name of the dot to cast if doting is active
+/varset DoTSpell2 "Chaos Venom"
+
+|----- Set spell name of the dot to cast if doting is active
+/varset DoTSpell3 "Pyre of Mori"
+
+|----- Set spell name of the dot to cast if doting is active
+/varset DoTSpell4 "Corath Venom"
+
+|----- Set spell name of a Primary nuke
+/varset PrimaryNuke "Ancient: Touch of Orshilak"
+
+|----- Set spell name of a secondary nuke
+/varset SecondaryNuke "Acikin"
+
+/if (!${Defined[CurrentNuke]}) {
+	/declare CurrentNuke string Global
+	/varset CurrentNuke ${PrimaryNuke}
+}
+
+/call Event_Status
+/echo waiting for initial target . . .
+
+
+
+/if (!${Defined[${Param1}]} && !${Defined[${Param2}]}) {
+} else /if (${CastHealth}<=${StopCastHealth}) {
+	/echo Your Start Casting Health is elss than your and your Stop Casting Health.  Macro will not function propery.  Try setting to 90 and 10(/macro AFKNecro TANK 90 10). Ending the macro
+	/endmacro
+}
+
+
+
+
+|MAINLOOPMAINLOOPMAINLOOPMAINLOOPMAINLOOP
+|MAINLOOPMAINLOOPMAINLOOPMAINLOOPMAINLOOP
+:Continue
+
+	/if (!${InvSlot[chest].Item.ID} && !${Me.Platinum}) /call Wait4Rez
+	/if (!${Me.Pet.ID} && ${MakeAPet}==1) /echo makepet
+	
+	
+	/call fs
+	/call Lich
+	/call oom
+	
+
+	/doevents
+	
+	/call GetTarget
+	|After Macro gets a target this next giant line determines if its something it wants to attack.
+	/if (${Target.PctHPs}>=65 && ${Target.PctHPs}<=98 && ${Target.Level}>=${MinTargetLevel} && ${Target.Type.Equal["NPC"]} && ${Target.Distance}<190 && ${Target.LineOfSight} && !${Me.Moving} && !${Me.Casting.ID} && !${String[${Target}].Find["NULL"]}>0) {
+		|Sets the Current Target Based on the ID number of the mob spawn it the zone.  This later comes into play when deciding that the mob has died
+		/varset CurrentTarget ${Target.ID}
+		/popup Target Aquired >>"${Target.CleanName}"<<
+		/echo Target Aquired >>"${Target.CleanName}"<<
+		/if (${DynManaBit}==1) /call DynMana
+		/goto :StartCombat
+
+	} else {
+		/goto :Continue
+	}
+
+
+
+|++++++++++++++++
+|This loops during combat
+:StartCombat
+	/call Curse
+	/call pyro
+	/call GetTarget
+	/call DoT1
+	/call GetTarget
+	/call DoT2
+	/call GetTarget
+	/call DoT3
+	/call GetTarget
+	/call DoT4
+	/call Cast
+	/call MW
+	/doevents
+	|If the Mobs name of the CurrentTarget ID number has corpse...its dead...find a new target, start over, your done
+	/if (${String[${Spawn[${CurrentTarget}]}].Find["corpse"]}) {
+		/call Event_exp
+		
+		/call Gmcheck
+		
+		/echo Current mob has Died
+		/if (!${Me.State.Equal[Stand]}) /stand
+		/goto :Continue
+	}
+/goto :StartCombat
+|+++++++++++++++++++
+
+
+
+|MAINLOOPMAINLOOPMAINLOOPMAINLOOPMAINLOOP
+|MAINLOOPMAINLOOPMAINLOOPMAINLOOPMAINLOOP
+
+
+
+
+/return
+|----------------------------------
+|Assists the MA and gets a target
+Sub GetTarget
+:Target
+/if (${Me.Casting.ID}) /return
+/if (${Me.Moving}) /return
+/if (${Spawn[${MainAssist}].ID}) {
+	/assist ${MainAssist}
+} else /if (${Spawn[${SecondAssist}].ID}) {
+	/assist ${SecondAssist}
+} else /if (${Spawn[${TripleAssist}].ID}) {
+	/assist ${TripleAssist}
+} else {
+	/echo None of your assigned tanks are in the zone, did you spell the name wrong?, pausing for 20 seconds...
+	/delay 20s
+}
+
+/delay 2
+
+/return
+|-------------------------------------
+|This is the Nuking Subroutine
+Sub Cast
+	:Loop0
+	/doevents
+	/if (!${Me.SpellReady[${CurrentNuke}]}) /goto :Loop0
+/if (${Me.Moving}) /return
+
+	
+	/if (${String[${Target}].Find["Warlod Gintolaken"]}>0 || ${String[${Target}].Find["Avatar o"]}>0) {
+		/echo This mob memblurs, you should cast your spells manually.
+		/delay 10s
+		/return
+	}
+	/if (${String[${Target}].Find["Guardian of T"]}) {
+		/echo This mob does not start at full health 4/5 times.  You should cast your spells manually
+		/delay 10s
+		/return
+	}
+
+
+	/if (${String[${Target}].Find["NULL"]}>0) /return
+	/if (${SitBit}==1) {
+		/if (${Target.PctHPs}>${CastHealth} || ${Target.PctHPs}==0) {
+			/if (${Me.State.Equal["STAND"]}) /sit
+			/delay 2s
+			/return
+		}
+	} else {
+			/stand
+	}
+|This next if then makes sure that you only send the pet once every 10 sec, if not it spams /pet attack..very annoying
+/if (${Target.PctHPs}<=97 && !${String[${Target}].Find["corpse"]}>0 && ${Target.Type.Equal["NPC"]} && ${Target.Distance}<190 && ${PetAttackTimer}==0) {
+		/pet attack
+		/varset PetAttackTimer 100
+	}
+	
+| Do we still want to cast on the current Target? Yes? Ok then continue
+/if (${Target.PctHPs}<=${CastHealth} && ${Me.SpellReady[${CurrentNuke}]} && ${Target.PctHPs}>${StopCastHealth} && ${Target.Type.Equal["NPC"]} && ${Target.Distance}<190 && ${Target.LineOfSight}) {
+
+	
+	/if (${FaceBit}==1) {
+		/face fast nolook
+		/look 0
+	}
+	
+	/echo Mob Detected, Casting ${CurrentNuke}
+	/stand
+	/cast ${CurrentNuke}
+	/stand
+	/delay 2
+	/cast ${CurrentNuke}
+	/stand
+	/delay 2
+	/cast ${CurrentNuke}
+	/stand
+	/delay 2
+	/cast ${CurrentNuke}
+	/if  (${DP}==1) /call AAFD
+
+}
+
+/return
+
+|=====================================
+|procing of Miraguls legs if turned on
+Sub Pyro
+
+	/if (${LegProc}==1 && ${Target.PctHPs}>=85 && ${Target.PctHPs}<=96 && ${Target.Level}>=${MinTargetLevel} && ${Pyro}==0 && ${Target.LineOfSight}) {
+	
+		/if ((${Raid} && ${Target.PctHPs}>=20) || (!${Raid} && ${Target.PctHPs}>=75)) {
+		} else {
+			/return
+		}
+		
+		:PyroLoop
+		/if (${Me.Casting.ID}) /goto :PyroLoop
+		/stand
+		/casting "Dagger of Death" item
+		/varset Pyro 200
+	}
+
+/return
+
+|=====================================
+|Procing the AA FD after each nuke subroutine
+Sub AAFD
+
+	:DP
+	/if (${Me.Casting.ID}) /goto :DP
+	/alt activate 428
+	/alt activate 428
+	/alt activate 428
+		/delay 13
+	:Stand
+	/if (!${Me.State.Equal["STAND"]}) {
+		/stand
+		/delay 2
+	/goto :Stand
+	}
+	
+/return
+|--------------------------------------
+|If by some chance you get to 8% mana you should turn on dynmana, but if not you will stop and med
+Sub oom
+/if (${Me.PctMana}<8) {
+	/echo waiting 3min for mana
+	/delay 60s
+	/echo 2min left
+	/delay 60s
+	/echo 1min left
+	/delay 30s
+	/echo 30 seconds until resuming script
+	/delay 30s
+	/echo resuming script
+	/popup Resuming script
+}
+/return
+|-------------------------------------------------
+| I wrote this subroutine but I don't think I use it in this macro :)
+Sub lich
+/declare tempspell string local
+/varset tempspell ${Me.Gem[8]}
+:memspell
+/if (${Me.Buff["Grave Pact"].Duration}<5) {
+	/echo Turning Lich on
+	/memspell 8 "Grave Pact"
+/if (!${String[${Me.Gem[8]}].Find["Grave Pact"]}>0) /goto :memspell
+	:notready
+	/if (!${Me.SpellReady["Grave Pact"]}) {
+		/goto :notready
+	} else {
+		/stand
+		/keypress esc
+		/keypress esc
+		/keypress esc
+		/cast "Grave Pact"
+		/delay 6s
+		/memspell 8 "${tempspell}"
+		/delay 5s
+		/stand
+	}
+}
+/if (!${Me.Buff["Grave Pact"].Duration}<5) /goto :memspell
+/return
+
+|--------------------------------------
+| This is a semi-complicated SubRoutine..good luck following it
+|Basically if you are not FD it spams the AA FD until you are FD or you are dead.
+|Once you are FD you will stand up in 15 seconds regardless of anything and attempt to summon a mount.
+|If your attempt to summon a mount fails... oh well.
+Sub Event_FD
+/if (${FDBit}==0) {
+	/doevents flush
+	/return
+}
+/echo You are being hit!  Trying to FD!
+/stopcast
+:top_of_FD
+
+/if (${String[${Me.State.}].Find["FEIGN"]}) {
+	/echo You are FD, pausing script.  You will automatically stand up when the mob is dead if you are above low health aggro.  Or you can stand up manually to resume the script. Or you will stand up in 15 seconds reguardless.
+	:already_FD
+		/if (!${String[${Me.State.}].Find["FEIGN"]}) {
+			:StandUp
+			/delay 5
+			/stand
+			/delay 2
+			/echo You stood up, resuming script...
+				
+			/return
+		} else {
+
+			/if (${String[${Target.Name}].Find["NULL"]} && ${Me.PctHPs}>=26) /stand
+			/doevents flush
+			/delay 5
+			/goto :already_FD
+
+		}
+} else /if (!${String[${Me.State.}].Find["FEIGN"]}) {
+	:not_FD_yet
+	/alt activate 428
+	/delay 2
+	/if (!${String[${Me.State.}].Find["FEIGN"]}) {
+		/goto :not_FD_yet
+	} else {
+		/timed 10 /stand
+		/goto :top_of_FD
+	}
+}
+/goto :top_of_FD
+/return
+
+
+|------------------------------------------
+|Yeah
+|Self Explainatory
+Sub Event_mezbreak
+/echo You broke a mez, shame on you.
+/endmacro
+/return
+|------------------------------------------
+|If you  have windows up somtimes it can fuck up the macro
+Sub Event_distract
+	/keypress esc
+	/keypress esc
+	/keypress esc
+	/keypress esc
+	/keypress esc
+	/keypress esc
+	/stand
+/return
+|------------------------------------------------------------
+|I should justfs erase this since this macro never accesses it, but oh well
+Sub Event_keepdistance
+
+/declare distance int local
+
+|----Set this Distance -------|
+/varset distance 10
+|----Set this shit-------|
+/echo Following your target to ${distance} feet
+	:Continue
+		/face fast
+      		/if (${Target.Distance}>${distance}) /keypress forward hold
+      		/if (${Target.Distance}<${distance}) /keypress Back
+
+	/goto :Continue
+
+
+/return
+|---------------------------------------------------------------
+|This Subroutine is called when the ${CurrentMob} is dies
+Sub Event_exp
+
+	/pet follow
+	/pet back off
+	/pet hold
+	
+
+/if (${LootNPCBit}==1) /call Lootnpc
+
+/return
+|---------------------------------------------------------------
+|This is called when you type /echo help.  Did I forget anything, probably?
+Sub Event_help
+/echo ----- Macro Information ------
+/echo /Macro AFKNecro <Tank Name> <Cast Health> <Stop Casting Health>
+/echo "/echo sit" Turns on/off sitting after casting if you are in a zone where you can not use a mount.  Defualt = off
+/echo "/echo face" Turns on/off Faceing the mob before each cast.  Defualt = off
+/echo "/echo curse" Turns on/off Casting Spell:${CurseSpell} before chain nuking on each mob.  Defualt = off
+/echo "/echo ma <Name>" Sets the MA's Name
+/echo "/echo sa <Name>" Sets the SA's Name
+/echo "/echo TA <Name>" Sets the TA's Name
+/echo "/echo dynmana" Turns on/off Dynamic Mana Consumption.  Defualt = off
+/echo "/echo pyro" Turns on/off procing of Legs after ${CurseSpell} (curse must be active).  Defualt = off
+/echo "/echo dot" Turns on/off Casting Spell:Blood of Thule after ${CurseSpell}, useful for long lasting mobs.  Defualt = off
+/echo "/echo status" Displays the current status of all your settings
+/echo "/echo pethaste" Calls the pethaste function in necro.inc
+/echo "/echo makepet" Calls the makepet function in necro.inc
+/echo "/echo switch" switches your nuke from ${PrimaryNuke} to ${SecondaryNuke} and back again
+/echo "/echo level <Level>" Sets the level of mob in which you will not Cast on above.  Defualt = 70
+/echo "/echo lootnpc" Sets the macro to loot the nearest corpse when a mob dies.
+/echo "/echo DP" turns on/off casting of AA FD between nukes
+/echo ------------------------------
+/return
+|=======================================
+|The upcoming subroutines are called via an echo to turn on/off the options for the macro
+Sub Event_sit
+/if (${SitBit}==0) {
+	/varset SitBit 1
+	/if (${Me.State.Equal["STAND"]}) /sit
+	/echo |===================================
+	/echo You will now sit when the mob reaches "${StopCastHealth}" health.  Your necro will not try to sit while moving but if he is still for more than 2 seconds he will sit.  /Stick with MQ2MoveUtils works very well I recommend: /stick 10 behind hold 
+	/echo |===================================
+} Else /if (${SitBit}==1) {
+	/varset SitBit 0
+	/stand
+	/echo |===================================
+	/echo You will NOT Sit anymore after casting.
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_face
+/if (${FaceBit}==0) {
+	/varset FaceBit 1
+	/echo |===================================
+	/echo You will now face the mob right before you cast on it
+	/echo |===================================
+} Else /if (${FaceBit}==1) {
+	/varset FaceBit 0
+	/stand
+	/echo |===================================
+	/echo You will now NOT face the mob before you cast on it
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_Curse
+/if (${CurseBit}==0) {
+	/varset CurseBit 1
+	/echo |===================================
+	/echo You will now cast ${CurseSpell} "smartly" on a mob before chain nuking
+	/echo |===================================
+} Else /if (${CurseBit}==1) {
+	/varset CurseBit 0
+	/echo |===================================
+	/echo You will now NOT cast ${CurseSpell} "smartly" on a mob before chain nuking
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_LegProc
+/if (${LegProc}==0) {
+	/varset LegProc 1
+	/echo |===================================
+	/echo You will proc your legs after you cast ${CurseSpell}
+	/echo |===================================
+} Else /if (${LegProc}==1) {
+	/varset LegProc 0
+	/echo |===================================
+	/echo You will now NOT proc your legs after you cast ${CurseSpell}
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_DoT1
+/if (${DoTBit1}==0) {
+	/varset DoTBit1 1
+	/echo |===================================
+	/echo You will now cast ${DoTSpell1} "smartly" on a mob before chain nuking
+	/echo |===================================
+} Else /if (${DoTBit1}==1) {
+	/varset DoTBit1 0
+	/echo |===================================
+	/echo You will now NOT cast ${DoTSpell1} "smartly" on a mob before chain nuking
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_DoT2
+/if (${DoTBit2}==0) {
+	/varset DoTBit2 1
+	/echo |===================================
+	/echo You will now cast ${DoTSpell2} "smartly" on a mob before chain nuking
+	/echo |===================================
+} Else /if (${DoTBit2}==1) {
+	/varset DoTBit2 0
+	/echo |===================================
+	/echo You will now NOT cast ${DoTSpell2} "smartly" on a mob before chain nuking
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_DoT3
+/if (${DoTBit3}==0) {
+	/varset DoTBit3 1
+	/echo |===================================
+	/echo You will now cast ${DoTSpell3} "smartly" on a mob before chain nuking
+	/echo |===================================
+} Else /if (${DoTBit3}==1) {
+	/varset DoTBit3 0
+	/echo |===================================
+	/echo You will now NOT cast ${DoTSpell3} "smartly" on a mob before chain nuking
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_DoT4
+/if (${DoTBit4}==0) {
+	/varset DoTBit4 1
+	/echo |===================================
+	/echo You will now cast ${DoTSpell4} "smartly" on a mob before chain nuking
+	/echo |===================================
+} Else /if (${DoTBit4}==1) {
+	/varset DoTBit4 0
+	/echo |===================================
+	/echo You will now NOT cast ${DoTSpell4} "smartly" on a mob before chain nuking
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_MWChange
+/if (${MWBit}==0) {
+	/varset MWBit 1
+	/echo |===================================
+	/echo You will now cast mind flay on mobs
+	/echo |===================================
+} Else /if (${MWBit}==1) {
+	/varset MWBit 0
+	/echo |===================================
+	/echo You will now NOT cast mind flay on mobs
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_DynMana
+/if (${DynManaBit}==0) {
+	/varset DynManaBit 1
+	/echo |===================================
+	/echo Dynamic Mana Consumption activated
+	/echo |===================================
+} Else /if (${DynManaBit}==1) {
+	/varset DynManaBit 0
+	/echo |===================================
+	/echo Dynamic Mana Consumption deactivated
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_DP
+/if (${DP}==0) {
+	/varset DP 1
+	/echo |===================================
+	/echo You will now cast your AA Death Peace in between Nukes
+	/echo |===================================
+} Else /if (${DP}==1) {
+	/varset DP 0
+	/echo |===================================
+	/echo You will now NOT cast your AA Death Peace in between Nukes
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_LootNPC
+/if (${LootNPCBit}==0) {
+	/varset LootNPCBit 1
+	/echo |===================================
+	/echo Looting of mob after exp is ON
+	/echo |===================================
+} Else /if (${LootNPCBit}==1) {
+	/varset LootNPCBit 0
+	/echo |===================================
+	/echo Looting of mob after exp is OFF
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_FDSwitchd
+/if (${FDBit}==0) {
+	/varset FDBit 1
+	/echo |===================================
+	/echo Feigning when you are getting hit has been turned ON
+	/echo |===================================
+} Else /if (${FDBit}==1) {
+	/varset FDBit 0
+	/echo |===================================
+	/echo Feigning when you are getting hit has been turned OFF
+	/echo |===================================
+}
+/return
+|=======================================
+
+Sub Event_MAChange(Zero, Name)
+	/echo ============================================
+	/echo Changing MA to ${Name}
+	/echo ============================================
+	/varset MainAssist ${Name}
+/return
+|======================================
+Sub Event_SAChange(Zero, Name)
+	/echo ============================================
+	/echo Changing SA to ${Name}
+	/echo ============================================
+	/varset SecondAssist ${Name}
+/return
+|======================================
+Sub Event_TAChange(Zero, Name)
+	/echo ============================================
+	/echo Changing TA to ${Name}
+	/echo ============================================
+	/varset TripleAssist ${Name}
+/return
+
+|======================================
+Sub Event_Switch
+/if (${String[${CurrentNuke}].Find[${PrimaryNuke}]}>0) {
+	/varset CurrentNuke ${SecondaryNuke}
+	/echo |===================================
+	/echo You will now cast ${SecondaryNuke} as your nuke
+	/echo |===================================
+} Else /if (${String[${CurrentNuke}].Find[${SecondaryNuke}]}>0) {
+	/varset CurrentNuke ${PrimaryNuke}
+	/echo |===================================
+	/echo You will now cast ${PrimaryNuke} as your nuke
+	/echo |===================================
+}
+/call DynMana
+/return
+|===========================================
+Sub Event_HighManaUseBit
+/if (${HighManaUseBit}==0) {
+	/varset HighManaUseBit 1
+	/echo |===================================
+	/echo You will now use more mana
+	/echo |===================================
+} Else /if (${HighManaUseBit}==1) {
+	/varset HighManaUseBit 0
+	/echo |===================================
+	/echo You will now use a normal amount of mana
+	/echo |===================================
+}
+/return
+|=======================================
+Sub Event_StopNuke
+/if (${DynManaBit}==1) /echo Dynmana
+/varset CastHealth 0
+/varset StopCastHealth 0
+/echo You will not nuke anymore
+/return
+|=======================================
+Sub Event_StartNuke
+/if (${DynManaBit}==0) /echo Dynmana
+/varset CastHealth 85
+/varset StopCastHealth 0
+/echo You will start nuking now
+/return
+|=======================================
+
+Sub Event_LevelToCast(Zero, Level)
+	/echo ============================================
+	/echo Changing Level to cast mob on to ${Level}
+	/echo ============================================
+	/varset LevelToCast ${Level}
+/return
+|=================================
+|his is called First if Casting of your Curse Based Spell is ON
+Sub Curse
+
+/if (${CurseTimer}==0 && ${CurseBit}==1 && ${Target.PctHPs}<=97 && ${Target.Level}>=${MinTargetLevel} && ${Target.Type.Equal["NPC"]} && ${Target.LineOfSight}) {
+	/if (${String[${Target}].Find["corpse"]}>1 || ${Target.Distance}>190 || ${String[${Target}].Find["NULL"]}>0)  /return
+	/if ((${Raid} && ${Target.PctHPs}>=20) || (!${Raid} && ${Target.PctHPs}>=75)) {
+	} else {
+		/return
+	}
+	
+	
+	:Loop0
+	/doevents
+	/if (!${Me.SpellReady[${CurseSpell}]}) /goto :Loop0
+	
+	/if (${SitBit}==1 && ${Me.State.Equal["STAND"]} && (${Target.PctHPs}>${CastHealth} || ${Target.PctHPs}==0) ) {
+		/sit
+		/delay 2s
+		/return
+	}
+
+	/varset CurseTimer ${Math.Calc[(${Spell[${CurseSpell}].RecastTime}+${Spell[${CurseSpell}].MyCastTime})*10+120]}
+	/if (${FaceBit}==1) {
+		/face fast nolook
+		/look 0
+	}
+	
+	/pet attack
+	/stand
+	/cast ${CurseSpell}
+	/stand
+	/delay 1s
+	/cast ${CurseSpell}
+	/stand
+	/delay 1s
+	/cast ${CurseSpell}
+	/delay 1s
+/if (${LegProc}==0 && ${DP}==1) /call AAFD
+}
+/return
+|=======================================
+|This is called after casting of your curse based spell if doting is turned ON
+
+Sub DoT1
+/if (${DoTTimer1}==0 && ${DoTBit1}==1 && ${Target.PctHPs}<=96 && ${Target.Level}>=${MinTargetLevel} && ${Target.Type.Equal["NPC"]} && ${Target.LineOfSight}) {
+	/if (${String[${Target}].Find["corpse"]}>1 || ${Target.Distance}>190 || ${String[${Target}].Find["NULL"]}>0)  /return
+	/if ((${Raid} && ${Target.PctHPs}>=20) || (!${Raid} && ${Target.PctHPs}>=75)) {
+	} else {
+		/return
+	}
+
+	:Loop0
+	/doevents
+	/if (!${Me.SpellReady[${DoTSpell1}]}) /goto :Loop0
+
+	/if (${SitBit}==1 && ${Me.State.Equal["STAND"]} && (${Target.PctHPs}>${CastHealth} || ${Target.PctHPs}==0) ) {
+		/sit
+		/delay 2s
+		/return
+	}
+
+	/varset DoTTimer1 ${Math.Calc[(${Spell[${DoTSpell1}].RecastTime}+${Spell[${DoTSpell1}].MyCastTime})*10+120]}
+	/if (${FaceBit}==1) {
+		/face fast nolook
+		/look 0
+	}
+	
+	/pet attack
+	/stand
+	/cast ${DoTSpell1}
+	/stand
+	/delay 1s
+	/cast ${DoTSpell1}
+	/stand
+	/delay 1s
+	/cast ${DoTSpell1}
+	/delay 1s
+	/if (${DP}==1) /call AAFD
+	:Loop1
+	/if (${Me.Casting.ID}) /goto :Loop1
+	/if (${LegProc}==0 && ${DP}==1) /call AAFD
+}
+/return
+|=======================================
+|This is called after casting of your curse based spell if doting is turned ON
+
+Sub DoT2
+
+/if (${DoTTimer2}==0 && ${DoTBit2}==1 && ${Target.PctHPs}>=20 && ${Target.PctHPs}<=95 && ${Target.Level}>=${MinTargetLevel} && ${Target.Type.Equal["NPC"]} && ${Target.LineOfSight}) {
+	/if (${String[${Target}].Find["corpse"]}>1 || ${Target.Distance}>190 || ${String[${Target}].Find["NULL"]}>0)  /return
+	/if ((${Raid} && ${Target.PctHPs}>=20) || (!${Raid} && ${Target.PctHPs}>=75)) {
+	} else {
+		/return
+	}
+	
+	:Loop0
+	/doevents
+	/if (!${Me.SpellReady[${DoTSpell2}]}) /goto :Loop0
+
+	/if (${SitBit}==1 && ${Me.State.Equal["STAND"]} && (${Target.PctHPs}>${CastHealth} || ${Target.PctHPs}==0) ) {
+		/sit
+		/delay 2s
+		/return
+	}
+
+	/varset DoTTimer2 ${Math.Calc[(${Spell[${DoTSpell2}].Duration})*60+120]}
+	/if (${FaceBit}==1) {
+		/face fast nolook
+		/look 0
+	}
+	
+	/pet attack
+	/stand
+	/cast ${DoTSpell2}
+	/stand
+	/delay 1s
+	/cast ${DoTSpell2}
+	/stand
+	/delay 1s
+	/cast ${DoTSpell2}
+	/delay 1s
+	/if (${DP}==1) /call AAFD
+	:Loop1
+	/if (${Me.Casting.ID}) /goto :Loop1
+	/if (${LegProc}==0 && ${DP}==1) /call AAFD
+}
+/return
+|=======================================
+|This is called after casting of your curse based spell if doting is turned ON
+
+Sub DoT3
+
+/if (${DoTTimer3}==0 && ${DoTBit3}==1 && ${Target.PctHPs}>=20 && ${Target.PctHPs}<=95 && ${Target.Level}>=${MinTargetLevel} && ${Target.Type.Equal["NPC"]} && ${Target.LineOfSight}) {
+	/if (${String[${Target}].Find["corpse"]}>1 || ${Target.Distance}>190 || ${String[${Target}].Find["NULL"]}>0)  /return
+	/if ((${Raid} && ${Target.PctHPs}>=20) || (!${Raid} && ${Target.PctHPs}>=75)) {
+	} else {
+		/return
+	}
+	
+	:Loop0
+	/doevents
+	/if (!${Me.SpellReady[${DoTSpell3}]}) /goto :Loop0
+
+	/if (${SitBit}==1 && ${Me.State.Equal["STAND"]} && (${Target.PctHPs}>${CastHealth} || ${Target.PctHPs}==0) ) {
+		/sit
+		/delay 2s
+		/return
+	}
+
+	/varset DoTTimer3 ${Math.Calc[(${Spell[${DoTSpell3}].RecastTime}+${Spell[${DoTSpell3}].MyCastTime})*10+120]}
+	/if (${FaceBit}==1) {
+		/face fast nolook
+		/look 0
+	}
+	
+	/pet attack
+	/stand
+	/cast ${DoTSpell3}
+	/stand
+	/delay 1s
+	/cast ${DoTSpell3}
+	/stand
+	/delay 1s
+	/cast ${DoTSpell3}
+	/delay 1s
+	/if (${DP}==1) /call AAFD
+	:Loop1
+	/if (${Me.Casting.ID}) /goto :Loop1
+	/if (${LegProc}==0 && ${DP}==1) /call AAFD
+}
+/return
+|=======================================
+|This is called after casting of your curse based spell if doting is turned ON
+
+Sub DoT4
+
+/if (${DoTTimer4}==0 && ${DoTBit4}==1 && ${Target.PctHPs}>=20 && ${Target.PctHPs}<=95 && ${Target.Level}>=${MinTargetLevel} && ${Target.Type.Equal["NPC"]} && ${Target.LineOfSight}) {
+	/if (${String[${Target}].Find["corpse"]}>1 || ${Target.Distance}>190 || ${String[${Target}].Find["NULL"]}>0)  /return
+	/if ((${Raid} && ${Target.PctHPs}>=20) || (!${Raid} && ${Target.PctHPs}>=75)) {
+	} else {
+		/return
+	}
+	
+	:Loop0
+	/doevents
+	/if (!${Me.SpellReady[${DoTSpell4}]}) /goto :Loop0
+
+	/if (${SitBit}==1 && ${Me.State.Equal["STAND"]} && (${Target.PctHPs}>${CastHealth} || ${Target.PctHPs}==0) ) {
+		/sit
+		/delay 2s
+		/return
+	}
+
+	/varset DoTTimer4 ${Math.Calc[(${Spell[${DoTSpell4}].RecastTime}+${Spell[${DoTSpell4}].MyCastTime})*10+120]}
+	/if (${FaceBit}==1) {
+		/face fast nolook
+		/look 0
+	}
+	
+	/pet attack
+	/stand
+	/cast ${DoTSpell4}
+	/stand
+	/delay 1s
+	/cast ${DoTSpell4}
+	/stand
+	/delay 1s
+	/cast ${DoTSpell4}
+	/delay 1s
+	/if (${DP}==1) /call AAFD
+	:Loop1
+	/if (${Me.Casting.ID}) /goto :Loop1
+	/if (${LegProc}==0 && ${DP}==1) /call AAFD
+}
+/return
+
+|===========================================
+|This is called after casting of your curse based spell if doting is turned ON
+
+Sub MW
+/if (${MWTimer}==0 && ${MWBit}==1 && ${Target.PctHPs}>=25 && ${Target.Level}>=${MinTargetLevel} && ${Target.Type.Equal["NPC"]} && ${Target.LineOfSight}) {
+	/if (${String[${Target}].Find["corpse"]}>1 || ${Target.Distance}>190 || ${String[${Target}].Find["NULL"]}>0)  /return
+	/if ((${Raid} && ${Target.PctHPs}>=20) || (!${Raid} && ${Target.PctHPs}>=75)) {
+	} else {
+		/return
+	}
+	
+	:Loop0
+	/doevents
+	/if (!${Me.SpellReady["mind flay"]}) /goto :Loop0
+
+	/if (${SitBit}==1 && ${Me.State.Equal["STAND"]} && (${Target.PctHPs}>${CastHealth} || ${Target.PctHPs}==0) ) {
+		/sit
+		/delay 2s
+		/return
+	}
+
+	/varset MWTimer ${Math.Calc[(${Spell["mind flay"].RecastTime}+${Spell["mind flay"].MyCastTime})*10+120]}
+	/if (${FaceBit}==1) {
+		/face fast nolook
+		/look 0
+	}
+	
+	/pet attack
+	/stand
+	/cast "mind flay"
+	/stand
+	/delay 1s
+	/cast "mind flay"
+	/stand
+	/delay 1s
+	/cast "mind flay"
+	/delay 1s
+	:Loop1
+	/if (${Me.Casting.ID}) /goto :Loop1
+}
+/return
+
+|===========================================
+|The next bunch of subroutines call other subroutines most from the include files when the proper /echo is made, like /echo pethaste
+Sub Event_pethaste
+/call PetHaste
+/return
+|===========================================
+Sub Event_makepet
+/call MakePet
+/return
+|======================================
+Sub Event_splurt
+/call splurt
+/return
+|=================================
+Sub Event_DMFMeh
+/call DMFSomeone
+/return
+|===========================================
+Sub Event_Enrage
+	/echo a Mob has become enraged, backing pet off
+	/pet follow
+	/pet back off
+	/pet hold
+	
+/return
+|====================================================
+Sub Event_EndEnrage
+
+	/pet attack
+	
+/return
+|====================================================
+|Shrinks myself using my shrink wand must have MQ2Exchange
+Sub Event_Shrink
+
+	/call Shrink
+	
+/return
+|====================================================
+Sub Event_Rebuff
+
+	/call Rebuff
+	
+/return
+|=============================================
+Sub Event_Invis
+
+	/call Invis
+	
+/return
+|=============================================
+|This is called whenever you type /echo status..a very handy subroutine to keep track of what options you have on/off
+Sub Event_Status
+/echo Status Report:
+/echo ~~~~~~   AFKNecro.mac   ~~~~~~~~~~~~
+/echo /macro AFKNecro <Tank Name> <Cast Health> <Stop Casting Health>
+/echo You will cast "${CurrentNuke}" between ${CastHealth} and ${StopCastHealth} on level ${LevelToCast} mobs and below
+/echo Primary assist is set to: "${MainAssist}"
+
+/if (!${Defined[SecondAssist]} && !${Defined[TripleAssist]}) {
+	/echo You do not have an SA and TA set
+} else /if (${Defined[SecondAssist]}) {
+	/echo Secondary assist is set to: "${SecondAssist}"
+} else /if (${Defined[TripleAssist]}) {
+	/echo Tertiary assist is set to: "${TripleAssist}"
+}
+
+/if (${CurseBit}==0) {
+	/echo Curse casting is: "OFF"
+} else /if (${CurseBit}==1) {
+	/echo Curse casting is: "ON"
+}
+/if (${DoTBit1}==0) {
+	/echo Casting of DoT1("${DoTSpell1}") is: "OFF"
+} else /if (${DoTBit1}==1) {
+	/echo Casting of DoT1("${DoTSpell1}") is: "ON"
+}
+/if (${DoTBit2}==0) {
+	/echo Casting of DoT2("${DoTSpell2}") is: "OFF"
+} else /if (${DoTBit2}==1) {
+	/echo Casting of DoT2("${DoTSpell2}") is: "ON"
+}
+/if (${DoTBit3}==0) {
+	/echo Casting of DoT3("${DoTSpell3}") is: "OFF"
+} else /if (${DoTBit3}==1) {
+	/echo Casting of DoT3("${DoTSpell3}") is: "ON"
+}
+/if (${DoTBit4}==0) {
+	/echo Casting of DoT4("${DoTSpell4}") is: "OFF"
+} else /if (${DoTBit4}==1) {
+	/echo Casting of DoT4("${DoTSpell4}") is: "ON"
+}
+/if (${MWBit}==0) {
+	/echo Casting of a mind flay is: "OFF"
+} else /if (${MWBit}==1) {
+	/echo Casting of mind flay is: "ON"
+}
+/if (${LegProc}==0) {
+	/echo Procing of pants after ${CurseSpell} is: "OFF"
+} else /if (${LegProc}==1) {
+	/echo Procing of pants after ${CurseSpell} is: "ON"
+}
+/if (${FaceBit}==0 && ${SitBit}==0) {
+	/echo Facing is: "OFF" || Sitting is: "OFF"
+} else /if (${FaceBit}==1 && ${SitBit}==0) {
+	/echo Facing is: "ON"  || Sitting is: "OFF"
+} else /if (${FaceBit}==0 && ${SitBit}==1) {
+	/echo Facing is: "OFF" || Sitting is: "ON"
+} else /if (${FaceBit}==1 && ${SitBit}==1) {
+	/echo Facing is: "ON" || Sitting is: "ON"
+}
+
+/if (${DynManaBit}==0) {
+	/echo Dynamic Mana Consumption is: "OFF"
+} else /if (${DynManaBit}==1) {
+	/echo Dynamic Mana Consumption is: "ON"
+}
+/if (${DP}==0) {
+	/echo Casting of DP is: "OFF"
+} else /if (${DynManaBit}==1) {
+	/echo Casting of DP is: "ON"
+}
+/if (${LootNPCBit}==0) {
+	/echo Lotting of mob is: "OFF"
+} else /if (${DynManaBit}==1) {
+	/echo Looting of mob is: "ON"
+}
+/if (${FDBit}==0) {
+	/echo FDing if you get hit is: "OFF"
+} else /if (${FDBit}==1) {
+	/echo FDing if you get hit is: "ON"
+}
+/if (${HighManaUseBit}==0) {
+	/echo Useing more mana is: "OFF"
+} else /if (${HighManaUseBit}==1) {
+	/echo Useing more mana is: "ON"
+}
+/echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/return
+|===================================================
+|This is called every time you recieve a tell
+Sub Event_tell(line)
+
+	/if (${String[${line}].Find[${Spawn[${Me}].Pet.CleanName}]}) /return
+	/sound 3
+	
+/return
+|====================================================
+|if you have looting of NPCs on this is called after a mob dies
+sub Lootnpc
+| Note: the number 4.3 in the /varset MoveDelay was empirically
+|	set for IRS5 ( Speed = 150 )
+/declare MoveDelay int local
+/declare LootSlot int local 1
+
+/keypress ESC
+/keypress ESC
+/keypress ESC
+/keypress ESC
+/stand
+/timed 150 /stand
+/timed 155 /notify LootWnd DoneButton leftmouseup
+
+:Top
+
+    /target npc corpse
+    /delay 4
+    	/if (!${Target.ID}) /goto :Top
+    	/if (${Target.Distance}<15) {
+	        		/face fast
+		} else /if (${Target.Distance}>=15 && ${Target.Distance}<120) {
+	        	/face fast
+	        	/keypress forward hold
+			/varset MoveDelay ${Math.Calc[(${Target.Distance})/4.3]}
+			    	/keypress forward hold
+			    	/delay ${MoveDelay}
+			/keypress forward
+			/goto :Top
+	    	} else {
+	    		/echo Corpse is too far away
+	    		/keypress ESC
+	    		/return
+    	}
+
+   
+   	/loot
+   		/delay 2
+   	/loot
+   		/delay 2
+   	/loot
+   		/delay 3
+   
+   		
+   	
+    /if (!${Window[LootWnd].Open}) /goto :Top
+   :lootloop
+
+	/if (${Me.State.Equal["STAND"]}) /goto :doneloot
+
+   /if (${Corpse.Items}==0) {
+      	/goto :doneloot
+   }
+
+   /if (${LootSlot}>=32) /goto :doneloot
+
+   :Loot
+   /itemnotify Loot${LootSlot} leftmouseup
+   /delay 1s
+
+   	/if (${Window[ConfirmationDialogBox].Open}) {
+   		/notify ConfirmationDialogBox Yes_Button leftmouseup
+   		/delay 1s
+   	}
+
+	    /autoinventory
+	    /delay 2
+
+   /varcalc LootSlot ${LootSlot}+1
+   /goto :lootloop
+   :doneloot
+   /notify LootWnd DoneButton leftmouseup
+   /varset LootSlot 0
+/return
+|====================================================
+|This works pretty well now.  It tends to keep your mana around 40-50, which is good because when there is a group interupption
+|you will have plenty of time to med.  Max DPS.  Never be fm
+Sub DynMana
+/declare SmallestCastHealth int local
+/declare HighestCastHealth int local
+/declare TempHealth int local
+/declare HeavyManaUse int local
+/declare EmpiricalModifier int local
+
+/varset SmallestCastHealth 15
+/varset HighestCastHealth 85
+/varset TempHealth ${CastHealth}
+/varset EmpiricalModifier 0
+
+|Empirically tested modifiers to bring your casting health down based on how heavy your mana use is based on the options set
+|Tested on a Time/GoD equipped necro (5.5K hp unbuffed 7500mana unbuffed) in typical high end grouping situations
+/if (${String[${Spell[${CurrentNuke}].TargetType}].Find["LifeTap"]}) /varcalc EmpiricalModifier ${EmpiricalModifier}-25
+/if (${DP}==1 || !${Me.Mount.ID}) /varcalc EmpiricalModifier ${EmpiricalModifier}-15
+/if (${DoTBit1}==1) /varcalc EmpiricalModifier ${EmpiricalModifier}-10
+/if (${DoTBit2}==1) /varcalc EmpiricalModifier ${EmpiricalModifier}-10
+/if (${DoTBit3}==1) /varcalc EmpiricalModifier ${EmpiricalModifier}-10
+/if (${DoTBit4}==1) /varcalc EmpiricalModifier ${EmpiricalModifier}-10
+/if (${CurseBit}==1) /varcalc EmpiricalModifier ${EmpiricalModifier}-10
+/if (${Raid.Members}>0) /varcalc EmpiricalModifier ${EmpiricalModifier}+25
+/if (${HighManaUseBit}==1) /varcalc EmpiricalModifier ${EmpiricalModifier}+15
+| if the mana you started with last time is more than 7mana less than the maan you have now, decrease the percent health at which
+|you will start casting by an additonal 10 units
+/if (${Math.Calc[${ManaLastDynManaCall}-${Me.PctMana}]}>=7 && !${Raid.Members}>0 && ${HighManaUseBit}==0) /varcalc HeavyManaUse ${HeavyManaUse}+12
+
+
+
+	|Changing CastHealth based on all the modifiers
+	/varcalc CastHealth ${Me.PctMana}-${HeavyManaUse}+${EmpiricalModifier}
+	|Debugging code:
+	/echo ${Me.PctMana} - ${HeavyManaUse} + ${EmpiricalModifier} = ${CastHealth}
+	
+	
+|If the calculated CastHealth is lower the set SmallestCastHealth(above) then set it to the SmallestCastHealth
+/if (${CastHealth}<${SmallestCastHealth} || ${CastHealth}<=0) {
+	/echo You've reached the lowest set Casting Health(${SmallestCastHealth}h) by expending too much mana, anything lower would be impractical.  Try rethinking your setup to utilize less mana by not nuking or reducing the number of dots.
+	/varset CastHealth ${SmallestCastHealth}
+}
+|If the calculated CastHealth is higher than the set HighestCastHealth(above) then set it to the HighestCastHealth
+/if (${CastHealth}>${HighestCastHealth}) {
+	/echo You've reached the highest set Casting Health(${HighestCastHealth}h) by not using enough mana per time. Setting Cast health to "${HighestCastHealth}"
+	/varset CastHealth ${HighestCastHealth}
+}
+
+|If the person set the CastHealth lower than the StopCastHealth...fix it
+/if (${CastHealth}<=${StopCastHealth} && ${StopCastHealth}>10 ) {
+	/echo Your Casting Health and the health at which you stop casting are the same or contradicting.  Lowering your Stop Casting Health to 10h
+	/varset StopCastHealth 10
+} else /if (${CastHealth}<=${StopCastHealth} && ${StopCastHealth}<=10 && !${StopCastHealth}==0) {
+	/echo Your Casting Health and the health at which you stop casting are the same or contradicting. You have a bad set up of Cast Health and Stop Casting Health, or my design on Dynamic Mana Control is bad.
+}
+|Sets your current mana for the next call of DynMana to establish a downward trend
+/varset ManaLastDynManaCall ${Me.PctMana}
+ 
+/if (${TempHealth}==${CastHealth}) {
+	/return
+} else {
+/echo Starting Casting at ${CastHealth}.  Changed from ${TempHealth}
+}
+/return
+|==============================================
+
+Sub Event_slain
+/if (${Target.CurrentHPs}>=0) /return 
+
+Sub Event_EXP
+/if (${Target.CurrentHPs}>=0) /return 
+
+Sub Event_GoM
+/varset gom 1
+:gom
+/if (${gom}==0) /return
+/popup Gift of Mana Active
+/doevents
+/delay 1s
+/goto :gom
+/return
+
+Sub Event_Gone
+/varset gom 0
+/popup Gift of Mana faded, Hope you used it well
+/return
+
+Sub Event_Deaderer
+/call Wait4Rez
+/doevents flush
+/return

@@ -1,0 +1,268 @@
+| https://www.redguides.com/community/threads/simple-farm-mob-macro.62086/
+
+| killbot.mac by Rogue601  v1.4 - work in progress
+|
+| This macro is meant as a tutorial for myself and possibly others.
+| I tried to keep it clean and OVER comment so others know what and why
+|
+| The point of this macro is to pick a list of mobs you want to farm.
+| It's meant to be simple and not have ignorelists or files.
+|
+| Please don't afk with this and get in trouble.
+|
+| This requires that you are running MQ2Nav and have a valid mesh.
+|
+| used with Autoloot this is a very effecting macro for farming tradeskill materials
+| I started this to farm bear skins. I've spent more time on it then I did on bearskins. LOL
+| enjoy!  
+
+| TODO - Add nav path distance to override radius
+
+
+| -------------------------------------------------------------------------------------
+| Sub Main
+| -------------------------------------------------------------------------------------
+Sub Main
+
+
+| COMMENT : Declare variables to save data to work with
+| COMMENT : to set a variable use the /varset command example: /varset searchRadius 10000
+| COMMENT : to use the variable in code  ${searchRadius}
+
+
+    /declare debugOn                     bool     outer FALSE    
+    /declare farmMobList                     string     outer ${Param1}
+    /declare activeMobID                     string    outer 0
+    /declare searchRadius                     int     outer ${Param0}    
+    /declare searchRadiusZ                     int     outer 500            
+    
+    
+    /if (2 > ${Macro.Params}) {
+        /echo 
+        /echo Usage: /mac killbot radius mob1, mob2 ... mobx
+        /echo
+        /echo Example : /mac killbot 10000 cave_bear lion wolf griffon giant        
+        /echo Note: There is no anchor, radius is from your current location after a kill.
+        /endmac
+    }
+
+    | ----------------------------------------------------------------------------
+    | farmMobList - Parse the parameters and build a mob list array
+    | ----------------------------------------------------------------------------    
+
+    | COMMENT : ${Macro.Params} will tell us how many parameters we received from /mac killbot param0 param2 .. paramX
+    | COMMENT : lets build an array of string called findMobList and make it the size of Macro.Params - 1
+    | COMMENT : Arrays are a little confusing for new programmers. An Array with 4 elements is accessed by
+    | COMMENT : calling arrayname[0],arrayname[1],arrayname[2],arrayname[3]. Since we don't want the searchRadius
+    | COMMENT : then we want an array 1 element smaller then the parameter array
+
+    /declare findMobList[${Math.Calc[${Macro.Params}-1]}]      string  outer
+
+    | COMMENT : That's the array with -1 item. Now we need some variable to build a for loop and fill it up
+    | COMMENT : with the parameters we send from the /mac killbot 1000 lion tiger bear
+
+      /declare paramCount                               int     local   0
+      /declare x                                    int     local   0
+
+    | COMMENT : only run this if more then 1 parameters is sent. param0 is the search radius
+    /if (${Macro.Params} > 1) {
+        | COMMENT : set our paramCount to the the size of the incoming parameter array - 1
+            /varset paramCount ${Math.Calc[${Macro.Params}-1]}
+            | COMMENT : loop through the items and put them into our findMobList array
+            /for x 1 to ${paramCount}
+                /if (${Defined[Param${x}]}) {                                
+                    /varset findMobList[${x}] ${Param${x}}
+                }
+            /next x
+    }
+        
+    | COMMENT : if debug is on we'll display the list
+        /if (!${debugOn}) {
+        /echo Welcome to Killbot!, Received ${findMobList.Size} mob names to hunt.
+        /for x 1 to ${findMobList.Size}
+            /echo ${x}. ${findMobList[${x}]}  
+        /next x
+    }
+
+    
+    | ----------------------------------------------------------------------------
+    | Initialize - Set some defaults and clear the xtarget list    
+    | ----------------------------------------------------------------------------    
+    /if (${debugOn}) /echo DEBUG: Initilizing MobList, xTar and Nav Mesh
+    /xtar remove
+    /nav reload
+    
+    
+    | ----------------------------------------------------------------------------
+    | Main Loop - This is where the magic happens. 
+    |        1.  Agroed: If we are agroed deal with that first
+    |        2. FindMob: Find the type of mob name you are looking for
+    |        3.  NavMob: Navigate to the mob using MQ2Nav
+    |        4. KillMob: Kill the Mob using MQ2Melee    
+    | ----------------------------------------------------------------------------
+        :mainloop
+                    
+            
+         | -----------------------------------------------------------------------------------
+        | 1. AGROED : If I don't have an activeMobID, but I have an Xtar that means
+        |       I have been agroed.  Let's make that my active target and skip the findMob
+        |------------------------------------------------------------------------------------
+                /if (${activeMobID}==0 && ${Me.XTarget[1].ID}) {
+                    
+                    /if (${debugOn}) /echo DEBUG: Agroed: activeMobID: ${activeMobID} Xtar: ${Me.XTarget[1].ID}
+                    /varset activeMobID ${Me.XTarget[1].ID}
+                    
+            
+        | ----------------------------------------------------------------------
+        | 2. FindMob : activeMobID NO then Findone or wait
+        |     Here we check for an activeMobID or if we have agro in Xtarget[1]
+        |    If we do NOT then we need to call FindMob
+        | -------------------------------------------------------------------------
+        } else /if (${activeMobID}==0 && !${Me.XTarget[1].ID}) {
+                /if (${debugOn}) /echo DEBUG: gotoloopfindmob: No Active Target.
+                /varset activeMobID 0
+                /call FindMob
+                
+                
+         
+        
+        | --------------------------------------------------------------------------------
+        | 3. NavMob: If we have an activeMobID and it's located further then 30 then Navigate
+        |         If we have an Xtar because of agro lets stop nav and switch
+        | ---------------------------------------------------------------------------------  
+        } else /if (${Spawn[id ${activeMobID}].ID} && ${Spawn[${activeMobID}].Distance} > 30) {
+        
+            /if (${activeMobID} == ${Me.XTarget[1].ID} || !${Me.XTarget[1].ID}) {
+                /call NavMob    
+            } else {
+                /squelch /nav stop
+                /varset activeMobID ${Me.XTarget[1].ID}    
+            }
+          
+
+        | ----------------------------------------------------------
+        | 4. KillMob : If everything worked we are near the activeMobID
+        | ----------------------------------------------------------              
+        } else {
+                
+                /call KillMob    
+
+        }
+            
+            
+           | COMMENT : the mainloop runs every 10 seconds. Change this to spead it up or slow it down.
+           /doevents
+           /delay 10
+            
+    /goto :mainloop
+
+    :mainend
+    /endmac
+/return 
+
+
+
+| -------------------------------------------------------------------------------------
+| OnExit - Things it does when you type /endmac
+| -------------------------------------------------------------------------------------
+:OnExit
+    /setchattitle MQ2
+    /squelch /nav stop
+    /stick off
+    /end
+        
+
+
+| -------------------------------------------------------------------------------------
+| Sub FindMob - Locate a Mob in the radius you specified
+| -------------------------------------------------------------------------------------
+Sub FindMob
+    | COMMENT : Simple radius search. This will be replaced with a NAV search eventually
+    | REMOVED : old simple one parameter search 
+    | REMOVED : /varset activeMobID ${NearestSpawn[npc targetable radius ${searchRadius} zradius ${searchRadiusZ} "${farmMobList}"].ID}
+
+    /declare closestMobID                     int    local 0
+    /declare closestMobDistance                float    local 99999
+    /declare checkMobID                    int    local 0
+    /declare checkMobDistance                float    local 0
+    /declare x                        int    local 0    
+    
+    | COMMENT : Lets find which of our mobs is closest and set it as the activeMobID
+    | COMMENT : We set the initial value of closestMobDistance to 99999 to guarantee the first
+    | COMMENT : mob checked would be chosen by default.
+    | COMMENT : We run a for loop on each mob name in the list and check it against the current one.
+    
+    /for x 1 to ${findMobList.Size} 
+        /varset checkMobID ${NearestSpawn[npc targetable radius ${searchRadius} zradius ${searchRadiusZ} "${findMobList[${x}]}"].ID}
+        /varset checkMobDistance ${Spawn[${checkMobID}].Distance}
+        /if (${closestMobDistance} > ${checkMobDistance} && ${checkMobID} > 0)    {
+            /varset closestMobID ${checkMobID}
+            /varset closestMobDistance ${checkMobDistance}
+        }
+    /if (${debugOn}) /echo DEBUG: FindMob:"${findMobList[${x}]}" closestMobID:${closestMobID} closestMobDistance:${closestMobDistance} checkMobID:${checkMobID} checkMobDistance:${checkMobDistance} 
+        
+    /next x
+
+    | COMMENT : Only change the activeMobID if we actually found something
+    | NOTE : You can do if statements in one line if there is only one command. 
+    /if (${closestMobID} > 0) /varset activeMobID ${closestMobID}
+    
+    /if (${debugOn}) /echo DEBUG: FindMob: radius ${searchRadius} zradius ${searchRadiusZ} "${farmMobList}"
+    /if (!${activeMobID}) {
+        /setchattitle Scanning for Targets
+        /echo FindMob: Nothing Found waiting 5 seconds. 
+        /delay 50
+    } 
+           
+/return
+
+| -------------------------------------------------------------------------------------
+| Sub NavMob - Navigate using MQ2Nav 
+| -------------------------------------------------------------------------------------
+Sub NavMob
+    | COMMENT : Once activeMobID is set we use MQ2Nav to get there.
+    /if (${debugOn}) /echo DEBUG: NavMob: Tracking "${Spawn[${activeMobID}].CleanName}" ID: ${activeMobID} Distance: ${Spawn[${activeMobID}].Distance}
+    /setchattitle Tracking ${Spawn[${activeMobID}].CleanName}
+    /squelch /nav id ${activeMobID}   | COMMENT: squelch removes the output of the nav spam
+
+
+    
+/return    
+
+| -------------------------------------------------------------------------------------
+| Sub KillMob - Target and Kill
+| -------------------------------------------------------------------------------------
+Sub KillMob
+    
+    | COMMENT : This is the kill code. It's only reachable if activeMobID is set and it's close range
+
+    /if (${debugOn}) /echo DEBUG: Killbot: Killing a ${Spawn[${activeMobID}].CleanName} ID: ${activeMobID}
+        
+    /target id ${activeMobID}
+    /if (${Target.ID} && ${Target.Type.Equal[NPC]}) {
+        
+        | COMMENT : Turn off Nav and activate MQ2Melee's /stick and /killthis
+        /squelch /nav stop
+        /stick 8 uw
+        /setchattitle Killing ${Target.CleanName}
+        /killthis
+                
+        :gotoloopkeepfighting
+        /if (${Target.ID} && ${Me.Combat} && ${Target.Type.Equal[npc]}) {
+            /delay 10
+            /doevents
+            /if (${debugOn}) /echo DEBUG: KillMob: Combat Loop
+            /goto :gotoloopkeepfighting            
+        } 
+
+    } else { 
+        /varset activeMobID 0 
+    }
+            
+    /if (${Target.Type.Equal[corpse]}) {
+        /if (${debugOn}) /echo DEBUG: KillMob: Clearing Corpse Target
+        /squelch /target clear
+        /varset activeMobID 0
+    }
+    
+/return
