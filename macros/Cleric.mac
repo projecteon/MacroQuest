@@ -13,10 +13,6 @@ Sub Main
     /declare clericIniFileName        string  local "ini/${MacroQuest.Server}/Cleric_${Me.CleanName}.ini"
 
     /call InitClericIni ${clericIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${clericIniFileName}"
-        /endmacro
-    }
 
     /echo "Cleric all set!"
     /bca "Cleric all set!"
@@ -26,7 +22,6 @@ Sub Main
         /if (${Stick.Status.Equal[ON]}) /goto :ClericLoop
 
         /call DoHeal
-        | /if (${Macro.Return} == 1) /goto :ClericLoop
         /call CheckManaStatus
         /call TryMedidate
         /call DoNuke
@@ -41,9 +36,6 @@ Sub Main
 | # for all healing.
 | ###############################################################################
 Sub DoHeal
-	|- Check the tank's hitpoints before we start to make sure we have time to check everyone else
-   	| /call CheckTank
-
 	|- Do we use a group heal?
 	/call GroupHeal
 	
@@ -53,15 +45,17 @@ Sub DoHeal
 /return
 
 Sub GroupHeal
+    /if (${Debug} || ${Debug_Heals}) /echo |- GroupHeal ==>
     /if (!${Group.Members} || ${Me.Gem[${groupHealSpell}]} < 0 || ${Me.CurrentMana} < ${Spell[${groupHealSpell}].Mana}) {
-        /return 0
+        /if (${Debug} || ${Debug_Heals}) /echo <== GroupHeal -|
+        /return
     }
 
     /declare groupMembersWithLowHealthCount int local 0
     /declare x int local
     /for x 1 to ${Group.Members} {
         /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${groupHealPct} && ${Group.Member[${x}].Distance} <= ${Spell[${groupHealSpell}].Range}) {
-            /varset groupMembersWithLowHealthCount ${Math.Calc[${groupMembersWithLowHealthCount}+1]}
+            /varcalc groupMembersWithLowHealthCount ${groupMembersWithLowHealthCount}+1
         }
         /next x
     }
@@ -72,9 +66,9 @@ Sub GroupHeal
         /call cast "${groupHealSpell}" gem${Me.Gem[${groupHealSpell}]} 0 CancelGroupHeal 3
 		|- Delay to give everyones hp time to update
 		/delay 50
-        /return 1
 	}
-/return 0
+    /if (${Debug} || ${Debug_Heals}) /echo <== GroupHeal -|
+/return
 
 
 Sub CancelGroupHeal
@@ -128,4 +122,9 @@ Sub InitClericIni(string iniFileName)
         /ini "${iniFileName}" "${options}" "GroupHealNum" "${groupHealNum}"
     }
 
-/return ${parentInitResult}
+    /if (${parentInitResult} == 0) {
+        /echo "Bootstrapped INI file, please update variables in: ${clericIniFileName}"
+        /endmacro
+    }
+
+/return 
