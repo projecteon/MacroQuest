@@ -4,15 +4,11 @@
 | ################################################################################	
 Sub InitDebufferIni(string iniFileName)
     /declare options            string  local "DeBuffOptions"
-    /if (!${Defined[debuffDimensions]})        /declare debuffDimensions        int     outer 4 
-    /if (!${Defined[debuffNameDimension]})     /declare debuffNameDimension     int     outer 1 
-    /if (!${Defined[debuffPctHpDimension]})    /declare debuffPctHpDimension    int     outer 2 
-    /if (!${Defined[debuffManaDimension]})     /declare debuffManaDimension     int     outer 3 
-    /if (!${Defined[debuffTimeDimension]})     /declare debuffTimeDimension     int     outer 4 
+    /if (!${Defined[debuffMinRefreshTimer]})   /declare debuffMinRefreshTimer   int     outer 10
     /if (!${Defined[Debug_DeBuffs]})           /declare Debug_DeBuffs           bool    outer FALSE
 
     /call InitSpell
-    /call IniArray "${iniFileName}" "DeBuffs" "DeBuff" ${debuffDimensions} DeBuffs
+    /call IniSpellArray "${iniFileName}" "DeBuffs" "DeBuff" DeBuffs
 
     /if (${Ini[${iniFileName},Debug,Debug_DeBuffs].Length}) {
        /varset Debug_DeBuffs ${Bool[${Ini[${iniFileName},Debug,Debug_DeBuffs]}]}     
@@ -43,8 +39,8 @@ Sub CheckDeBuffs
     }
 
     /declare k  int local
-    /for k 1 to ${Math.Calc[${DeBuffs.Size}/${debuffDimensions}]}
-        /call TryDoDebuff "${DeBuffs[${k},${debuffNameDimension}]}" ${DeBuffs[${k},${debuffPctHpDimension}]} ${DeBuffs[${k},${debuffManaDimension}]} ${DeBuffs[${k},${debuffTimeDimension}]}
+    /for k 1 to ${Math.Calc[${DeBuffs.Size}/${spellPropsDimentions}]}
+        /call TryDoDebuff "${DeBuffs[${k},${spellNameProp}]}" ${DeBuffs[${k},${spellMinTargetHpProp}]} ${DeBuffs[${k},${spellMinManaProp}]} ${debuffMinRefreshTimer}
     /next k 
     
     /if (${Debug} || ${Debug_DeBuffs}) /echo <== CheckDeBuffs -|
@@ -71,7 +67,7 @@ Sub TryDoDebuff(string debuffSpell, int minPctHp, int minMana, int remainingTime
     /if (${Me.Casting.ID} || ${Me.Moving} || !${Me.Gem[${debuffSpell}]} || ${minMana} > ${Me.PctMana} || ${Me.CurrentMana} < ${Spell[${debuffSpell}].Mana}) {
         /if (${Debug} || ${Debug_DeBuffs}) /echo <== TryDoDebuff -|
         /return 0
-    }
+    }   
     
     /declare isNPC          local ${Spawn[${targetId}].Type.Equal[NPC]}
     /declare isPet          local ${Spawn[${targetId}].Type.Equal[PET]}

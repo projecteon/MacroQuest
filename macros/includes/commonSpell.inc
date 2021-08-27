@@ -37,31 +37,42 @@ Sub IniSpellArray(string iniFile, string section, string keyName, arrayName)
         
         /if (${keys.Right[1].Equal[|]}) /goto :trimKeys
 
-        /declare numberOfKeys int local ${Math.Calc[${keys.Count[|]}+1]}
-        /if (${Debug}) /echo |- numberOfKeys > ${numberOfKeys}
+        /if (${Debug}) /echo |- numberOfKeys > ${Math.Calc[${keys.Count[|]}+1]}
 
-        /if (${numberOfKeys} < 1) {
-            /if (${Debug}) /echo No keys found, exiting.
-            /goto :endIniSpellArray
-        }
-
-        /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
-        /declare ${arrayName}[${numberOfKeys},${spellPropsDimentions}] string outer
-
-        /declare value string local
+        /declare numberOfValidKeys int local 0
         /declare key string local
         /for k 1 to ${Math.Calc[${keys.Count[|]}+1]}
             /varset key ${keys.Arg[${k},|]}
-            /for s 1 to ${spellPropsDimentions}
-                /if (${Debug}) /echo |- parsing ${Ini[${iniFile},${section},${key}]} > spellProps[${s}] > ${spellProps[${s}]}
+            /if (${key.Left[-2].Equal[${keyName}]} || ${key.Left[-1].Equal[${keyName}]}) {
+                /varcalc numberOfValidKeys ${numberOfValidKeys}+1
+            } 
+        /next k
 
-                /call getValue "${Ini[${iniFile},${section},${key}]}" ${s}
-                /varset value ${Macro.Return}
-                
-                /if (${Debug}) /echo |- ${key} > [${k},${s}] > ${value}
- 
-                /varset ${arrayName}[${k},${s}] ${value}
-            /next s
+        /if (${numberOfValidKeys} < 1) {
+            /if (${Debug}) /echo No valid keys found, exiting.
+            /goto :endIniArray
+        }
+
+        /if (${Debug}) /echo |- numberOfValidKeys > ${numberOfValidKeys}
+
+        /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
+        /declare ${arrayName}[${numberOfValidKeys},${spellPropsDimentions}] string outer
+
+        /declare value string local
+        /for k 1 to ${Math.Calc[${keys.Count[|]}+1]}
+            /varset key ${keys.Arg[${k},|]}
+            /if (${key.Left[-2].Equal[${keyName}]} || ${key.Left[-1].Equal[${keyName}]}) {
+                /for s 1 to ${spellPropsDimentions}
+                    /if (${Debug}) /echo |- parsing ${Ini[${iniFile},${section},${key}]} > spellProps[${s}] > ${spellProps[${s}]}
+
+                    /call getValue "${Ini[${iniFile},${section},${key}]}" ${s}
+                    /varset value ${Macro.Return}
+                    
+                    /if (${Debug}) /echo |- ${key} > [${k},${s}] > ${value}
+    
+                    /varset ${arrayName}[${k},${s}] ${value}
+                /next s
+            }
         /next k
 
     :endIniSpellArray
