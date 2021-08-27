@@ -219,24 +219,29 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 		|- Do we have mana
 		/if (${Me.CurrentMana} < ${Spell[${healSpell}].Mana}) { 		
             /if (${hasNotifiedNoMana}) {
-                /return 0
+                /if (${Debug} || ${Debug_Heals}) /echo <== CastHeal -|
+                /return
             }
 
             /varset hasNotifiedNoMana TRUE
 			/delay 1s
 			/if (${Group.Members}) /gsay !!! NO MANA TO HEAL ${healTargetName} !!!
 			/bca !!! NO MANA TO HEAL ${healTargetName} !!!
-			/return 0
+            /if (${Debug} || ${Debug_Heals}) /echo <== CastHeal -|
+			/return
 		} else {			
             /varset hasNotifiedNoMana FALSE
-            /if (${Target.ID} != ${healTargetId}) {
-                /target id ${healTargetId}
-                /delay 2s ${Target.ID} == ${healTargetId}
-                /if (${Target.ID} != ${healTargetId}) /return 0
+            
+
+            /call EnsureTarget ${healTargetId}
+            /if (${Target.ID} != ${healTargetId} && ${Target.Type.NotEqual[Corpse]}) {
+                /if (${Debug} || ${Debug_Heals}) /echo |- Invalid target
+                /if (${Debug} || ${Debug_Heals}) /echo <== CastHeal -|
+                /return
             }
 
-			|- If right target and in range, cast the spell
-			/if (${Target.ID} == ${healTargetId} && (${Target.Distance} <= ${Spell[${healSpell}].Range}) && ${Target.Type.NotEqual[Corpse]}) {	
+			|- If target in range, cast the spell
+			/if ((${Target.Distance} <= ${Spell[${healSpell}].Range})) {	
                 /if (${Me.Sitting}) {
                     /stand
                 }
@@ -250,16 +255,10 @@ Sub CastHeal(string healSpell, int healTargetId, string healTargetName)
 	}
 
     /if (${Debug} || ${Debug_Heals}) /echo <== CastHeal -|
-/return 1
-
-Sub iniHeal(string INIFile, string section, string key, array)
-    /declare s int local
-    /for s 1 to ${iniHealDimensions}
-        /varset ${array}[${k},${s}] ${Ini[${INIFile},${section},${key}].Token[${s},/]}
-    /next s
 /return
 
 Sub CancelHeal(int spellId)
+    | check main tank emergency heal
     /if (${Spell[${mainTankHeal}].ID}==${spellId} && ${Bool[${mainTankEmergencyHeal}]} && ${Me.Gem[${mainTankEmergencyHeal}]}) {
         /if (${Target.PctHPs} <= ${mainTankEmergencyHealPct} && ${mainTankEmergencyHeal.NotEqual[${mainTankHeal}]} && ${castEndTime} > ${Spell[${mainTankEmergencyHeal}].MyCastTime}) { 
             /call Interrupt
@@ -268,7 +267,8 @@ Sub CancelHeal(int spellId)
     }
 
     | Following line has issue with NetBots update report, cancels heals when it shouldnt
-	| /if (${Target.PctHPs} > ${defaultHealPct}) /call Interrupt
+	/if (${Target.PctHPs} > ${defaultHealPct} && ${spellId} == ${Spell[${mainTankHeal}].ID}) /call Interrupt
+	/if (${Target.PctHPs} > ${mainTankHealPct} && ${spellId} == ${Spell[${defaultHeal}].ID}) /call Interrupt
 	/if (${Target.Distance} > ${healDist}) /call Interrupt
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
 	| /if (${Me.AltAbilityReady[Divine Arbitration]}) /call DivineArbitration
