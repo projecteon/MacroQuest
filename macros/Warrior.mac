@@ -34,6 +34,7 @@ Sub Main
 Sub InitWarriorIni(string iniFileName)
     /declare warriorOptions       string  outer "WarriorOptions"
     /declare parentInitResult     int     local 1
+    /declare Debug_Tank           bool    outer FALSE
 
     /call InitGenralIni "${iniFileName}"
     /varset parentInitResult ${Macro.Return}
@@ -45,5 +46,5 @@ Sub InitWarriorIni(string iniFileName)
     /if (${Macro.Return} == 0) {
         /varset parentInitResult 0
     }
-    
+
 /return ${parentInitResult}

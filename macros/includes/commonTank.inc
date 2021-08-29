@@ -1,4 +1,4 @@
-Sub AmIOfftank(mainTanks)
+Sub AmIOfftank
     /if (${Debug}) /echo  |- AmIOfftank ==>
     /declare iAmOfftank bool local FALSE
 
@@ -9,14 +9,15 @@ Sub AmIOfftank(mainTanks)
     
     /declare currentMainTank string local
     /declare mainTank string local
+    /declare i  int local
     /declare k  int local
-    /for k 1 to ${mainTanks.Size}
+    /for k 1 to ${MainTanks.Size}
         /varcalc i ${k}+1
-        /varset mainTank ${mainTanks[${k}]}
+        /varset mainTank ${MainTanks[${k}]}
         /if (${NetBots[${mainTank}].ID} && ${NetBots[${mainTank}].InZone}) {
-            /if (${i} <= ${mainTanks.Size} && ${NetBots[${mainTanks[${i}]}].InZone} && ${mainTanks[${i}].NotEqual[${Me}]}) {
+            /if (${i} <= ${MainTanks.Size} && ${NetBots[${MainTanks[${i}]}].InZone} && ${MainTanks[${i}].NotEqual[${Me}]}) {
                 /goto :endAmIOfftank
-            } else /if (${mainTanks[i].Equal[${Me}]}) {      
+            } else /if (${MainTanks[${i}].Equal[${Me}]}) {      
                 /varset iAmOfftank TRUE
                 /goto :endAmIOfftank
             }
@@ -55,11 +56,11 @@ Sub TargetOfftankAdd(string currentAssist, string offtank, int otRadius)
     /if (${Debug} || ${Debug_Tank}) /echo <== TargetOfftankAdd -|
 /return
 
-#event Assist "<#1#> offtank nearets target"
-SUB event_OfftankNearest(line, sender)
+#Event OfftankNearest "<#1#> offtank nearets target"
+Sub event_OfftankNearest(line, sender)
     /if (${Debug} || ${Debug_Tank}) /echo |- event_OfftankNearest ==>
     
-    /call AmIOfftank ${mainTanks}
+    /call AmIOfftank
     /declare iAmOffTank  bool local ${Macro.Return}
 
     /if (!${iAmOffTank}) /return
@@ -78,7 +79,7 @@ SUB event_OfftankNearest(line, sender)
 Sub DoTankEvents
     /if (${Debug} || ${Debug_Tank}) /echo |- DoTankEvents ==>
 
-    /doevents Assist
+    /doevents OfftankNearest
     
     /if (${Debug} || ${Debug_Tank}) /echo <== DoTankEvents -|
 /return
