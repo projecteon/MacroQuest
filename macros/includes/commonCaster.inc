@@ -101,6 +101,9 @@ Sub CheckManastone
     /if (${Debug} || ${Debug_Caster}) /echo <== CheckManastone -|
 /return
 
+Sub EmptyCancelCast
+/return
+
 
 Sub DoEvacute
     /if (${Debug} || ${Debug_Caster}) /echo |- DoEvacute ==>

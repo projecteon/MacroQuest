@@ -67,7 +67,7 @@ Sub SummonDrinkFood
 /return
 
 Sub Summon(string itemSpell)
-  /call cast "${itemSpell}"
+  /call cast "${itemSpell}" gem${Me.Gem[${itemSpell}]} 0 EmptyCancelCast
   /delay 5
   /autoinv
   /delay 5

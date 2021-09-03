@@ -1,5 +1,5 @@
 #include includes\common.inc
-#turbo 40
+#turbo 100
 
 Sub Main    
     /squelch /alias /autocombine /echo Auto Combine

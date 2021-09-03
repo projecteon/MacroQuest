@@ -2,7 +2,7 @@
 #include includes\common.inc
 #include includes\commonMelee.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 100
 
 Sub Main
     /declare rogueIniFileName        string  outer "ini/${MacroQuest.Server}/Rogue_${Me.CleanName}.ini"

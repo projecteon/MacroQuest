@@ -571,7 +571,7 @@ Sub Event_CheckCanLootCorpse
   /varset canLootCorpse FALSE
 /RETURN
 
-Sub InitLoot
+Sub InitLoot(string iniFileName)
     /declare lootSettingsIniFileName string outer "ini/${MacroQuest.Server}/Loot Settings.ini"
 
     /declare Debug_Loot     bool    outer FALSE

@@ -2,7 +2,7 @@
 | https://www.mmobugs.com/forums/index.php?threads/simplify-quest-turn-in.34738/
 | https://www.mmobugs.com/forums/index.php?threads/hand-in-macro-help-request.32770/
 
-#turbo 40
+#turbo 100
 #Event Exp             "You gain#*#experience#*#"
 Sub Main
 /declare  ReportExp          bool	outer	TRUE

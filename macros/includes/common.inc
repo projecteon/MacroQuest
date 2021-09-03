@@ -49,7 +49,7 @@ Sub InitGenralIni(string iniFileName)
     /squelch /alias /followme /bc follow me
     /squelch /alias /movetome /bc move to me
 
-    /call InitLoot
+    /call InitLoot ${iniFileName}
 /return ${initResult}
 
 

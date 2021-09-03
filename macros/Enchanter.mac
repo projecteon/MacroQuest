@@ -10,7 +10,7 @@
 #include includes\commonDebuffer.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 100
 
 Sub Main
     /declare enchanterIniFileName   string  local "ini/${MacroQuest.Server}/Enchanter_${Me.CleanName}.ini"
@@ -79,7 +79,8 @@ sub DoMezz
                         } else /if (${castReturn.Equal[CAST_RESISTED]}) {
                             /bca "Mezz resited 3 times, retrying next run - " ${Target.Name}
                         } else {
-                            /bca ${Target.Name} " mezzed for " ${SpellTimer[${mezTarg},any,${mezzSpell}]}
+                            /delay 10
+                            /bca ${Target.Name} mezzed for ${SpellTimer[${mezTarg},any,${mezzSpell}]}s
                         }
                     }
                 }

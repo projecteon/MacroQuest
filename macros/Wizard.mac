@@ -9,7 +9,7 @@
 #include includes\commonBuffer.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 100
 
 Sub Main
     /declare wizardIniFileName string local "ini/${MacroQuest.Server}/Wizard_${Me.CleanName}.ini"
@@ -45,7 +45,7 @@ Sub DoHarvest
         /declare manaFromMax    int     local ${Math.Calc[${Me.MaxMana}-${Me.CurrentMana}]}
 
         /if ((!${hasNpcInCamp} && ${manaFromMax} > 350) || ${Me.PctMana} < 2) {
-            /call cast "${harvestSpell}"
+            /call cast "${harvestSpell}" gem${Me.Gem[${harvestSpell}]} 0 EmptyCancelCast
         }
     }
 

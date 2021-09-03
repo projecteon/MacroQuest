@@ -10,7 +10,7 @@
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 100
 
 Sub Main
     /declare mageIniFileName    string  local "ini/${MacroQuest.Server}/Mage_${Me.CleanName}.ini"

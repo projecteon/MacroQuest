@@ -9,7 +9,7 @@
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 100
 
 Sub Main
     /declare shamanIniFileName        string  local "ini/${MacroQuest.Server}/Shaman_${Me.CleanName}.ini"
@@ -51,7 +51,7 @@ Sub DoCannibalize
         /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
         
         /if (!${hasNpcInCamp} || ${Me.PctMana} < 4) {
-            /call cast "${cannibalizeSpell}" gem${Me.Gem[${cannibalizeSpell}]} 0
+            /call cast "${cannibalizeSpell}" gem${Me.Gem[${cannibalizeSpell}]} 0 EmptyCancelCast
         }
     }
     

@@ -3,7 +3,7 @@
 #include includes\commonSpell.inc
 #include includes\commonMelee.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 100
 
 Sub Main
     /declare bardIniFileName        string  outer "ini/${MacroQuest.Server}/Bard_${Me.CleanName}.ini"

@@ -128,14 +128,12 @@ Sub SummonPet
         /if (${Bool[${petFocusItem}]} && ${Bool[${FindItem[=${petFocusItem}]}]} && ${FindItem[=${petFocusItem}].ItemSlot} >=23) {
             /declare currentMainHand string local ${Me.Inventory[mainhand]} 
             /exchange "${petFocusItem}" mainhand
-            /delay 1s ${Me.Inventory[mainhand].Name.Equal[${petFocusItem}]}
         }
 
-        /call cast "${petSpell}"
+        /call cast "${petSpell}" gem${Me.Gem[${petSpell}]} 0 EmptyCancelCast
 
         /if (${Defined[currentMainHand]} && ${Bool[${currentMainHand}]}) {
             /exchange "${currentMainHand}" mainhand
-            /delay 1s ${Me.Inventory[mainhand].Name.Equal[${currentMainHand}]}
         }
     }
 
@@ -146,6 +144,8 @@ Sub SummonPet
         /pet taunt off
     }
     
+    /if (${Cursor.ID}) /autoinv 
+
     :endSummonPet
     /if (${Debug} || ${Debug_Pet}) /echo <== SummonPet -|
 /return
@@ -195,7 +195,7 @@ Sub WeaponizePet(int petID)
             /delay 6s
         }
 
-        /call cast "${petWeaponsSpell}"
+        /call cast "${petWeaponsSpell}" gem${Me.Gem[${petWeaponsSpell}]} 3 EmptyCancelCast
         /delay 3
         /click left target
         /delay 1s ${Window[GiveWnd].Open}
@@ -230,7 +230,7 @@ Sub BuffPet
 
         /if (!${Bool[${Me.PetBuff[${buffSpell}]}]}) {
             /call EnsureTarget ${Me.Pet.ID}
-            /call cast "${buffSpell}" gem${Me.Gem[${buffSpell}]} 3     
+            /call cast "${buffSpell}" gem${Me.Gem[${buffSpell}]} 3 EmptyCancelCast
         }
     /next k 
 
