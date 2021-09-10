@@ -10,7 +10,7 @@
 #include includes\commonDebuffer.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 100
+#turbo 150
 
 Sub Main
     /declare enchanterIniFileName   string  local "ini/${MacroQuest.Server}/Enchanter_${Me.CleanName}.ini"

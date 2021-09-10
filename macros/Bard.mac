@@ -3,7 +3,7 @@
 #include includes\commonSpell.inc
 #include includes\commonMelee.inc
 #include includes\wait4rez.inc
-#turbo 100
+#turbo 150
 
 Sub Main
     /declare bardIniFileName        string  outer "ini/${MacroQuest.Server}/Bard_${Me.CleanName}.ini"
@@ -16,6 +16,8 @@ Sub Main
 
     /echo "Bard rock'n'rolling!"
     /bca "Bard rock'n'rolling!"
+
+    /call CheckAllBagsAreOpen
 
     :BardLoop
         /call Wait4Rez_Background_Events

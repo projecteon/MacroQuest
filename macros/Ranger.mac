@@ -11,7 +11,7 @@
 #include includes\commonMelee.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 100
+#turbo 150
 
 Sub Main
     /declare rangerIniFileName        string  outer "ini/${MacroQuest.Server}/Ranger_${Me.CleanName}.ini"

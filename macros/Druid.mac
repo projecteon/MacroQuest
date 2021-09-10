@@ -8,7 +8,7 @@
 #include includes\commonDebuffer.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 100
+#turbo 150
 
 Sub Main
     /declare druidIniFileName        string  local "ini/${MacroQuest.Server}/Druid_${Me.CleanName}.ini"

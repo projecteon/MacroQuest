@@ -9,7 +9,7 @@
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 100
+#turbo 150
 
 Sub Main
     /declare shamanIniFileName        string  local "ini/${MacroQuest.Server}/Shaman_${Me.CleanName}.ini"

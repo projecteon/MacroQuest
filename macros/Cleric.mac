@@ -7,7 +7,7 @@
 #include includes\commonBuffer.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 100
+#turbo 150
 
 Sub Main
     /declare clericIniFileName        string  local "ini/${MacroQuest.Server}/Cleric_${Me.CleanName}.ini"

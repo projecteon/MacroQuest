@@ -1,5 +1,5 @@
 #include includes\commonItems.inc
-#turbo 100
+#turbo 150
 
 Sub Main
     /if (!${Defined[numInventorySlots]})    /declare numInventorySlots  int	    outer 8    
