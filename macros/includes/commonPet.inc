@@ -126,16 +126,18 @@ Sub SummonPet
 
     /if (!${Bool[${Me.Pet.ID}]} && !${Bool[${Me.Casting}]} && ${Me.SpellReady[${petSpell}]} && ${Me.CurrentMana} > ${Spell[${petSpell}].Mana}) {
         /if (${Bool[${petFocusItem}]} && ${Bool[${FindItem[=${petFocusItem}]}]} && ${FindItem[=${petFocusItem}].ItemSlot} >=23) {
+            /call CheckAllBagsAreOpen
+            /delay 10
             /declare currentMainHand string local ${Me.Inventory[mainhand]} 
             /exchange "${petFocusItem}" mainhand
-            /delay 5
+            /delay 10
         }
 
         /call cast "${petSpell}" gem${Me.Gem[${petSpell}]} 0 EmptyCancelCast
 
         /if (${Defined[currentMainHand]} && ${Bool[${currentMainHand}]}) {
             /exchange "${currentMainHand}" mainhand
-            /delay 5
+            /delay 10
         }
     }
 
