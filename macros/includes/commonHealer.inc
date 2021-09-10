@@ -269,7 +269,7 @@ Sub CancelHeal(int spellId)
     | Following line has issue with NetBots update report, cancels heals when it shouldnt
 	/if (${Target.PctHPs} > ${defaultHealPct} && ${spellId} == ${Spell[${defaultHeal}].ID}) /call Interrupt
 	/if (${Target.PctHPs} > ${mainTankHealPct} && ${spellId} == ${Spell[${mainTankHeal}].ID}) /call Interrupt
-	/if (${Target.PctHPs} > ${mainTankEmergencyHealPct} && ${spellId} == ${Spell[${mainTankEmergencyHeal}].ID}) /call Interrupt
+	| /if (${Target.PctHPs} > ${mainTankEmergencyHealPct} && ${spellId} == ${Spell[${mainTankEmergencyHeal}].ID}) /call Interrupt
 	/if (${Target.Distance} > ${healDist}) /call Interrupt
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
 	| /if (${Me.AltAbilityReady[Divine Arbitration]}) /call DivineArbitration
