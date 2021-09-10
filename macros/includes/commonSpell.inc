@@ -1,10 +1,11 @@
 Sub InitSpell
-    /if (!${Defined[spellPropsDimentions]})         /declare spellPropsDimentions       int     outer 5
+    /if (!${Defined[spellPropsDimentions]})         /declare spellPropsDimentions       int     outer 6
     /if (!${Defined[spellNameProp]})                /declare spellNameProp              int     outer 1 
     /if (!${Defined[spellGem]})                     /declare spellGem                   int     outer 2 
     /if (!${Defined[spellMinManaProp]})             /declare spellMinManaProp           int     outer 3 
     /if (!${Defined[spellClassRestrictionProp]})    /declare spellClassRestrictionProp  int     outer 4 
     /if (!${Defined[spellMinTargetHpProp]})         /declare spellMinTargetHpProp       int     outer 5
+    /if (!${Defined[itemCastProp]})                  /declare itemCastProp              int     outer 6
 
     /if (!${Defined[spellProps]}) {
 		/declare spellProps[${spellPropsDimentions}] string outer
@@ -13,6 +14,7 @@ Sub InitSpell
 		/varset spellProps[${spellMinManaProp}] MinMana
 		/varset spellProps[${spellClassRestrictionProp}] Classes
 		/varset spellProps[${spellMinTargetHpProp}] MinTargetHp
+		/varset spellProps[${itemCastProp}] ItemCast
 	}
 /return
 

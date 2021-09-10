@@ -143,7 +143,7 @@ var group4 = new List<(string netbot, bool petuser)>() {
 	,("Vierna", false)
 	,("Eilistraee", false)
 	,("Valsharess", false)
-	,("Araushnee", false)
+	,("Araushnee", true)
 	,("Genesis", false)
 };
 

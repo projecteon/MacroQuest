@@ -128,12 +128,14 @@ Sub SummonPet
         /if (${Bool[${petFocusItem}]} && ${Bool[${FindItem[=${petFocusItem}]}]} && ${FindItem[=${petFocusItem}].ItemSlot} >=23) {
             /declare currentMainHand string local ${Me.Inventory[mainhand]} 
             /exchange "${petFocusItem}" mainhand
+            /delay 5
         }
 
         /call cast "${petSpell}" gem${Me.Gem[${petSpell}]} 0 EmptyCancelCast
 
         /if (${Defined[currentMainHand]} && ${Bool[${currentMainHand}]}) {
             /exchange "${currentMainHand}" mainhand
+            /delay 5
         }
     }
 
