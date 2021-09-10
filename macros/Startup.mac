@@ -1,0 +1,18 @@
+#turbo 100
+
+Sub Main
+    /echo "Starting up bots!"
+    /for x 1 to ${NetBots.Counts}
+        /varset netbotsClient "${NetBots.Client[${x}]}"
+        /if (!${NetBots[${netbotsClient}].Equal[${Me}]}) {
+            /if (${NetBots.Client[${x}].Class.Equal[Necromancer]}) {
+                /echo "Starting up ${NetBots.Client[${x}]} >> Necro"
+                /bct ${NetBots.Client[${x}]} "//mac Necro"
+
+            } else {
+                /echo "Starting up ${NetBots.Client[${x}]} >> ${NetBots.Client[${x}].Class}"
+                /bct ${NetBots.Client[${x}]} "//mac ${NetBots.Client[${x}].Class}"
+            }            
+        }      
+    /next x
+/return
