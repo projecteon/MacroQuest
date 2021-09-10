@@ -169,7 +169,12 @@ Sub CheckNetBotBuffs
                 /if (${NetBots[${netbotsClient}].InZone} && (${classRestrictions.Length} == 0 || ${Select[${NetBots[${netbotsClient}].Class.ShortName},${classRestrictions}]})) {
                     /if (!${NetBots[${netbotsClient}].Buff.Find[${buffId} ]} && ${NetBots[${netbotsClient}].Stacks[${buffId}]}) {
                         /if (${Debug} || ${Debug_NetBots_Buffs}) /echo Buff missing, recasting
-                        /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+
+                        /if (${Bool[${Buffs[${k},${itemCastProp}]}]}) {
+                            /call ItemClickBuff "${Buffs[${k},${itemCastProp}]}" "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+                        } else {
+                            /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
+                        }
                     } 
                     |     /if (!${Defined[i]}) /declare i int local
                     |     /for i 0 to ${NetBots[${netbotsClient}].Buff.Length}
@@ -253,6 +258,34 @@ Sub CheckCanCastBuff(string buffSpell, int minMana)
 
     /if (${Debug}) /echo <== CheckCanCastBuff 1 -|
 /return 1
+
+Sub ItemClickBuff(string itemClick, string buffSpell, int buffTargetId, string buffTargetName)
+    /if (${Debug}) /echo  |- ItemClickBuff ==> ${itemClick} -> ${buffTargetName}
+
+    /if (${Me.Casting.ID}) {
+        /goto :endItemClickBuff
+    }
+
+    /if (${Target.ID} != ${buffTargetId}) {
+        /call EnsureTarget ${buffTargetId}
+        /if (${Target.ID} != ${buffTargetId}) {
+            /goto :endItemClickBuff
+        }
+    }
+
+    /if (${Target.ID} == ${buffTargetId} && (${Target.Distance} <= ${Spell[${buffSpell}].Range}) && ${Target.Type.NotEqual[Corpse]}) {	
+        /if (${Me.Sitting}) {
+            /stand
+        }
+        
+        /bca <<< ${itemClick} -> ${buffSpell} -> ${buffTargetName} >>>
+        /casting "${itemClick}"
+        /delay 30 ${Me.Casting.ID}
+    }
+
+    :endItemClickBuff
+    /if (${Debug}) /echo <== ItemClickBuff
+/return
 
 Sub CastBuff(string buffSpell, int buffTargetId, string buffTargetName)
     /if (${Debug}) /echo  |- CastBuff ==> ${buffSpell} -> ${buffTargetName}
