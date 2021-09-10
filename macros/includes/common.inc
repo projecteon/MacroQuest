@@ -382,6 +382,16 @@ SUB EVENT_ClickIt(line, chatSender, eventParams)
     /if (${Debug} || ${Debug_Common}) /echo <== EVENT_ClickIt -|
 /return
 
+Sub CheckAllBagsAreOpen
+    /if (!${Defined[currentZone]}) {
+        /keypress OPEN_INV_BAGS
+        /declare currentZoneId int outer ${Zone.ID}
+    } else /if (${currentZoneId} != ${Zone.ID}) {
+        /keypress OPEN_INV_BAGS
+        /varset currentZoneId ${Zone.ID}
+    } 
+/return
+
 Sub DoCommonEvents
     /if (${Debug} || ${Debug_Common}) /echo |- DoCommonEvents ==>
 
