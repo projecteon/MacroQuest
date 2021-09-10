@@ -91,6 +91,11 @@ Sub FindItemsInToonBank(string chatSender, string itemToFind)
     /if (${Debug} || ${Debug_Common}) /echo <== FindItemsInToonBank -|
 /return
 
+Sub InitItems(string iniFileName)
+    /declare Debug_Items     bool    outer FALSE
+
+    /squelch /alias /finditem /bc Find Item
+/return
 
 Sub DoItemEvents
   /doevents FindItems
