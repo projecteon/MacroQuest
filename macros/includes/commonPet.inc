@@ -133,7 +133,7 @@ Sub SummonPet
             /delay 10
         }
 
-        /call cast "${petSpell}" gem${Me.Gem[${petSpell}]} 0 EmptyCancelCast
+        /call cast "${petSpell}" gem${Me.Gem[${petSpell}]} 3 EmptyCancelCast
 
         /if (${Defined[currentMainHand]} && ${Bool[${currentMainHand}]}) {
             /exchange "${currentMainHand}" mainhand
@@ -148,8 +148,6 @@ Sub SummonPet
         /pet taunt off
     }
     
-    /if (${Cursor.ID}) /autoinv 
-
     :endSummonPet
     /if (${Debug} || ${Debug_Pet}) /echo <== SummonPet -|
 /return
