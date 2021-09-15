@@ -54,7 +54,7 @@ Sub GroupHeal
     /declare groupMembersWithLowHealthCount int local 0
     /declare x int local
     /for x 1 to ${Group.Members} {
-        /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${groupHealPct} && ${Group.Member[${x}].Distance} <= ${Spell[${groupHealSpell}].Range}) {
+        /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${groupHealPct} && ${Group.Member[${x}].Distance} <= ${Spell[${groupHealSpell}].AERange}) {
             /varcalc groupMembersWithLowHealthCount ${groupMembersWithLowHealthCount}+1
         }
         /next x
