@@ -115,7 +115,12 @@ Sub GetMainTank
 Sub CheckNPCInRange(int radiusCheck)
     /if (${Debug} || ${Debug_Common}) /echo |- CheckNPCInRange ==>
 
-	/if (!${Defined[radiusCheck]})  /declare radiusCheck int local ${campRadius}
+	/if (!${Defined[radiusCheck]}) {
+        /declare radiusCheck int local ${campRadius}
+    } else /if (${radiusCheck} == 0) {
+        /varset radiusCheck ${campRadius}
+    } 
+
 	/if (!${Defined[npcCount]})  /declare npcCount int local ${SpawnCount[npc los radius ${radiusCheck}]}
     
     /if (${Debug} || ${Debug_Common}) {
