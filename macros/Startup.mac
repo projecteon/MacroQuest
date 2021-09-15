@@ -11,6 +11,11 @@ Sub Main
                 /echo "Starting up ${netbotsClient} >> Necro"
                 /bct ${NetBots.Client[${x}]} //mac Necro
 
+            } else 
+            /if (${NetBots[${netbotsClient}].Class.Name.Equal[Magician]}) {
+                /echo "Starting up ${netbotsClient} >> Mage"
+                /bct ${NetBots.Client[${x}]} //mac Mage
+
             } else {
                 /echo "Starting up ${netbotsClient} >> ${NetBots[${netbotsClient}].Class.Name}"
                 /bct ${netbotsClient} //mac ${NetBots[${netbotsClient}].Class.Name}
