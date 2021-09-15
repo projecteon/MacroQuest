@@ -1,6 +1,7 @@
 #include includes\ini.inc
 #include includes\commonItems.inc
 #include includes\commonLoot.inc
+#include includes\commonAutopilot.inc
 
 Sub InitGenralIni(string iniFileName)
     /declare options string  local "General"
@@ -50,6 +51,7 @@ Sub InitGenralIni(string iniFileName)
     /squelch /alias /movetome /bc move to me
 
     /call InitLoot ${iniFileName}
+    /call InitAutopilot ${iniFileName}
 /return ${initResult}
 
 
@@ -208,9 +210,8 @@ Sub MoveToLoc(int yLoc, int xLoc, int timeToWait, int arrivalDist)
 
     /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
     
-    /squelch /moveto loc ${yLoc} ${xLoc} dist ${arrivalDist}
     :retryMove
-        | /call Background_Events
+        /squelch /moveto loc ${yLoc} ${xLoc} dist ${arrivalDist}
         /delay ${Math.Calc[${timeToWait}/5]} ${Math.Distance[${yLoc},${xLoc}]}<=${arrivalDist}
         /if (${Math.Distance[${yLoc},${xLoc}]}>${arrivalDist} && ${moveTimer}) {
             /goto :retryMove
@@ -236,7 +237,11 @@ Sub Event_MoveToMe(string line, string sender)
         /goto :endMoveToMe
     }
     
-    /squelch /call MoveToLoc ${Me.Y} ${Me.X}
+    /if (${Nav}) {
+        /squelch /nav id ${Me.ID}
+    } else {
+        /squelch /call MoveToLoc ${Me.Y} ${Me.X}
+    }
 
     :endMoveToMe
     /if (${Debug} || ${Debug_Common}) /echo <== Event_MoveToMe -|
@@ -257,7 +262,11 @@ Sub Event_FollowMe(string line, string sender)
     }
     
     /squelch /makecamp off
-    /squelch /stick id ${NetBots.Client[${sender}].ID} uw 15
+    /if (${NetAdvPath} || (${AdvPath} && ${AdvPath.Active})) {
+        /squelch /afollow spawn ${NetBots.Client[${sender}].ID}
+    } else {
+        /squelch /stick id ${NetBots.Client[${sender}].ID} uw 15
+    }
 
     :endFollowMe
     /if (${Debug} || ${Debug_Common}) /echo <== FollowMe -|
@@ -408,6 +417,7 @@ Sub DoCommonEvents
     
     /call DoItemEvents
     /call DoLootEvents
+    /call DoAutoPilotEvents
 
     :endDoClearCampEvents
     /if (${Debug} || ${Debug_Common}) /echo <== DoCommonEvents -|

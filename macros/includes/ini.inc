@@ -105,3 +105,32 @@ Sub IniArray2(string iniFile, string section, string keyName, arrayName)
     :endIniArray
     /if (${Debug}) /echo <== IniArray2
 /return
+
+Sub IniKeyToArray(string iniFile, string section, string keyName, arrayName)
+    /if (${Debug}) /echo |- IniKeyToArray ==>
+
+    /declare values     string  local
+    /declare k          int     local
+    /declare key        string  local
+
+    /varset values ${Ini[${iniFile},${section},${keyName}]}
+
+    /if (${values.Equal[NULL]}) {
+        /if (${Debug}) /echo <values> is NULL, exiting.
+        /goto :endIniKeyToArray
+    }
+
+    /declare numberOfValues int local ${Math.Calc[${values.Count[/]}+1]}
+
+    /if (${Defined[${arrayName}]}) /deletevar ${arrayName}
+    /declare ${arrayName}[${numberOfValues}] string outer
+
+    /for k 1 to ${numberOfValues}
+        /varset key ${values.Arg[${k},|]}
+        /if (${Debug}) /echo |- ${key} > [${k}] > ${values.Token[${k},/]}
+        /varset ${arrayName}[${k}] ${values.Token[${k},/]}
+    /next k
+
+    :endIniKeyToArray
+    /if (${Debug}) /echo <== IniKeyToArray
+/return
