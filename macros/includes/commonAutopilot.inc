@@ -12,9 +12,9 @@ Sub DoAutoPilot(string route)
 
   :doAutopilot
   /varset zoneWayPoints ${Ini[${autoPilotIniFileName},${route},${currentAutoPilotZone}]}
-  /if (${Debug} || ${Debug_AutoPilot}) /echo zoneWayPoints <${zoneWayPoints}>
+  /if (${Debug} || ${Debug_AutoPilot}) /echo <${currentAutoPilotZone}> zoneWayPoints <${zoneWayPoints}>
   /if (${zoneWayPoints.Equal[NULL]}) {
-    /echo No waypoints for <${currentAutoPilotZone}>, exiting.
+    /echo Arrived at destination or missing waypoints for <${currentAutoPilotZone}>, exiting.
     /goto :endAutoPilot
   } else {
     /if (${Defined[waypoints]}) /deletevar waypoints
