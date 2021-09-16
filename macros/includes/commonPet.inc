@@ -126,9 +126,18 @@ Sub SummonPet
 
     /if (!${Bool[${Me.Pet.ID}]} && !${Bool[${Me.Casting}]} && ${Me.SpellReady[${petSpell}]} && ${Me.CurrentMana} > ${Spell[${petSpell}].Mana}) {
         /if (${Bool[${petFocusItem}]} && ${Bool[${FindItem[=${petFocusItem}]}]} && ${FindItem[=${petFocusItem}].ItemSlot} >=23) {
+            /if (!${Me.FreeInventory}) {
+                /bcaa No free inventory for current weapons
+                /beep
+                /goto :endSummonPet
+            }
+
             /call CheckAllBagsAreOpen
             /delay 10
             /declare currentMainHand string local ${Me.Inventory[mainhand]} 
+            /declare currentOffHand  string local ${Me.Inventory[offhand]}
+            /unequip offhand
+            /delay 10
             /exchange "${petFocusItem}" mainhand
             /delay 10
         }
@@ -138,6 +147,11 @@ Sub SummonPet
         /if (${Defined[currentMainHand]} && ${Bool[${currentMainHand}]}) {
             /exchange "${currentMainHand}" mainhand
             /delay 10
+
+            /if (${Bool[${currentOffHand}]}) {
+                /exchange "${currentOffHand}" offhand
+                /delay 10
+            }
         }
     }
 
