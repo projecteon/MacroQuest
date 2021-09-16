@@ -51,7 +51,7 @@ sub DoMezz
 
         /declare canMezzMob     bool local TRUE
         /declare retry          int local
-        /declare i              int local 0
+        /declare i              int local 
         /declare mezTarg        int local
         /declare maTargetId     int local ${NetBots[${mainAssist}].TargetID}
         /declare mezTargetCount int local ${SpawnCount[npc los targetable radius ${mezzRadius}]}
@@ -61,7 +61,7 @@ sub DoMezz
         /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz - # of mezz targets: ${mezTargetCount}
         /for i 1 to ${mezTargetCount}
             /varset mezTarg ${NearestSpawn[${i},npc los targetable radius ${mezzRadius}].ID}
-            /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz - mezz target: ${mezTarg}
+            /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz - mezz target: ${mezTarg} ma target: ${maTargetId}
             /if (${mezTarg}!=${maTargetId}) {
                 /call CheckCanMezzMob ${mezTarg}
                 /varset canMezzMob ${Macro.Return}
