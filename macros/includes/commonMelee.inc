@@ -72,11 +72,11 @@ Sub DoKill
     /if (${Debug} || ${Debug_Melee}) /echo <== DoKill -|
 /return
 
-Sub DoMelee(meleeAbilitySub)    
-    /if (${Debug} || ${Debug_Melee}) /echo |- DoMelee ==>	
+Sub DoMeleeDps(meleeAbilitySub)    
+    /if (${Debug} || ${Debug_Melee}) /echo |- DoMeleeDps ==>	
 
 	/if (${Me.Combat}) {
-        /goto :endDoMelee
+        /goto :endDoMeleeDps
     }
 
     /call GetMainAssist
@@ -84,13 +84,13 @@ Sub DoMelee(meleeAbilitySub)
 
     /if (${mainAssist.Equal[NULL]}) {
         /if (${Debug} || ${Debug_Heals}) /echo |- No main assist defined
-        /goto :endDoMelee
+        /goto :endDoMeleeDps
     }
 
     /declare targetId int local ${NetBots[${mainAssist}].TargetID}
     /if (!${targetId} || ${Bool[${Spawn[id ${targetId}].Type.Equal[Corpse]}]}) {
         /if (${Me.Combat}) /attack off
-        /goto :endDoMelee
+        /goto :endDoMeleeDps
     }
     
     /declare isNPC          local ${Spawn[${targetId}].Type.Equal[NPC]}
@@ -99,17 +99,22 @@ Sub DoMelee(meleeAbilitySub)
     /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
     /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight}) {
-        /goto :endDoMelee
+        /goto :endDoMeleeDps
     }
 
     /call EnsureTarget ${targetId}
     /if (!${Target.ID} || ${Target.ID}==${Me.ID} || ${Target.ID}!=${targetId}) {
         /if (${Debug} || ${Debug_Melee}) /echo |- Invalid target
-        /goto :endDoMelee
+        /goto :endDoMeleeDps
     }
 
-    /if (!${Stick.Active}) /stick id ${targetId} snaproll 90%
+    | https://www.mmobugs.com/wiki/index.php/MQ2MoveUtils:v11_FAQ
+    | https://www.redguides.com/community/threads/mq2moveutils-question.70706/
+    | https://www.redguides.com/community/threads/mq2-vanilla-max-melee-range.54990/
+    | only snaproll for rogues, others can start DPS right away?    
+    /if (!${Stick.Active} || ${Stick.StickTarget} != ${targetId}) /stick id ${targetId} snaproll 90% 
     /if (${Target.Distance} <= ${Stick.Distance}) {
+        | rogues need hidden check, we might want to start with disc strike backstab
         /if (!${Me.Combat}) /attack on
 
         /if (Defined[${meleeAbilitySub}]) {
@@ -117,6 +122,6 @@ Sub DoMelee(meleeAbilitySub)
         }
     }
 
-    :endDoMelee
-    /if (${Debug} || ${Debug_Melee}) /echo <== DoMelee -|
+    :endDoMeleeDps
+    /if (${Debug} || ${Debug_Melee}) /echo <== DoMeleeDps -|
 /return
