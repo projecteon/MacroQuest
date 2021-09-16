@@ -17,13 +17,12 @@ Sub Main
     /echo "Bard rock'n'rolling!"
     /bca "Bard rock'n'rolling!"
 
-    /call CheckAllBagsAreOpen
-
     :BardLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :BardLoop
         /if (${Stick.Status.Equal[ON]}) /goto :BardLoop
 
+        /call CheckAllBagsAreOpen
         /call DoKill
         /call DoCommonEvents
         /goto :BardLoop
