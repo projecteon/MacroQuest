@@ -42,12 +42,13 @@ Sub DoHarvest
     /if (${autoHarvest} && ${Bool[harvestSpell]} && ${Cast.Ready[${harvestSpell}]} && ${Me.Gem[${harvestSpell}]}) {
         /call CheckNPCInRange
         /declare hasNpcInCamp   bool    local ${Bool[${Macro.Return}]}  
-        /declare manaFromMax    int     local ${Math.Calc[${Me.MaxMana}-${Me.CurrentMana}]}
+        /declare manaFromMax    int     local 0
+        /varcalc manaFromMax ${Me.MaxMana}-${Me.CurrentMana}
 
         /if (${Debug} || ${Debug_Wizard}) /echo Check cast <${harvestSpell}>
         /if ((!${hasNpcInCamp} && ${manaFromMax} > 350) || ${Me.PctMana} < 2) {
-            /if (${Debug} || ${Debug_Wizard}) /echo Cast <${harvestSpell}>
-            /call cast "${harvestSpell}" gem${Me.Gem[${harvestSpell}]} 0 EmptyCancelCast
+            /if (${Debug} || ${Debug_Wizard}) /echo Casting <${harvestSpell}>
+            /call cast "${harvestSpell}" gem${Me.Gem[${harvestSpell}]} 2 EmptyCancelCast
         }
     }
 
