@@ -7,22 +7,22 @@ Sub DoAutoPilot(string route)
     /goto :endAutoPilot
   }
 
-  /declare currentZone    string  local ${Zone.ShortName}
+  /declare currentAutoPilotZone    string  local ${Zone.ShortName}
   /declare zoneWayPoints  string  local
 
   :doAutopilot
-  /varset zoneWayPoints ${Ini[${autoPilotIniFileName},${route},${currentZone}]}
+  /varset zoneWayPoints ${Ini[${autoPilotIniFileName},${route},${currentAutoPilotZone}]}
   /if (${Debug} || ${Debug_AutoPilot}) /echo zoneWayPoints <${zoneWayPoints}>
   /if (${zoneWayPoints.Equal[NULL]}) {
-    /echo No waypoints for <${currentZone}>, exiting.
+    /echo No waypoints for <${currentAutoPilotZone}>, exiting.
     /goto :endAutoPilot
   } else {
     /if (${Defined[waypoints]}) /deletevar waypoints
-    /call IniKeyToArray ${autoPilotIniFileName} ${route} ${currentZone} waypoints
+    /call IniKeyToArray ${autoPilotIniFileName} ${route} ${currentAutoPilotZone} waypoints
     /call NavigateZoneWaypoints
 
-    /if (${Zone.ShortName.NotEqual[${currentZone}]}) {
-      /varset currentZone ${Zone.ShortName}
+    /if (${Zone.ShortName.NotEqual[${currentAutoPilotZone}]}) {
+      /varset currentAutoPilotZone ${Zone.ShortName}
       /goto :doAutopilot
     }
   }
