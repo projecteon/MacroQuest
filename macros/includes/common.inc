@@ -324,6 +324,15 @@ Sub TypeChrs(string inputString)
     /if (${Debug} || ${Debug_Common}) /echo <== TypeChrs -|
 /return
 
+Sub CheckAllBagsAreOpen
+    /if (!${Defined[currentZoneIdForBags]}) {
+        /keypress OPEN_INV_BAGS
+        /declare currentZoneIdForBags int outer ${Zone.ID}
+    } else /if (${currentZoneIdForBags} != ${Zone.ID}) {
+        /keypress OPEN_INV_BAGS
+        /varset currentZoneIdForBags ${Zone.ID}
+    } 
+/return
 
 | #####################################################################################
 | # Moves to a given location, and clicks the nearest door object. 										
@@ -394,16 +403,6 @@ SUB EVENT_ClickIt(line, chatSender, eventParams)
 
     :endClickIt
     /if (${Debug} || ${Debug_Common}) /echo <== EVENT_ClickIt -|
-/return
-
-Sub CheckAllBagsAreOpen
-    /if (!${Defined[currentZone]}) {
-        /keypress OPEN_INV_BAGS
-        /declare currentZoneId int outer ${Zone.ID}
-    } else /if (${currentZoneId} != ${Zone.ID}) {
-        /keypress OPEN_INV_BAGS
-        /varset currentZoneId ${Zone.ID}
-    } 
 /return
 
 Sub DoCommonEvents
