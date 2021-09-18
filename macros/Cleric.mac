@@ -65,7 +65,7 @@ Sub GroupHeal
 		/bca <<< ${groupHealSpell} >>>			
         /call cast "${groupHealSpell}" gem${Me.Gem[${groupHealSpell}]} 0 CancelGroupHeal 3
 		|- Delay to give everyones hp time to update
-		/delay 50
+		/delay 5
 	}
     /if (${Debug} || ${Debug_Heals}) /echo <== GroupHeal -|
 /return
