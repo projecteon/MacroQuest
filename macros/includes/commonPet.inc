@@ -142,7 +142,7 @@ Sub SummonPet
             /delay 10
         }
 
-        /call cast "${petSpell}" gem${Me.Gem[${petSpell}]} 3 EmptyCancelCast
+        /call cast "${petSpell}" gem${Me.Gem[${petSpell}]} 0 EmptyCancelCast 3
 
         /if (${Defined[currentMainHand]} && ${Bool[${currentMainHand}]}) {
             /exchange "${currentMainHand}" mainhand
@@ -211,7 +211,7 @@ Sub WeaponizePet(int petID)
             /delay 6s
         }
 
-        /call cast "${petWeaponsSpell}" gem${Me.Gem[${petWeaponsSpell}]} 3 EmptyCancelCast
+        /call cast "${petWeaponsSpell}" gem${Me.Gem[${petWeaponsSpell}]} 0 EmptyCancelCast 3
         /delay 3
         /click left target
         /delay 1s ${Window[GiveWnd].Open}
@@ -246,7 +246,7 @@ Sub BuffPet
 
         /if (!${Bool[${Me.PetBuff[${buffSpell}]}]}) {
             /call EnsureTarget ${Me.Pet.ID}
-            /call cast "${buffSpell}" gem${Me.Gem[${buffSpell}]} 3 EmptyCancelCast
+            /call cast "${buffSpell}" gem${Me.Gem[${buffSpell}]} 0 EmptyCancelCast 3
         }
     /next k 
 
