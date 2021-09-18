@@ -25,7 +25,7 @@ Sub Main
     :DruidLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :DruidLoop
-        /if (${Stick.Status.Equal[ON]}) /goto :DruidLoop
+        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :DruidLoop
         
         /call CheckHeals
         /if (${Macro.Return} == 1) /goto :DruidLoop

@@ -19,7 +19,7 @@ Sub Main
     :ClericLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :ClericLoop
-        /if (${Stick.Status.Equal[ON]}) /goto :ClericLoop
+        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :ClericLoop
 
         /call DoHeal
         /call CheckManaStatus

@@ -19,7 +19,7 @@ Sub Main
     :MonkLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :MonkLoop
-        /if (${Stick.Status.Equal[ON]}) /goto :MonkLoop
+        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :MonkLoop
 
         /call DoKill
         /call DoCommonEvents

@@ -20,7 +20,7 @@ Sub Main
     :BardLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :BardLoop
-        /if (${Stick.Status.Equal[ON]}) /goto :BardLoop
+        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :BardLoop
 
         /call CheckAllBagsAreOpen
         /call DoKill

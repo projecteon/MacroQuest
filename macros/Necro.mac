@@ -28,7 +28,7 @@ Sub Main
     :NecroLoop
         /call Wait4Rez_Background_Events
         /if (${Me.Invis}) /goto :NecroLoop
-        /if (${Stick.Status.Equal[ON]}) /goto :NecroLoop
+        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :NecroLoop
         
         /call CheckManaStatus
         /call TryMedidate

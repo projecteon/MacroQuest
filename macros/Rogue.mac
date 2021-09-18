@@ -18,7 +18,7 @@ Sub Main
 
     :RogueLoop
         /call Wait4Rez_Background_Events
-        /if (${Stick.Status.Equal[ON]}) /goto :RogueLoop
+        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :RogueLoop
 
         /call DoKill
         | /call DoMelee DoBackStab
