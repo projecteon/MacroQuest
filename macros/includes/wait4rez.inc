@@ -17,6 +17,8 @@ Sub InitWait4Rez(string iniFileName)
     /declare wait4RezEnabled                bool    outer FALSE 
     /declare wait4RezAlertCount             int     outer 1 
     /declare waiting4Rez                    bool    outer FALSE 
+    /declare waiting4RezMemmedSpells        bool    outer FALSE 
+    /declare waiting4RezSpellset            string  outer  
 
     /if (${Ini[${iniFileName},${options},Enabled].Length}) {
        /varset wait4RezEnabled ${Bool[${Ini[${iniFileName},${options},Enabled]}]}     
@@ -28,6 +30,12 @@ Sub InitWait4Rez(string iniFileName)
        /varset wait4RezAlertCount ${Ini[${iniFileName},${options},AlertBeepsCount]}
     } else {
         /ini "${iniFileName}" "${options}" "AlertBeepsCount" "${wait4RezAlertCount}"
+    }
+
+    /if (${Ini[${iniFileName},${options},SpellSet].Length}) {
+       /varset waiting4RezSpellset ${Ini[${iniFileName},${options},SpellSet]}
+    } else {
+        /ini "${iniFileName}" "${options}" "SpellSet" "${waiting4RezSpellset}"
     }
 
     /call Wait4Rez_Aliases
@@ -124,6 +132,11 @@ Sub Wait4Rez(functionCall)
 
         /call Wait4Rez_Background_Events
         /delay 10 ${Window[ConfirmationDialogBox].Open}
+        /if (!${waiting4RezMemmedSpells} && ${waiting4RezSpellset}) {
+            /loadspells ${waiting4RezSpellset}
+            /varset waiting4RezMemmedSpells TRUE
+        }
+
         /if (!${Window[ConfirmationDialogBox].Open}) /goto :rezmeffs
 
         |Click yes to rez box.
@@ -177,6 +190,7 @@ Sub Wait4Rez(functionCall)
 	
     /doevents flush
 	
+    /varset waiting4RezMemmedSpells FALSE
     | /if (${buffAfterRez} && ${NetBots[${NetBots.Client[1]}].CombatState}>=3) /bc buff me
     
     /if (${Debug} || ${Debug_Wait4Rez}) /echo <== Wait4Rez -|	
