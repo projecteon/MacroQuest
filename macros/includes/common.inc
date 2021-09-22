@@ -49,6 +49,7 @@ Sub InitGenralIni(string iniFileName)
     
     /squelch /alias /followme /bc follow me
     /squelch /alias /movetome /bc move to me
+    /squelch /alias /removebuffs /bc remove buffs with remaining duration:
 
     /call InitLoot ${iniFileName}
     /call InitAutopilot ${iniFileName}
@@ -340,7 +341,7 @@ Sub CheckAllBagsAreOpen
 #EVENT ClickIt "<#1#> Click It#2#"
 #EVENT ClickIt "#1# tells the group, 'Click It#2#'"
 #EVENT ClickIt "#1# tell your party, 'Click It#2#'"
-SUB EVENT_ClickIt(line, chatSender, eventParams)  
+Sub EVENT_ClickIt(line, chatSender, eventParams)  
     /if (${Debug} || ${Debug_Common}) /echo |- EVENT_ClickIt ==>
 
     /call IniArray "data\doors.ini" "${Zone.ShortName}" "${Zone.ShortName}#" 1 doorList
@@ -405,6 +406,22 @@ SUB EVENT_ClickIt(line, chatSender, eventParams)
     /if (${Debug} || ${Debug_Common}) /echo <== EVENT_ClickIt -|
 /return
 
+
+#EVENT RemoveLowDurationBuffs "<#*#> remove buffs with remaining duration: #1#"
+Sub EVENT_RemoveLowDurationBuffs(line, int duration)  
+    /if (${Debug}) /echo  |- EVENT_RemoveLowDurationBuffs ==>
+    
+    /declare k  int local
+    /for k 1 to 15
+        /if (${Bool[${Me.Buff[${k}]}]} && ${Me.Buff[${k}].Duration.TotalSeconds} < ${duration}) {
+            /if (${Debug}) /echo  Removing buff <${Me.Buff[${k}]}> from buffslot <${Math.Calc[${k}-1].Int}> with remaining duration <${Me.Buff[${k}].Duration.TotalSeconds}s>    
+            /notify BuffWindow Buff${Math.Calc[${k}-1].Int} leftmouseup
+        }
+    /next k 
+
+    /if (${Debug}) /echo <== EVENT_RemoveLowDurationBuffs -|
+/return
+
 Sub DoCommonEvents
     /if (${Debug} || ${Debug_Common}) /echo |- DoCommonEvents ==>
 
@@ -413,6 +430,7 @@ Sub DoCommonEvents
     /doevents ClickIt
     /doevents FollowMe
     /doevents MoveToMe
+    /doevents RemoveLowDurationBuffs
 
     /call CheckNPCInRange
     /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
