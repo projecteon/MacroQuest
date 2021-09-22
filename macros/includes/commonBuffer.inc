@@ -172,7 +172,7 @@ Sub CheckNetBotBuffs
 
                         /if (${Bool[${Buffs[${k},${itemCastProp}]}]}) {
                             /call ItemClickBuff "${Buffs[${k},${itemCastProp}]}" "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
-                        } else {
+                        } else /if (${Cast.Ready[${buffSpell}]}) {
                             /call CastBuff "${buffSpell}" ${NetBots[${netbotsClient}].ID} "${NetBots[${netbotsClient}].Name}"
                         }
                     } 
@@ -241,7 +241,7 @@ Sub CheckPetBuffs
 Sub CheckCanCastBuff(string buffSpell, int minMana)
     /if (${Debug}) /echo  |- CheckCanCastBuff ==> ${buffSpell} ${minMana}
     
-    /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || !${Cast.Ready[${buffSpell}]} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
+    /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
         /if (${Debug}) /echo <== CheckCanCastBuff 0 -|
         /return 0
     }
