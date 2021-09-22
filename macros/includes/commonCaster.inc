@@ -73,7 +73,7 @@ Sub CheckManaStatus
 Sub TryMedidate 
     /if (${Debug} || ${Debug_Caster}) /echo |- TryMedidate ==>
 
-    /if (${Me.Casting.ID}) {
+    /if (${Me.Casting.ID} || ${Window[SpellBookWnd].Open}) {
         /goto :endTryMedidate
     }
 
