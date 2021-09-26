@@ -327,12 +327,30 @@ Sub TypeChrs(string inputString)
 
 Sub CheckAllBagsAreOpen
     /if (!${Defined[currentZoneIdForBags]}) {
+        /echo |- CheckAllBagsAreOpen ==> <${Zone.ID}>
         /keypress OPEN_INV_BAGS
         /declare currentZoneIdForBags int outer ${Zone.ID}
     } else /if (${currentZoneIdForBags} != ${Zone.ID}) {
+        /echo |- CheckAllBagsAreOpen ==> <${currentZoneIdForBags}> <${Zone.ID}>
         /keypress OPEN_INV_BAGS
         /varset currentZoneIdForBags ${Zone.ID}
     } 
+/return
+
+Sub CheckPlugin(string pluginName)
+    /if (${Debug} || ${Debug_Common}) /echo |- CheckPlugin ==>
+
+    /if (!${Bool[${Plugin[${pluginName}]}]}) {
+        /squelch /plugin ${pluginName}
+        /echo ${pluginName} not detected! This macro requires it! Loading ...
+        /delay 2s ${Bool[${Plugin[${pluginName}]}]}
+        /if (!${Bool[${Plugin[${pluginName}]}]}) {
+            /echo Unable to load plugin <${pluginName}> ending macro...
+            /endmac
+        }
+    }
+    
+    /if (${Debug} || ${Debug_Common}) /echo <== CheckPlugin -|
 /return
 
 | #####################################################################################
