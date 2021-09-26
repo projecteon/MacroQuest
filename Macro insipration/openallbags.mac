@@ -1,0 +1,54 @@
+
+
+| OpenBank.mac
+
+
+Sub main
+	/keypress f8
+	/delay 1s 
+	/face
+	/delay 1s 
+	/keypress u
+	/delay 1s 
+	/call OpenBank
+	/call OpenSharedBank
+	/call OpenPacks 
+/return 
+
+
+Sub OpenBank
+   /declare BankBag int local 0 
+   /delay 1s 
+   /for BankBag 0 to 23 step 1 
+	/notify BigBankWnd BIGB_BankSlot${BankBag} rightmouseup 
+   /next BankBag 
+   /delay 1s 
+/return 
+
+Sub OpenSharedBank
+   /declare SharedBankBag int local 0 
+   /delay 1s 
+   /for SharedBankBag 0 to 1 step 1 
+	/notify BigBankWnd BIGB_SharedBankSlot${SharedBankBag} rightmouseup 
+   /next SharedBankBag 
+   /delay 1s 
+/return 
+
+Sub OpenPacks 
+   /declare bag int local 0 
+   /declare check int local 0 
+   /newif (!${Window[InventoryWindow].Open}) /nomodkey /keypress inventory 
+   /delay 1s 
+   /for bag 1 to 8 step 1 
+      /newif (${Window[Pack${bag}].Open}==FALSE) /nomodkey /itemnotify pack${bag} rightmouseup 
+   /next bag 
+   /delay 1s 
+   /for check 1 to 9 step 1 
+      /if  (${Window[TradeskillWnd].Open}) { 
+         /nomodkey /notify TradeskillWnd ExperimentButton leftmousehold 
+         /nomodkey /notify TradeskillWnd ExperimentButton leftmouseup 
+      } 
+   /next check 
+   /delay 1s 
+/return
+
