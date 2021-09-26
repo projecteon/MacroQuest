@@ -246,12 +246,12 @@ Sub CheckCanCastBuff(string buffSpell, int minMana)
         /return 0
     }
 
-    /if (${Select[${buffSpell},Spirit of Wolf,Spirit of Eagle,Flight of Eagles]} && ${Select[${Zone.ShortName}, ${inDoorZone}]}) {
+    /if (${Select[${buffSpell},Spirit of Wolf,Spirit of Eagle,Flight of Eagles]} && ${Select[${Zone.ShortName},${inDoorZone}]}) {
         /if (${Debug}) /echo <== CheckCanCastBuff 0 > cant cast indoor -|
         /return 0
     }
 
-    /if (${Select[${buffSpell},Spirit of Eagle,Flight of Eagles,Levitate,Levitation,Dead Man Floating,Dead Men Floating]} && ${Select[${Zone.ShortName}, ${noLevitateZones}]}) {
+    /if (${Select[${buffSpell},Spirit of Eagle,Flight of Eagles,Levitate,Levitation,Dead Man Floating,Dead Men Floating]} && ${Select[${Zone.ShortName},${noLevitateZones}]}) {
         /if (${Debug}) /echo <== CheckCanCastBuff 0 > cant cast levitate -|
         /return 0
     }
