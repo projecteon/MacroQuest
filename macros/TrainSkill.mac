@@ -28,8 +28,7 @@ Sub Main(string ability)
         }
 
         /if (${Me.Sneaking}) {
-                /doability Sneak  
-
+            /doability Sneak  
         }
 
         /if (${Bool[${Me.AbilityReady[${ability}]}]}) {
