@@ -202,6 +202,7 @@ Sub WeaponizePet(int petID)
         /goto :endWeaponizePet       
     }
 
+    /call ClearCursor
     /call EnsureTarget ${petID}
 
     /declare k  int local
