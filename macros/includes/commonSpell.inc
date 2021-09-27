@@ -78,7 +78,7 @@ Sub IniSpellArray(string iniFile, string section, string keyName, arrayName)
         /next k
 
     :endIniSpellArray
-    /if (${Debug}) /echo <== IniSpellArray
+    /if (${Debug}) /echo <== IniSpellArray -|
 /return
 
 Sub getValue(string iniValue, int spellKeyIndex)
