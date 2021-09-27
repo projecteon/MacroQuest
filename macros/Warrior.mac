@@ -8,6 +8,12 @@
 Sub Main
     /declare warriorIniFileName        string  outer "ini/${MacroQuest.Server}/Warrior_${Me.CleanName}.ini"
 
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+    /call CheckPlugin MQ2Nav
+
     /call InitWarriorIni ${warriorIniFileName}
     /if (${Macro.Return} == 0) {
         /echo "Bootstrapped INI file, please update variables in: ${warriorIniFileName}"

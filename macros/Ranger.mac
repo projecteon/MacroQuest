@@ -16,6 +16,13 @@
 Sub Main
     /declare rangerIniFileName        string  outer "ini/${MacroQuest.Server}/Ranger_${Me.CleanName}.ini"
 
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+	/call CheckPlugin MQ2CastTimer
+    /call CheckPlugin MQ2Nav
+
     /call InitRangerIni ${rangerIniFileName}
     /if (${Macro.Return} == 0) {
         /echo "Bootstrapped INI file, please update variables in: ${rangerIniFileName}"

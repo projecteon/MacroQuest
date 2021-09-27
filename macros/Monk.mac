@@ -7,6 +7,12 @@
 Sub Main
     /declare monkIniFileName        string  outer "ini/${MacroQuest.Server}/Monk_${Me.CleanName}.ini"
 
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+    /call CheckPlugin MQ2Nav
+
     /call InitMonkIni ${monkIniFileName}
     /if (${Macro.Return} == 0) {
         /echo "Bootstrapped INI file, please update variables in: ${monkIniFileName}"

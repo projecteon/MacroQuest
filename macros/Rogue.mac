@@ -1,11 +1,18 @@
 #include includes\ini.inc
 #include includes\common.inc
 #include includes\commonMelee.inc
+#include includes\commonTank.inc
 #include includes\wait4rez.inc
 #turbo 150
 
 Sub Main
     /declare rogueIniFileName        string  outer "ini/${MacroQuest.Server}/Rogue_${Me.CleanName}.ini"
+
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+    /call CheckPlugin MQ2Nav
 
     /call InitRogueIni ${rogueIniFileName}
     /if (${Macro.Return} == 0) {
@@ -20,8 +27,8 @@ Sub Main
         /call Wait4Rez_Background_Events
         /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :RogueLoop
 
-        /call DoKill
-        | /call DoMelee DoBackStab
+        | /call DoKill
+        /call DoMeleeDps DoBackStab
         /call DoCommonEvents
         /goto :RogueLoop
 /return

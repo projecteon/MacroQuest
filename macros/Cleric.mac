@@ -12,6 +12,13 @@
 Sub Main
     /declare clericIniFileName        string  local "ini/${MacroQuest.Server}/Cleric_${Me.CleanName}.ini"
 
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+	/call CheckPlugin MQ2CastTimer
+    /call CheckPlugin MQ2Nav
+
     /call InitClericIni ${clericIniFileName}
 
     /echo "Cleric all set!"

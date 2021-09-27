@@ -14,6 +14,14 @@
 Sub Main
     /declare shamanIniFileName        string  local "ini/${MacroQuest.Server}/Shaman_${Me.CleanName}.ini"
 
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+	/call CheckPlugin MQ2CastTimer
+	/call CheckPlugin MQ2Exchange
+    /call CheckPlugin MQ2Nav
+
     /call InitShamanIni ${shamanIniFileName}
     /if (${Macro.Return} == 0) {
         /echo "Bootstrapped INI file, please update variables in: ${shamanIniFileName}"

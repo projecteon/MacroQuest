@@ -16,6 +16,15 @@
 Sub Main
     /declare mageIniFileName    string  local "ini/${MacroQuest.Server}/Necro_${Me.CleanName}.ini"
 
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+	/call CheckPlugin MQ2CastTimer
+	/call CheckPlugin MQ2BagWindow
+	/call CheckPlugin MQ2Exchange
+    /call CheckPlugin MQ2Nav
+
     /call InitNecroIni ${mageIniFileName}
     /if (${Macro.Return} == 0) {
         /echo "Bootstrapped INI file, please update variables in: ${mageIniFileName}"

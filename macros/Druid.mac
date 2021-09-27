@@ -13,6 +13,13 @@
 Sub Main
     /declare druidIniFileName        string  local "ini/${MacroQuest.Server}/Druid_${Me.CleanName}.ini"
 
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+	/call CheckPlugin MQ2CastTimer
+    /call CheckPlugin MQ2Nav
+
     /call InitDruidIni ${druidIniFileName}
     /if (${Macro.Return} == 0) {
         /echo "Bootstrapped INI file, please update variables in: ${druidIniFileName}"
