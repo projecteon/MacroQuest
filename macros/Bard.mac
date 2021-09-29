@@ -25,7 +25,7 @@ Sub Main
         /endmacro
     }
 
-    /bardswap
+    /if (!${BardSwap}) /bardswap
 
     /echo "Bard rock'n'rolling!"
     /bca "Bard rock'n'rolling!"
