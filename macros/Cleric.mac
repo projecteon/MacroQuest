@@ -44,37 +44,36 @@ Sub Main
 | ###############################################################################
 Sub DoHeal
 	|- Do we use a group heal?
-	/call GroupHeal
+	/call GroupAOEHeal
 	
 	|- Check for heals
     /call CheckHeals
 
 /return
 
-Sub GroupHeal
-    /if (${Debug} || ${Debug_Heals}) /echo |- GroupHeal ==>
-    /if (!${Group.Members} || ${Me.Gem[${groupHealSpell}]} < 0 || ${Me.CurrentMana} < ${Spell[${groupHealSpell}].Mana}) {
-        /if (${Debug} || ${Debug_Heals}) /echo <== GroupHeal -|
+Sub GroupAOEHeal
+    /if (${Debug} || ${Debug_Heals}) /echo |- GroupAOEHeal ==>
+    /if (!${Group.Members} || ${Me.Gem[${areaGroupHeal}]} < 0 || ${Me.CurrentMana} < ${Spell[${areaGroupHeal}].Mana}) {
+        /if (${Debug} || ${Debug_Heals}) /echo <== GroupAOEHeal -|
         /return
     }
 
     /declare groupMembersWithLowHealthCount int local 0
     /declare x int local
-    /for x 1 to ${Group.Members} {
-        /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${groupHealPct} && ${Group.Member[${x}].Distance} <= ${Spell[${groupHealSpell}].AERange}) {
+    /for x 1 to ${Group.Members}
+        /if (${Spawn[${Group.Member[${x}]}].ID} && ${Group.Member[${x}].PctHPs} <= ${areaGroupHealPct} && ${Group.Member[${x}].Distance} <= ${Spell[${areaGroupHeal}].AERange}) {
             /varcalc groupMembersWithLowHealthCount ${groupMembersWithLowHealthCount}+1
         }
-        /next x
-    }
+    /next x
 
 	/if (${groupMembersWithLowHealthCount} >= ${groupHealNum}) {
-		/gsay <<< ${groupHealSpell} >>>			
-		/bca <<< ${groupHealSpell} >>>			
-        /call cast "${groupHealSpell}" gem${Me.Gem[${groupHealSpell}]} 0 CancelGroupHeal 3
+		/gsay <<< ${areaGroupHeal} >>>			
+		/bca <<< ${areaGroupHeal} >>>			
+        /call cast "${areaGroupHeal}" gem${Me.Gem[${areaGroupHeal}]} 0 CancelGroupHeal 3
 		|- Delay to give everyones hp time to update
 		/delay 5
 	}
-    /if (${Debug} || ${Debug_Heals}) /echo <== GroupHeal -|
+    /if (${Debug} || ${Debug_Heals}) /echo <== GroupAOEHeal -|
 /return
 
 
@@ -84,8 +83,8 @@ Sub CancelGroupHeal
 Sub InitClericIni(string iniFileName)
     /declare options            string  local "HealingOptions"
     /declare parentInitResult   int     local 1
-    /declare groupHealSpell     string  outer "GroupHeal" 
-    /declare groupHealPct       int     outer 0
+    /declare areaGroupHeal      string  outer "GroupAOEHeal" 
+    /declare areaGroupHealPct   int     outer 0
     /declare groupHealNum       int     outer 4
 
     /call InitGenralIni "${iniFileName}"
@@ -111,22 +110,22 @@ Sub InitClericIni(string iniFileName)
         /varset parentInitResult 0
     }
     
-    /if (${Ini[${iniFileName},${options},GroupHeal].Length}) {
-        /varset groupHealSpell "${Ini[${iniFileName},${options},GroupHeal]}"
+    /if (${Ini[${iniFileName},${options},AreaGroupHeal].Length}) {
+        /varset areaGroupHeal "${Ini[${iniFileName},${options},AreaGroupHeal]}"
     } else {
-        /ini "${iniFileName}" "${options}" "GroupHeal" "${groupHealSpell}"
+        /ini "${iniFileName}" "${options}" "AreaGroupHeal" "${areaGroupHeal}"
     }
     
-    /if (${Ini[${iniFileName},${options},GroupHealPct].Length}) {
-        /varset groupHealPct ${Ini[${iniFileName},${options},GroupHealPct]} 
+    /if (${Ini[${iniFileName},${options},AreaGroupHealPct].Length}) {
+        /varset areaGroupHealPct ${Ini[${iniFileName},${options},AreaGroupHealPct]} 
     } else {
-        /ini "${iniFileName}" "${options}" "GroupHealPct" "${groupHealPct}"
+        /ini "${iniFileName}" "${options}" "AreaGroupHealPct" "${areaGroupHealPct}"
     }
     
-    /if (${Ini[${iniFileName},${options},GroupHealNum].Length}) {
-        /varset groupHealNum ${Ini[${iniFileName},${options},GroupHealNum]} 
+    /if (${Ini[${iniFileName},${options},AreaGroupHealNum].Length}) {
+        /varset groupHealNum ${Ini[${iniFileName},${options},AreaGroupHealNum]} 
     } else {
-        /ini "${iniFileName}" "${options}" "GroupHealNum" "${groupHealNum}"
+        /ini "${iniFileName}" "${options}" "AreaGroupHealNum" "${groupHealNum}"
     }
 
     /if (${parentInitResult} == 0) {
