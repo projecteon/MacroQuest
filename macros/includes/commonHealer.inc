@@ -13,6 +13,7 @@ Sub InitHealIni(string iniFileName)
     /if (!${Defined[hasNotifiedNoMana]})        /declare hasNotifiedNoMana              bool    outer FALSE
     /if (!${Defined[isHealingGroup]})           /declare isHealingGroup                 bool    outer FALSE
     /if (!${Defined[isHealingNetbots]})         /declare isHealingNetbots               bool    outer FALSE
+    /if (!${Defined[isHealingMaintank]})        /declare isHealingMaintank              bool    outer FALSE
 
     /if (!${Defined[Debug_Heals]})              /declare Debug_Heals                    bool    outer FALSE
         
@@ -158,7 +159,9 @@ Sub CheckMainTankHeal(string healSpell, int healPct)
     }
     
     /if (${NetBots[${mainTankToHeal}].PctHPs} <= ${healPct}) { 
+        /varset isHealingMaintank TRUE
         /call CastHeal "${healSpell}" ${NetBots[${mainTankToHeal}].ID} ${mainTankToHeal}
+        /varset isHealingMaintank FALSE
     }
 
     :endCheckMainTankHeal
@@ -319,7 +322,7 @@ Sub CancelHeal(int spellId)
     | Following line has issue with NetBots update report, cancels heals when it shouldnt
 	/if (${isHealingGroup} && ${Target.PctHPs} > ${groupHealPct}) /call Interrupt
 	/if (${isHealingNetbots} && ${Target.PctHPs} > ${netbotsHealPct}) /call Interrupt
-	/if (${mainTankHealPct} > 0 && ${Target.PctHPs} > ${mainTankHealPct} && ${spellId} == ${Spell[${mainTankHeal}].ID}) /call Interrupt
+	/if (${isHealingMaintank} && ${Target.PctHPs} > ${mainTankHealPct}) /call Interrupt
 	| /if (${Target.PctHPs} > ${mainTankEmergencyHealPct} && ${spellId} == ${Spell[${mainTankEmergencyHeal}].ID}) /call Interrupt
 	/if (${Target.Distance} > ${healDist}) /call Interrupt
 	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
