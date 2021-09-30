@@ -148,7 +148,7 @@ Sub CheckNPCInRange(int radiusCheck)
     /if (${Debug} || ${Debug_Common}) /echo <== CheckNPCInRange -|
 /return 0
 
-Sub EnsureTarget(targetId) 
+Sub EnsureTarget(int targetId) 
     /if (${Debug} || ${Debug_Common}) /echo |- EnsureTarget ==>
 
     /if (${Target.ID}==${targetId}) {
@@ -268,7 +268,10 @@ Sub Event_FollowMe(string line, string sender)
     }
     
     /squelch /makecamp off
-    /if (${NetAdvPath} || (${AdvPath} && ${AdvPath.Active})) {
+    /if (${NetAdvPath}) {
+        /call EnsureTarget ${NetBots.Client[${sender}].ID}
+        /squelch /netfollow on
+    } else /if (${AdvPath} && ${AdvPath.Active}) {
         /squelch /afollow spawn ${NetBots.Client[${sender}].ID}
     } else {
         /squelch /stick id ${NetBots.Client[${sender}].ID} uw 15
