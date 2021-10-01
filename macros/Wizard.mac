@@ -31,7 +31,7 @@ Sub Main
     /bca "Wizard all fired up!"
     :WizardLoop
         /call Wait4Rez_Background_Events
-        /if (${Me.Invis}) /goto :WizardLoop
+        /if (${Me.Invis} || ${Me.Stunned}) /goto :WizardLoop
         /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :WizardLoop
 
         /call CheckManaStatus
@@ -63,7 +63,7 @@ Sub DoHarvest
 /return
 
 Sub CancelHarvest
-    /if (!${Cast.Ready[${harvestSpell}]}) /call Interrupt
+    /if (!${Me.Casting.ID} && !${Cast.Ready[${harvestSpell}]}) /call Interrupt
 /return
 
 Sub InitWizardIni(string iniFileName)
