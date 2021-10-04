@@ -13,10 +13,10 @@ Sub Main
 /declare kCount int outer 0
 
 /declare l0 int local
-/declare minItemsPerHandin int local 1
+/declare minItemsPerHandin int local 4
 /declare maxItemsPerHandin int local 4
-/declare turnin string outer Bottle of Milk
-/declare handinNPC string outer "Mojax Hikspin"
+/declare turnin string outer Left Goblin Ear
+/declare handinNPC string outer "Captain Bosec"
 
 
 
@@ -34,7 +34,7 @@ Sub Main
       /delay 20 ${Window[GiveWnd].Open}
       /delay 0
    } else {
-      /notify GiveWnd GVW_MyItemSlot${l0} leftmouseup
+      /notify GiveWnd GVW_MyItemSlot${Math.Calc[${l0}-1].Int} leftmouseup
       /delay 20 !${Cursor.ID}
       /delay 0
    }
@@ -55,8 +55,9 @@ Sub Main
 
 Sub Event_Exp(string Line)
   |- Experience calculation and reporting
- /if (${ReportExp}) /echo ** XP-Delta: REG (${Math.Calc[${Me.PctExp}-${Exp}]}%), AA (${Math.Calc[${Me.PctAAExp}-${AAExp}]}%), LDR (${Math.Calc[${Me.PctGroupLeaderExp}-${LDExp}]}%)
-  /varset LDExp ${Me.PctGroupLeaderExp}
+|  /if (${ReportExp}) /echo ** XP-Delta: REG (${Math.Calc[${Me.PctExp}-${Exp}]}%), AA (${Math.Calc[${Me.PctAAExp}-${AAExp}]}%), LDR (${Math.Calc[${Me.PctGroupLeaderExp}-${LDExp}]}%)
+ /if (${ReportExp}) /echo ** XP-Delta: REG (${Math.Calc[${Me.PctExp}-${Exp}]}%), AA (${Math.Calc[${Me.PctAAExp}-${AAExp}]}%)
+|   /varset LDExp ${Me.PctGroupLeaderExp}
   /varset AAExp ${Me.PctAAExp}
   /varset Exp ${Me.PctExp}  
   /varcalc kCount ${kCount}+1
