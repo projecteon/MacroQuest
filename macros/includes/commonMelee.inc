@@ -74,24 +74,26 @@ Sub DoKill
 /return
 
 Sub DoMeleeDps(meleeAbilitySub)   
-    /if (${Debug} || ${Debug_Melee}) /echo |- DoMeleeDps ==>	 
-
-	/if (${Me.Combat}) {
-        /goto :endDoMeleeDps
-    }
+    /if (${Debug} || ${Debug_Melee}) /echo |- DoMeleeDps ==>
 
     /call GetMainAssist
     /declare mainAssist string	local ${Macro.Return}
 
     /if (${mainAssist.Equal[NULL]}) {
         /if (${Debug} || ${Debug_Heals}) /echo |- No main assist defined
+        /if (${Me.Combat}) /attack off
         /goto :endDoMeleeDps
     }
 
-    /declare targetId int local ${NetBots[${mainAssist}].TargetID}
+    /declare targetId int local ${NetBots[${mainAssist}].TargetID}	
+
     /if (!${targetId} || ${Bool[${Spawn[id ${targetId}].Type.Equal[Corpse]}]} || ${isEnraged}) {
         /if (${Me.Combat}) /attack off
-        /if (${Bool[${Spawn[id ${targetId}].Type.Equal[Corpse]}]} && ${isEnraged}) /varset isEnraged FALSE
+        /if (!${targetId} || ${Bool[${Spawn[id ${targetId}].Type.Equal[Corpse]}]}) /varset isEnraged FALSE
+        /goto :endDoMeleeDps
+    } 
+
+	/if (${Me.Combat} && ${Target.ID} == ${targetId}) {
         /goto :endDoMeleeDps
     }
     
