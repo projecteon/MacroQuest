@@ -138,6 +138,7 @@ Sub SummonPet
             /declare currentOffHand  string local ${Me.Inventory[offhand]}
             /unequip offhand
             /delay 10
+            /call ClearCursor
             /exchange "${petFocusItem}" mainhand
             /delay 10
         }
