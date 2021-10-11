@@ -203,25 +203,48 @@ Sub WeaponizePet(int petID)
     }
 
     /call ClearCursor
+    /if (${Cursor.ID}) {
+        /bcaa Cursor not empty <${Cursor}>, cancelling pet weaponizing
+        /beep
+        /goto :endWeaponizePet
+    }   
+
     /call EnsureTarget ${petID}
 
+    /declare tradeAttemps int local 1
     /declare k  int local
-    /for k 1 to 2 {
+    /for k 1 to 2
         /if (!${Me.SpellReady[${petSpell}]}) {
             | /delay ${Spell[${petSpell}].RecastTime} | reports wrong, reports recovery time
             /delay 6s
         }
 
         /call cast "${petWeaponsSpell}" gem${Me.Gem[${petWeaponsSpell}]} 0 EmptyCancelCast 3
-        /delay 3
-        /click left target
-        /delay 1s ${Window[GiveWnd].Open}
+        /delay 1s ${Cursor.ID}
+        
+        :tradePet
+        /varcalc tradeAttemps ${tradeAttemps} + 1 
+        /if (${Me.Pet.Distance}>16 && ${Me.Pet.DistanceZ} < 80) {
+            /call MoveToLoc ${Me.Pet.Y} ${Me.Pet.X} 20 12
+        }
+
+        /if (!${Window[GiveWnd].Open}) {
+            /click left target
+            /delay 1s ${Window[GiveWnd].Open}
+        }
+
         /if (${Window[GiveWnd].Open}) {
             /notify GiveWnd GVW_Give_Button LeftMouseUp
             /delay 5s !${Window[GiveWnd].Open}
         }
-        /next k
-    }
+
+        /if (${Cursor.ID} && ${tradeAttemps} < 3) /goto :tradePet
+
+        /if (${Cursor.ID}) {
+            /bcaa Could not hand <${Cursor}> to <${Target}> <${petID}>
+            /beep
+        }
+    /next k
     
     :endWeaponizePet
 
