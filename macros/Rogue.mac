@@ -30,6 +30,7 @@ Sub Main
         | /call DoKill
         /call DoMeleeDps DoBackStab
         /call DoCommonEvents
+        /call DoMeleeEvents
         /goto :RogueLoop
 /return
 
