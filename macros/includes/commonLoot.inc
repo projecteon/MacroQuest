@@ -3,20 +3,22 @@
 | ################################################################################
 SUB LootNearestCorpse
     /if (${Debug} || ${Debug_Loot}) /echo |- LootNearestCorpse ==>
-    /declare startX int ${Me.X}
-    /declare startY int ${Me.Y}
+    /declare startX         int     ${Me.X}
+    /declare startY         int     ${Me.Y}
+    /declare isTwisting    bool    ${Twist.Twisting}
     /squelch /hidecor looted
-    /if (${Twist.Twisting}) {
+    /if (${isTwisting}) {
         /squelch /twist stop
 	    /delay 20 !${Me.Casting.ID}
     }
 
-    /delay 5s !${Me.Casting.ID}
+    /delay 10s !${Me.Casting.ID}
+    /if (${Navigation.Active}) /squelch /nav stop
     /if (${NetAdvPath.Following}) /squelch /netfollow off
     /if (${Stick.Active}) /squelch /stick off
 
     /declare seek_Radius        int local 50
-    /declare closestCorpseID        int local
+    /declare closestCorpseID    int local
 
     /varset closestCorpseID ${NearestSpawn[1,npc corpse zradius 50 radius ${seek_Radius} "_"].ID}
 
@@ -42,6 +44,7 @@ SUB LootNearestCorpse
     
     :skipCorpse
     /call MoveToLoc ${startY} ${startX} 15 20
+    /if (${isTwisting}) /twist
 
     /if (${Debug} || ${Debug_Loot}) /echo <== LootNearestCorpse -|
 /return
@@ -80,7 +83,7 @@ SUB LootCorpse
     /declare itemSlot int local
     /declare canDestroy bool local
 
-    /for i 1 to ${numItems} {
+    /for i 1 to ${numItems}
         /if (${Debug} || ${Debug_Loot}) /echo |- starting loot slot: ${i} of ${numItems}
 
         /delay 1s ${Corpse.Item[${i}].ID}
@@ -114,7 +117,7 @@ SUB LootCorpse
             /varset itemSlot ${FindItem[=${itemName}].ItemSlot}
             /if (${Debug} || ${Debug_Loot}) /bca I've got a stack of ${itemName} in itemSlot: ${itemSlot}
 
-            /for j 1 to 10 {
+            /for j 1 to 10
                 /if (${Me.Inventory[${itemSlot}].Item[${j}].Name.Equal[${itemName}]}) {
                     /if (!${Me.Inventory[${itemSlot}].Item[${j}].FreeStack} ) {
                         /if (${Debug} || ${Debug_Loot}) /echo I've got a stack, but its full, skipping
@@ -122,8 +125,7 @@ SUB LootCorpse
                         /goto :skipItem
                     } 
                 }
-                /next j
-            }
+            /next j
         }
 
         | No free large enough spot for item
@@ -137,7 +139,7 @@ SUB LootCorpse
             /beep
             /bca My inventory is full!
             /if (${Debug} || ${Debug_Loot}) /echo |- No free inventory slots
-            /goto :skipLoot
+            /goto :couldNotLoot
         }
         
         /call LootItem ${i} keep
@@ -146,9 +148,9 @@ SUB LootCorpse
     
         :skipItem
         /if (${Debug} || ${Debug_Loot}) /echo Done with slot i: ${i}
-        /next i
-    }
+    /next i
 
+    :couldNotLoot
     /delay 1
     |looting done, if items leftover link them
     /if (${Corpse.Items}) {
