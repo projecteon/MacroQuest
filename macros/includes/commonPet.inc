@@ -351,6 +351,7 @@ Sub Event_SummonYourPet
 | ################################################################################
 | # Summon pet event
 | ################################################################################
+#Event SummonYourPet "<#*#> ask for pet weapons from #1#"
 #Event SummonYourPet "[#*#] ask for pet weapons from #1#"
 Sub Event_BegForWeapons(eventText, string weaponSummoner)
     /if (${Debug} || ${Debug_Pet}) /echo |- Event_BegForWeapons ==>
