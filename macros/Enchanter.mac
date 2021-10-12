@@ -80,7 +80,7 @@ sub DoMezz
                     /if (${Cast.Ready[${mezzSpell}]} && ${Target.Distance} < ${Spell[${mezzSpell}].Range}) {
                         /call cast "${mezzSpell}" gem${Me.Gem[${mezzSpell}]} 0 CancelMezz 3
                         /if (${castReturn.Equal[CAST_IMMUNE]}) {
-                            /declare targetName string  local ${Spawn[${targetId}].Name}
+                            /declare targetName string  local ${Spawn[${mezTarg}].Name}
                             /bca "Mezz immune - " ${Target.Name}
                             /ini "${mesmerizeSettingsFileName}" "Immune" "${targetName}" "TRUE"
                         } else /if (${castReturn.Equal[CAST_RESISTED]}) {
@@ -126,7 +126,7 @@ Sub CancelMezz
 /return
 
 Sub InitEnchanterIni(string iniFileName)
-    /declare mesmerizeSettingsFileName  string  outer "ini/MesmerizeSettings.ini"
+    /declare mesmerizeSettingsFileName  string  outer "data/MesmerizeSettings.ini"
     /declare enchanterOptions           string  outer "EnchanterOptions"
     /declare autoMezz                   int     outer 1
     /declare mezzRadius                 int     outer 100
