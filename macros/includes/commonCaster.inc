@@ -6,6 +6,7 @@ Sub InitCasterIni(string iniFileName)
     /if (!${Defined[_readyMana]})               /declare _readyMana             int     outer 85 
     /if (!${Defined[_meditateAt]})              /declare _meditateAt            int     outer 90 
     /if (!${Defined[_meditateWithNpcInCamp]})   /declare _meditateWithNpcInCamp bool    outer FALSE 
+    /if (!${Defined[_disableMediateTimer]})     /declare _disableMediateTimer   timer   outer 0 
     /if (!${Defined[_manaStoneMinPctHP]})       /declare _manaStoneMinPctHP     int     outer 80 
     /if (!${Defined[_manaStoneMaxPctMana]})     /declare _manaStoneMaxPctMana   int     outer 70 
     /if (!${Defined[_evacSpell]})               /declare _evacSpell             string  outer 
@@ -81,7 +82,7 @@ Sub TryMedidate
     /call CheckNPCInRange
     /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
     /if (${Debug} || ${Debug_Caster}) /echo |- hasNpcInCamp ${hasNpcInCamp}
-    /if (${Me.PctMana} < ${_meditateAt} && !${Me.Sitting} && (!${hasNpcInCamp} || ${_meditateWithNpcInCamp}) && ${Stick.Status.Equal[OFF]}) {
+    /if (${Me.PctMana} < ${_meditateAt} && !${Me.Sitting} && (!${hasNpcInCamp} || (${_meditateWithNpcInCamp} && !${_disableMediateTimer})) && ${Stick.Status.Equal[OFF]}) {
         /sit
     } else /if (${Me.Sitting} && (${Me.CurrentMana} == ${Me.MaxMana} || (${hasNpcInCamp} && !${_meditateWithNpcInCamp}))) {
         /stand
@@ -102,6 +103,20 @@ Sub CheckManastone
 /return
 
 Sub EmptyCancelCast
+/return
+
+| ################################################################################
+| # Turn off MedBreak if it's currently on                                        
+| # Author: Tibbs                                                                
+| ################################################################################
+Sub DisableMeditateWithNpcInCampOffWhenHit
+    /if (${Debug} || ${Debug_Caster}) /echo |- DisableMeditateWithNpcInCampOffWhenHit ==>
+
+    /varset _disableMediateTimer 3s
+    /if (${Me.Sitting}) /stand
+    /bc A mob hit me, disabling automeditation for <${_disableMediateTimer}> ticks
+    
+    /if (${Debug} || ${Debug_Caster}) /echo <== DisableMeditateWithNpcInCampOffWhenHit -|
 /return
 
 
@@ -142,6 +157,20 @@ Sub Event_Evac
     /if (${Debug} || ${Debug_Caster}) /echo <== Event_Evac -|
 /return
 
+| ################################################################################
+| # Calls various routines when hit by an NPC.                                    
+| # Author: Tibbs                                                                
+| ################################################################################
+#Event HitByNPC "#*# YOU for #1# points of damage."
+Sub Event_HitByNPC(line, dmgAmount)
+    /if (${Debug} || ${Debug_Caster}) /echo |- Event_HitByNPC ==>
+    
+    /if (${_meditateWithNpcInCamp} && !${_disableMediateTimer}) /call DisableMeditateWithNpcInCampOffWhenHit
+    
+    /if (${Debug} || ${Debug_Caster}) /echo <== Event_HitByNPC -|
+/return
+
 Sub DoCasterEvents
   /doevents Evac
+  /doevents HitByNPC
 /return
