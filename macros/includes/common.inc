@@ -223,9 +223,9 @@ Sub MoveToLoc(int yLoc, int xLoc, int timeToWait, int arrivalDist)
             /goto :retryMove
         } 
 
+    :endMoveToLoc
     /moveto off
 
-    :endMoveToLoc
     /if (${Debug} || ${Debug_Common}) /echo <== MoveToLoc -|
 /return
 
