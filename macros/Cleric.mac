@@ -29,7 +29,6 @@ Sub Main
         /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :ClericLoop
 
         /call DoHeal
-        /call CheckManaStatus
         /call TryMedidate
         /call DoNuke
         /call DoBuffs

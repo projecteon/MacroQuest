@@ -34,7 +34,6 @@ Sub Main
         /if (${Me.Invis} || ${Me.Stunned}) /goto :WizardLoop
         /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :WizardLoop
 
-        /call CheckManaStatus
         /call DoHarvest
         /call TryMedidate
         /call DoBuffs

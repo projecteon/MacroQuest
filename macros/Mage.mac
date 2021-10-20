@@ -38,7 +38,7 @@ Sub Main
         /if (${Me.Invis}) /goto :MageLoop
         /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :MageLoop
         
-        /call CheckManaStatus
+        /call 
         /call TryMedidate
         /call DoBuffs
         /call DoPet

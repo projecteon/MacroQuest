@@ -56,21 +56,6 @@ Sub InitCasterIni(string iniFileName)
     /squelch /alias /evacuate /echo EVACUATE NOW
 /return ${initResult}
 
-Sub CheckManaStatus
-    /if (${Debug} || ${Debug_Caster}) /echo |- CheckManaStatus ==>
-
-	/if (!${Defined[_lowMana]}) /declare _lowMana outer FALSE 	
-	/if (${Math.Calc[${Me.MaxMana}*${_minMana}/100]} >= ${Me.CurrentMana} && !${_lowMana}) { 
-		/bca I am Low On Mana... 
-        /varset _lowMana TRUE
-	} else /if (${Math.Calc[${Me.MaxMana}*${_readyMana}/100]} <= ${Me.CurrentMana} && ${_lowMana}) { 
-		/bca I am ready...      
-        /varset _lowMana FALSE
-	} 
-    
-    /if (${Debug} || ${Debug_Caster}) /echo <== CheckManaStatus -|
-/return 
-
 Sub TryMedidate 
     /if (${Debug} || ${Debug_Caster}) /echo |- TryMedidate ==>
 

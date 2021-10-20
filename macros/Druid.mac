@@ -36,7 +36,6 @@ Sub Main
         
         /call CheckHeals
         /if (${Macro.Return} == 1) /goto :DruidLoop
-        /call CheckManaStatus
         /call TryMedidate
         /call DoDeBuffs 
         /call DoNuke
