@@ -260,6 +260,13 @@ Sub BuffPet
         /goto :endBuffPet
     }
     
+    /if (!${doBuffsWithNpcInCamp}) {
+        /call CheckNPCInRange
+        /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
+        /if (${Debug}) /echo |- CheckNPCInRange > ${hasNpcInCamp}
+        /if (${hasNpcInCamp}) /goto :endBuffPet
+    }
+    
     /declare buffSpell string local
     /declare buffId int local
     /declare k  int local
