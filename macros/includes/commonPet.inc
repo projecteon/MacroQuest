@@ -136,9 +136,16 @@ Sub SummonPet
             /delay 10
             /declare currentMainHand string local ${Me.Inventory[mainhand]} 
             /declare currentOffHand  string local ${Me.Inventory[offhand]}
-            /unequip offhand
-            /delay 10
-            /call ClearCursor
+            /if (${Bool[${Me.Inventory[offhand]}]}) {
+                /call UnequipOffhand ${numInventorySlots}
+                /if (${Cursor.ID} || ${Bool[${Me.Inventory[14]}]}) { | 14 -> offhand
+                    /call ClearCursor
+                    /bcaa Could not unequip offhand
+                    /beep
+                    /goto :endSummonPet
+                }
+            }
+
             /exchange "${petFocusItem}" mainhand
             /delay 10
         }
@@ -284,6 +291,47 @@ Sub BuffPet
 
     :endBuffPet
     /if (${Debug} || ${Debug_Pet}) /echo <== BuffPet -|
+/return
+
+Sub UnequipOffhand(int numberOfInventorySlots))
+    /if (${Debug} || ${Debug_Pet}) /echo |- UnequipOffhand ==> InventorySlots[${numberOfInventorySlots}]
+
+    /if (!${Me.FreeInventory}) /goto :endUnequipOffhand
+    /if (${Me.LargestFreeInventory} < ${Me.Inventory[offhand].Size}) /goto :endUnequipOffhand
+
+    /declare i int local
+    /declare c int local
+  
+    /if (${Debug} || ${Debug_Pet}) /echo |- attempting to find free slot
+    /for i 1 to ${numberOfInventorySlots}
+        /if (!${Bool[${Me.Inventory[pack${i}]}]}) {
+            /if (${Debug} || ${Debug_Pet}) /echo |- free inventory slot
+	        /itemnotify offhand leftmouseup
+            /delay 5
+            /itemnotify pack${i} leftmouseup
+            /delay 5
+            /goto :endUnequipOffhand
+        }
+
+        /if (${Me.Inventory[pack${i}].Container}) {
+            /if (${Debug} || ${Debug_Pet}) /echo |- check bag size capacity
+            /if (${Me.Inventory[pack${i}].SizeCapacity} >=  ${Cursor.Size}) {
+                /for c 1 to ${Me.Inventory[pack${i}].Container}
+                    /if (!${Bool[${Me.Inventory[pack${i}].Item[${c}]}]}) {  
+                        /if (${Debug} || ${Debug_Pet}) /echo |- free bag slot pack${i} slot${c}
+                        /itemnotify offhand leftmouseup
+                        /delay 5                  
+                        /itemnotify in pack${i} ${c} leftmouseup
+                        /delay 5
+                        /goto :endUnequipOffhand
+                    }
+                /next c
+            }
+        }
+    /next i
+
+    :endUnequipOffhand
+    /if (${Debug} || ${Debug_Pet}) /echo <== UnequipOffhand -|
 /return
 
 | ################################################################################
