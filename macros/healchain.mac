@@ -1,10 +1,11 @@
 #include includes\spell_routines.inc
 #include includes\common.inc
-#include includes\healchain.inc
+#include includes\heal_chain.inc
 
 Sub Main(string Search)
     /declare testIniFileName        string  local "ini/${MacroQuest.Server}/Test_${Me.CleanName}.ini"
-    /if (!${Defined[Debug]})  		                    /declare Debug       	                bool  	outer FALSE 
+    
+    /if (!${Defined[Debug]})    /declare Debug  bool  	outer FALSE 
 
     /call InitHealChain ${testIniFileName}
 

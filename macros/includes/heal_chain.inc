@@ -1,4 +1,11 @@
 |----------------------+----------------------------------------------------------------------+
+| @file     heal_chain.inc
+| @author   Eredhrin
+| @date     v1.00
+| 
+| Handle main tank heal chain for druids and clerics.
+|----------------------+----------------------------------------------------------------------+
+| Heal Chain States
 | IDLE              | Waiting for commands
 | BUILDING          | In process of building heal chain
 | HEALING           | Heal chain is active and running
@@ -24,7 +31,6 @@ Sub DoHealChain
                     /tell ${prevHealer} Heal <${currTank}>
                     /varset numberOfHealers ${Math.Calc[${chainHealers.Count[,]}+1]}
                     /varset chainNextHealTimer ${Math.Calc[100/${numberOfHealers}+5]}
-                    /echo <${prevHealer}> <${chainNextHealTimer}> <${chainHealers}>
                 } else /if (${Bool[${chainHealers}]}) {
                     /if (${Debug} || ${Debug_Heal_Chain}) /echo Missing healer or tank or both to run chain: <${prevHealer}> <${currTank}>
                     /rs Stop heal chain
@@ -78,8 +84,6 @@ Sub GetTank
 Sub AddHealerToChain(string healer)
     /if (${Debug} || ${Debug_Heal_Chain}) /echo |- AddHealerToChain ==>
 
-    /if (!${chainState.NotEqual[BUILDING]}) /goto :endAddHealerToChain
-
     /if (${chainHealers.Length} == 0) {
         /varset chainHealers ${healer}
     } else {
@@ -101,6 +105,8 @@ Sub Event_StartChain(string eventText)
         /varset chainState HEALING
     }
     
+    /rs Chain Heal State: <${chainState}>
+    
     /if (${Debug} || ${Debug_Heal_Chain}) /echo <== Event_StartChain -|
 /return
 
@@ -115,6 +121,8 @@ Sub Event_EndChain(string eventText)
         /varset chainNextHealTimer 0
         /varset chainTankList ""
     }
+
+    /rs Chain Heal State: <${chainState}>
     
     /if (${Debug} || ${Debug_Heal_Chain}) /echo <== Event_EndChain -|
 /return
@@ -147,6 +155,7 @@ Sub Event_MakeChain(string eventText, string tankList)
 
     /if (${canJoinHealChain}) /call AddHealerToChain ${Me}
 
+    /rs Chain Heal State: <${chainState}>
     /rs Join heal chain
     
     :endEvent_MakeChain
@@ -196,15 +205,8 @@ Sub Event_RemoveHealer(string eventText, string sender)
     /if (!${Select[${sender},${chainHealers}]}) {
         /rs <{sender}> is not part of the heal chain.
     } else {
-        /declare numberOfHealers    int     local ${Math.Calc[${chainHealers.Count[,]}+1]}
-        /declare k                  int     local
-        /declare healer             string  local
-        /for k 1 to ${numberOfHealers}
-            /varset healer ${chainHealers.Arg[${k},,]}
-            /if (${Debug} || ${Debug_Heal_Chain}) /echo |- ${healer} > [${k}] > ${chainHealers.arg[${k},,]}
-            /if (${sender.NotEqual[${healer}]}) /call AddHealerToChain ${healer}
-        /next k
-        
+        /declare removeHealer string local ${sender},
+        /varset chainHealers ${chainHealers.Replace[${removeHealer},]}        
         /rs Removed <${sender}> from healing chain <ChainCount>: <${Math.Calc[${chainHealers.Count[,]}+1]}>
     }
 
