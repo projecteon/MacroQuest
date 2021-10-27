@@ -65,6 +65,7 @@ Sub Event_dead
 		| /docommand ${ChatToggle} I'm dead. Waiting for rez.
 		/bca I'm dead. Waiting for rez.
 		/varset waiting4Rez TRUE
+		/varset waiting4RezMemmedSpells FALSE
 		/call Wait4Rez
 	}
     
@@ -86,6 +87,7 @@ Sub Event_waitNow(line, chatSender)
         |If I'm not already waiting, wait for a rez.
         /if (!${waiting4Rez}) {
 		    /varset waiting4Rez TRUE
+		    /varset waiting4RezMemmedSpells FALSE
             /call Wait4Rez
         }
     }
