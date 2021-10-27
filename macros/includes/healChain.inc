@@ -100,7 +100,7 @@ Sub Event_CastHeal(string eventText, string healTarget)
 
     /if (${chainState.Equal[HEALING]}) {
         /rs <${Time.Time24}> <${Me.PctMana}m> Casting <${If[${Me.Class.ShortName.Equal[clr]},CH,KR]}> on <${Spawn[pc =${healTarget}].Name}>
-        /casting "${If[${Me.Class.ShortName.Equal[clr]},Complete Heal,Karana's Renewal]}" "-targetid|${Spawn[pc =${Chain_Target}].ID}" -maxtries|3
+        /casting "${If[${Me.Class.ShortName.Equal[clr]},Complete Heal,Karana's Renewal]}" "-targetid|${Spawn[pc =${healTarget}].ID}" -maxtries|3
     }
     
     /if (${Debug} || ${Debug_Heal_Chain}) /echo <== Event_CastHeal -|
@@ -190,7 +190,7 @@ Sub InitHealChain(string iniFileName)
     /declare chainTankList      string  outer
     /declare canJoinHealChain   bool    outer FALSE
 
-    /declare validClasses       string  local "CLR DRU"
+    /declare validClasses       string  local "clr dru"
 
     /if (${Ini[${iniFileName},Debug,Debug_Heal_Chain].Length}) {
        /varset Debug_Heal_Chain ${Bool[${Ini[${iniFileName},Debug,Debug_Heal_Chain]}]}     
