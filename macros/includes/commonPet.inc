@@ -427,8 +427,8 @@ Sub Event_BegForWeapons(eventText, string weaponSummoner)
 | ################################################################################
 | # Weaponize pet event
 | ################################################################################
-#EVENT WeaponizeThePet "<#1#> weaponize the pet:#1#"
-#EVENT WeaponizeThePet "<#1#> weaponize your pet#*#"
+#EVENT WeaponizeThePet "<#*#> weaponize the pet:#1#"
+#EVENT WeaponizeThePet "<#*#> weaponize your pet#*#"
 #Event WeaponizeThePet "#*#[MQ2] weaponize the pet:#1#"
 #Event WeaponizeThePet "#*#[MQ2] weaponize your pet#*#"
 #Event WeaponizeThePet "[#*#] weaponize the pet:#1#"
