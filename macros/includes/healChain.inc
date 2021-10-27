@@ -161,7 +161,6 @@ Sub Event_RemoveHealer(string eventText, string sender)
     
     /if (!${Raid.Members}) /goto :endEvent_RemoveHealer
     /if (!${Select[${sender},${Raid.Members}]}) /goto :endEvent_RemoveHealer
-    /if (!${Select[${sender},${Raid.Members}]}) /goto :endEvent_RemoveHealer
 
     /if (!${Select[${sender},${chainHealers}]}) {
         /rs <{sender}> is not part of the heal chain.
