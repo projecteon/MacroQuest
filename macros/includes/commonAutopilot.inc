@@ -1,3 +1,11 @@
+|----------------------+----------------------------------------------------------------------------+
+| @file     commonAutopilot.inc
+| @author   Eredhrin
+| @date     v1.00
+| 
+| Uses MQ2Nav, MQ2Nav waypoints and ini file to join waypoints to full travel routes through zones.
+|----------------------+----------------------------------------------------------------------------+
+
 Sub DoAutoPilot(string route)
   /if (${Debug} || ${Debug_AutoPilot}) /echo |- DoAutoPilot ==> 
 
