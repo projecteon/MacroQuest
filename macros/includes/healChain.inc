@@ -19,10 +19,14 @@ Sub DoHealChain
                 /call GetTank
                 /varset currTank ${Macro.Return}
 
-                /tell ${prevHealer} Heal <${currTank}>
-
-                /declare numberOfHealers    int local ${Math.Calc[${chainHealers.Count[,]}+1]}
-                /varset chainNextHealTimer ${Math.Calc[100/${numberOfHealers}+5]}
+                /if (${Bool[${prevHealer}]} && ${Bool[${currTank}]}) {
+                    /tell ${prevHealer} Heal <${currTank}>
+                    /declare numberOfHealers    int local ${Math.Calc[${chainHealers.Count[,]}+1]}
+                    /varset chainNextHealTimer ${Math.Calc[100/${numberOfHealers}+5]}
+                } else {
+                    /if (${Debug} || ${Debug_Heal_Chain}) /echo Missing healer or tank or both to run chain: <${prevHealer}> <${currTank}>
+                    /rs Stop heal chain
+                }
             }
         }
         
@@ -35,9 +39,9 @@ Sub DoHealChain
 Sub GetNextHealer(string previousHealer)
     /if (${Debug} || ${Debug_Heal_Chain}) /echo |- GetNextHealer ==>
 
-    /declare healer          string  local
-    /declare numberOfHealers int local ${Math.Calc[${chainHealers.Count[,]}+1]}
-    /declare e int local ${Math.Calc[${Select[${previousHealer},${chainHealers}]} + 1]}
+    /declare healer             string  local
+    /declare numberOfHealers    int     local ${Math.Calc[${chainHealers.Count[,]}+1]}
+    /declare e                  int     local ${Math.Calc[${Select[${previousHealer},${chainHealers}]}+1]}
     /if (${e} == ${numberOfHealers}) /varset e 1
 
     /declare k int local
@@ -81,6 +85,7 @@ Sub Event_StartChain(string eventText)
 /return
 
 #Event EndChain  "<#*#> Stop heal chain"
+#Event EndChain  "#*# tells the raid, 'Stop heal chain'"
 Sub Event_EndChain(string eventText)
     /if (${Debug} || ${Debug_Heal_Chain}) /echo |- Event_EndChain ==>
 
