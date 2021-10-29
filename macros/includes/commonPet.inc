@@ -138,7 +138,7 @@ Sub SummonPet
             /declare currentOffHand  string local ${Me.Inventory[offhand]}
             /if (${Bool[${Me.Inventory[offhand]}]}) {
                 /call UnequipOffhand ${numInventorySlots}
-                /if (${Cursor.ID} || ${Bool[${Me.Inventory[14]}]}) { | 14 -> offhand
+                /if (${Cursor.ID} || ${Bool[${Me.Inventory[offhand]}]}) { | 14 -> offhand
                     /call ClearCursor
                     /bcaa Could not unequip offhand
                     /beep
