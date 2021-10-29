@@ -12,98 +12,97 @@
 #turbo 150
 
 Sub Main
-    /declare wizardIniFileName string local "ini/${MacroQuest.Server}/Wizard_${Me.CleanName}.ini"
+  /declare wizardIniFileName string local "ini/${MacroQuest.Server}/Wizard_${Me.CleanName}.ini"
 
 	/call CheckPlugin MQ2EQBC
 	/call CheckPlugin MQ2NetBots
 	/call CheckPlugin MQ2Moveutils
 	/call CheckPlugin MQ2Cast
 	/call CheckPlugin MQ2CastTimer
-    /call CheckPlugin MQ2Nav
+  /call CheckPlugin MQ2Nav
 
-    /call InitWizardIni ${wizardIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${wizardIniFileName}"
-        /endmacro
-    }
+  /call InitWizardIni ${wizardIniFileName}
+  /if (${Macro.Return} == 0) {
+    /echo "Bootstrapped INI file, please update variables in: ${wizardIniFileName}"
+    /endmacro
+  }
 
-    /echo "Wizard all fired up!"
-    /bca "Wizard all fired up!"
-    :WizardLoop
-        /call Wait4Rez_Background_Events
-        /if (${Me.Invis} || ${Me.Stunned}) /goto :WizardLoop
-        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :WizardLoop
+  /echo "Wizard all fired up!"
+  /bca "Wizard all fired up!"
+  :WizardLoop
+    /call Wait4Rez_Background_Events
+    /if (${Me.Invis} || ${Me.Stunned}) /goto :WizardLoop
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :WizardLoop
 
-        /call DoHarvest
-        /call TryMedidate
-        /call DoBuffs
-        /call DoNuke
-        /call DoCommonEvents
-        /goto :WizardLoop
+    /call DoHarvest
+    /call TryMedidate
+    /call DoBuffs
+    /call DoNuke
+    /call DoCommonEvents
+    /goto :WizardLoop
 /return
 
 Sub DoHarvest
-    /if (${Debug} || ${Debug_Wizard}) /echo |- DoHarvest ==>
-    
-    /if (${autoHarvest} && ${Bool[harvestSpell]} && ${Cast.Ready[${harvestSpell}]} && ${Me.Gem[${harvestSpell}]}) {
-        /call CheckNPCInRange
-        /declare hasNpcInCamp   bool    local ${Bool[${Macro.Return}]}  
-        /declare manaFromMax    int     local 0
-        /varcalc manaFromMax ${Me.MaxMana}-${Me.CurrentMana}
+  /if (${Debug} || ${Debug_Wizard}) /echo |- DoHarvest ==>
 
-        /if (${Debug} || ${Debug_Wizard}) /echo Check cast <${harvestSpell}>
-        /if ((!${hasNpcInCamp} && ${manaFromMax} > 350) || ${Me.PctMana} < 2) {
-            /if (${Debug} || ${Debug_Wizard}) /echo Casting <${harvestSpell}>
-            /call cast "${harvestSpell}" gem${Me.Gem[${harvestSpell}]} 0 CancelHarvest
-        }
+  /if (${autoHarvest} && ${Bool[harvestSpell]} && ${Cast.Ready[${harvestSpell}]} && ${Me.Gem[${harvestSpell}]}) {
+    /call CheckNPCInRange
+    /declare hasNpcInCamp   bool    local ${Bool[${Macro.Return}]}
+    /declare manaFromMax    int     local 0
+    /varcalc manaFromMax ${Me.MaxMana}-${Me.CurrentMana}
+
+    /if (${Debug} || ${Debug_Wizard}) /echo Check cast <${harvestSpell}>
+    /if ((!${hasNpcInCamp} && ${manaFromMax} > 350) || ${Me.PctMana} < 2) {
+      /if (${Debug} || ${Debug_Wizard}) /echo Casting <${harvestSpell}>
+      /call cast "${harvestSpell}" gem${Me.Gem[${harvestSpell}]} 0 CancelHarvest
     }
+  }
 
-    /if (${Debug} || ${Debug_Wizard}) /echo <== DoHarvest -|
+  /if (${Debug} || ${Debug_Wizard}) /echo <== DoHarvest -|
 /return
 
 Sub CancelHarvest
-    /if (!${Me.Casting.ID} && !${Cast.Ready[${harvestSpell}]}) /call Interrupt
+  /if (!${Me.Casting.ID} && !${Cast.Ready[${harvestSpell}]}) /call Interrupt
 /return
 
 Sub InitWizardIni(string iniFileName)
-    /declare wizardOptions    string  outer "WizardOptions"
-    /declare parentInitResult int     local 1
-    /declare autoHarvest      bool    outer FALSE
-    /declare harvestSpell     string  outer 
-    /if (!${Defined[Debug_Wizard]})           /declare Debug_Wizard           bool    outer FALSE
+  /declare wizardOptions    string  outer "WizardOptions"
+  /declare parentInitResult int     local 1
+  /declare autoHarvest      bool    outer FALSE
+  /declare harvestSpell     string  outer
+  /if (!${Defined[Debug_Wizard]})           /declare Debug_Wizard           bool    outer FALSE
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
 
-    /call InitNukeIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitNukeIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
-    /call InitBufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitBufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+      /varset parentInitResult 0
+  }
 
-    /if (${Ini[${iniFileName},${wizardOptions},AutoHarvest].Length}) {
-       /varset autoHarvest ${Bool[${Ini[${iniFileName},${wizardOptions},AutoHarvest]}]}
-    } else {
-        /ini "${iniFileName}" "${wizardOptions}" "AutoHarvest" "${autoHarvest}"
-    }
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
-    /if (${Ini[${iniFileName},${wizardOptions},HarvestSpell].Length}) {
-       /varset harvestSpell "${Ini[${iniFileName},${wizardOptions},HarvestSpell]}"   
-    } else {
-        /ini "${iniFileName}" "${wizardOptions}" "HarvestSpell" "${harvestSpell}"
-    }
-    
-    /if (${Ini[${iniFileName},Debug,Debug_Wizard].Length}) {
-       /varset Debug_Wizard ${Bool[${Ini[${iniFileName},Debug,Debug_Wizard]}]}     
-    } 
+  /if (${Ini[${iniFileName},${wizardOptions},AutoHarvest].Length}) {
+    /varset autoHarvest ${Bool[${Ini[${iniFileName},${wizardOptions},AutoHarvest]}]}
+  } else {
+    /ini "${iniFileName}" "${wizardOptions}" "AutoHarvest" "${autoHarvest}"
+  }
 
+  /if (${Ini[${iniFileName},${wizardOptions},HarvestSpell].Length}) {
+    /varset harvestSpell "${Ini[${iniFileName},${wizardOptions},HarvestSpell]}"
+  } else {
+    /ini "${iniFileName}" "${wizardOptions}" "HarvestSpell" "${harvestSpell}"
+  }
+
+  /if (${Ini[${iniFileName},Debug,Debug_Wizard].Length}) {
+    /varset Debug_Wizard ${Bool[${Ini[${iniFileName},Debug,Debug_Wizard]}]}
+  }
 /return ${parentInitResult}

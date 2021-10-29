@@ -5,48 +5,47 @@
 #turbo 150
 
 Sub Main
-    /declare monkIniFileName        string  outer "ini/${MacroQuest.Server}/Monk_${Me.CleanName}.ini"
+  /declare monkIniFileName        string  outer "ini/${MacroQuest.Server}/Monk_${Me.CleanName}.ini"
 
 	/call CheckPlugin MQ2EQBC
 	/call CheckPlugin MQ2NetBots
 	/call CheckPlugin MQ2Moveutils
 	/call CheckPlugin MQ2Cast
-    /call CheckPlugin MQ2Nav
+  /call CheckPlugin MQ2Nav
 
-    /call InitMonkIni ${monkIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${monkIniFileName}"
-        /endmacro
-    }
+  /call InitMonkIni ${monkIniFileName}
+  /if (${Macro.Return} == 0) {
+    /echo "Bootstrapped INI file, please update variables in: ${monkIniFileName}"
+    /endmacro
+  }
 
-    /echo "Monk rock'n'rolling!"
-    /bca "Monk rock'n'rolling!"
+  /echo "Monk rock'n'rolling!"
+  /bca "Monk rock'n'rolling!"
 
-    :MonkLoop
-        /call Wait4Rez_Background_Events
-        /if (${Me.Invis}) /goto :MonkLoop
-        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :MonkLoop
+  :MonkLoop
+    /call Wait4Rez_Background_Events
+    /if (${Me.Invis}) /goto :MonkLoop
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :MonkLoop
 
-        /call DoKill
-        /call DoCommonEvents
-        /goto :MonkLoop
+    /call DoKill
+    /call DoCommonEvents
+    /goto :MonkLoop
 /return
 
 Sub InitMonkIni(string iniFileName)
-    /declare monkOptions       string  outer "MonkOptions"
-    /declare parentInitResult  int     local 1
+  /declare monkOptions       string  outer "MonkOptions"
+  /declare parentInitResult  int     local 1
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-    
-    /call InitMeleeIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
+
+  /call InitMeleeIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 /return ${parentInitResult}

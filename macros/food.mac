@@ -9,7 +9,7 @@ Sub Main(numberOfStacks)
 
   /if (${Defined[numberOfStacks]}) /declare numberOfStacks int outer 1
   /if (${numberOfStacks}<1 || ${numberOfStacks}>20) /varset numberOfStacks 1
-  
+
   /echo Summoning ${numberOfStacks} stack(s) of food and drink.
   /call SummonDrinkFood
   /echo Done summoning stuff!
@@ -35,7 +35,7 @@ Sub SummonDrinkFood
     }
 
     :BigLoop
-      /varset drinkCount ${Math.Calc[${FindItemCount[=${drinkItem}]}]}      
+      /varset drinkCount ${Math.Calc[${FindItemCount[=${drinkItem}]}]}
       /if (${Me.SpellReady[${drinkSpell}]} && ${Math.Calc[20*${numberOfStacks}]}>${drinkCount}) {
         :DrinkLoop
           /if (!${Me.State.Equal[STAND]} || ${Cursor.ID} || ${Me.Casting.ID}) {
@@ -62,7 +62,7 @@ Sub SummonDrinkFood
       /if (${Math.Calc[20*${numberOfStacks}]}>=${Math.Calc[${FindItemCount[=${drinkItem}]}+4]}) /goto :BigLoop
       /if (${Math.Calc[20*${numberOfStacks}]}>=${Math.Calc[${FindItemCount[=${foodItem}]}+4]}) /goto :BigLoop
   }
-    
+
   /echo <== SummonDrinkFood -|
 /return
 

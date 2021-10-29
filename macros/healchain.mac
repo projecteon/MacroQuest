@@ -3,14 +3,14 @@
 #include includes\heal_chain.inc
 
 Sub Main(string Search)
-    /declare testIniFileName        string  local "ini/${MacroQuest.Server}/Test_${Me.CleanName}.ini"
-    
-    /if (!${Defined[Debug]})    /declare Debug  bool  	outer FALSE 
+  /declare testIniFileName        string  local "ini/${MacroQuest.Server}/Test_${Me.CleanName}.ini"
 
-    /call InitHealChain ${testIniFileName}
+  /if (!${Defined[Debug]})    /declare Debug  bool  	outer FALSE
 
-    :HealChainLoop
-        /call DoHealChain
-        /goto :HealChainLoop
+  /call InitHealChain ${testIniFileName}
 
-/return 
+  :HealChainLoop
+    /call DoHealChain
+    /goto :HealChainLoop
+
+/return

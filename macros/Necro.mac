@@ -14,7 +14,7 @@
 #turbo 150
 
 Sub Main
-    /declare mageIniFileName    string  local "ini/${MacroQuest.Server}/Necro_${Me.CleanName}.ini"
+  /declare mageIniFileName    string  local "ini/${MacroQuest.Server}/Necro_${Me.CleanName}.ini"
 
 	/call CheckPlugin MQ2EQBC
 	/call CheckPlugin MQ2NetBots
@@ -23,61 +23,60 @@ Sub Main
 	/call CheckPlugin MQ2CastTimer
 	/call CheckPlugin MQ2BagWindow
 	/call CheckPlugin MQ2Exchange
-    /call CheckPlugin MQ2Nav
+  /call CheckPlugin MQ2Nav
 
-    /call InitNecroIni ${mageIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${mageIniFileName}"
-        /endmacro
-    }
+  /call InitNecroIni ${mageIniFileName}
+  /if (${Macro.Return} == 0) {
+    /echo "Bootstrapped INI file, please update variables in: ${mageIniFileName}"
+    /endmacro
+  }
 
-    /echo "Necro ruling the dead!"
-    /bca "Necro ruling the dead!"
-    
-    :NecroLoop
-        /call Wait4Rez_Background_Events
-        /if (${Me.Invis}) /goto :NecroLoop
-        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :NecroLoop
-        
-        /call TryMedidate
-        /call DoPet
-        /call DoDeBuffs
-        /call DoNuke
-        /call DoBuffs
-        /call DoCommonEvents
-        /goto :NecroLoop
+  /echo "Necro ruling the dead!"
+  /bca "Necro ruling the dead!"
+
+  :NecroLoop
+    /call Wait4Rez_Background_Events
+    /if (${Me.Invis}) /goto :NecroLoop
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :NecroLoop
+
+    /call TryMedidate
+    /call DoPet
+    /call DoDeBuffs
+    /call DoNuke
+    /call DoBuffs
+    /call DoCommonEvents
+    /goto :NecroLoop
 /return
 
 Sub InitNecroIni(string iniFileName)
-    /declare necroOptions       string  outer "NecroOptions"
-    /declare parentInitResult   int     local 1
+  /declare necroOptions       string  outer "NecroOptions"
+  /declare parentInitResult   int     local 1
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
 
-    /call InitNukeIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitNukeIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
-    /call InitBufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitDebufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitBufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
-    /call InitPetIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitDebufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
+  /call InitPetIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 /return ${parentInitResult}

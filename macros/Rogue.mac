@@ -6,49 +6,49 @@
 #turbo 150
 
 Sub Main
-    /declare rogueIniFileName        string  outer "ini/${MacroQuest.Server}/Rogue_${Me.CleanName}.ini"
+  /declare rogueIniFileName        string  outer "ini/${MacroQuest.Server}/Rogue_${Me.CleanName}.ini"
 
 	/call CheckPlugin MQ2EQBC
 	/call CheckPlugin MQ2NetBots
 	/call CheckPlugin MQ2Moveutils
 	/call CheckPlugin MQ2Cast
-    /call CheckPlugin MQ2Nav
+  /call CheckPlugin MQ2Nav
 
-    /call InitRogueIni ${rogueIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${rogueIniFileName}"
-        /endmacro
-    }
+  /call InitRogueIni ${rogueIniFileName}
+  /if (${Macro.Return} == 0) {
+    /echo "Bootstrapped INI file, please update variables in: ${rogueIniFileName}"
+    /endmacro
+  }
 
-    /echo "Rogue backstabbin!"
-    /bca "Rogue backstabbin!"
+  /echo "Rogue backstabbin!"
+  /bca "Rogue backstabbin!"
 
-    :RogueLoop
-        /call Wait4Rez_Background_Events
-        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :RogueLoop
+  :RogueLoop
+    /call Wait4Rez_Background_Events
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :RogueLoop
 
-        | /call DoKill
-        /call DoMeleeDps DoBackStab
-        /call DoCommonEvents
-        /call DoMeleeEvents
-        /goto :RogueLoop
+    | /call DoKill
+    /call DoMeleeDps DoBackStab
+    /call DoCommonEvents
+    /call DoMeleeEvents
+    /goto :RogueLoop
 /return
 
 Sub DoBackStab
-    /if (${Debug} || ${Debug_Melee}) /echo |- DoBackStab ==>	
-	
-    /if (${Math.Abs[${Me.Heading.Degrees}-${Target.Heading.Degrees}]} < 45) {
-        | /call DoRogueStrike
-        /if (${Me.AbilityReady[Backstab]}) {
-            /doability Backstab
-        }
-    }
+  /if (${Debug} || ${Debug_Melee}) /echo |- DoBackStab ==>
 
-    /if (${Debug} || ${Debug_Melee}) /echo <== DoBackStab -|
+  /if (${Math.Abs[${Me.Heading.Degrees}-${Target.Heading.Degrees}]} < 45) {
+    | /call DoRogueStrike
+    /if (${Me.AbilityReady[Backstab]}) {
+      /doability Backstab
+    }
+  }
+
+  /if (${Debug} || ${Debug_Melee}) /echo <== DoBackStab -|
 /return
 
 Sub DoRogueStrike
-    /if (${Debug} || ${Debug_Melee}) /echo |- DoRogueStrike ==>	
+  /if (${Debug} || ${Debug_Melee}) /echo |- DoRogueStrike ==>
 
 	/if (${Me.Endurance} > ${strikeDiscEndCost} && ${Me.PctEndurance} >= ${strikeDiscMinEnd} && ${Me.CombatAbilityReady[${strikeDisc}]} && ${Me.AbilityReady[Backstab]} && !${Me.ActiveDisc.ID} && ${Me.Invis} && ${Me.Sneaking}) {
 		| Use 'Assassin's Strike' type disc.
@@ -61,22 +61,21 @@ Sub DoRogueStrike
 		/attack on
 	}
 
-    /if (${Debug} || ${Debug_Melee}) /echo <== DoRogueStrike -|
+  /if (${Debug} || ${Debug_Melee}) /echo <== DoRogueStrike -|
 /return
 
 Sub InitRogueIni(string iniFileName)
-    /declare rogueOptions       string  outer "RogueOptions"
-    /declare parentInitResult   int     local 1
+  /declare rogueOptions       string  outer "RogueOptions"
+  /declare parentInitResult   int     local 1
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-    
-    /call InitMeleeIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
+
+  /call InitMeleeIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
+
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 /return ${parentInitResult}
