@@ -2,12 +2,12 @@
 | @file     commonAutopilot.inc
 | @author   Eredhrin
 | @date     v1.00
-| 
+|
 | Uses MQ2Nav, MQ2Nav waypoints and ini file to join waypoints to full travel routes through zones.
 |----------------------+----------------------------------------------------------------------------+
 
 Sub DoAutoPilot(string route)
-  /if (${Debug} || ${Debug_AutoPilot}) /echo |- DoAutoPilot ==> 
+  /if (${Debug} || ${Debug_AutoPilot}) /echo |- DoAutoPilot ==>
 
   /declare zones string local ${Ini[${autoPilotIniFileName},${route}]}
   /if (${zones.Equal[NULL]}) {
@@ -34,7 +34,7 @@ Sub DoAutoPilot(string route)
       /goto :doAutopilot
     }
   }
-  
+
   :endAutoPilot
   /if (${Debug} || ${Debug_AutoPilot}) /echo <== DoAutoPilot -|
 /return
@@ -52,15 +52,14 @@ Sub NavigateZoneWaypoints
     :doNaviate
     /delay 5
     /if (${Navigation.Active}) /goto :doNaviate
-  /next k 
+  /next k
 /return
 
 Sub InitAutopilot(string iniFile)
   /declare autoPilotIniFileName string  outer "data/Autopilot Routes.ini"
-  /declare Debug_AutoPilot 	    bool  	outer TRUE 
+  /declare Debug_AutoPilot 	    bool  	outer TRUE
 
-  
-    /squelch /alias /autopilot /bc autopilot too
+  /squelch /alias /autopilot /bc autopilot too
 /return
 
 | ################################################################################
@@ -69,10 +68,10 @@ Sub InitAutopilot(string iniFile)
 #Event AutoPilot "<#*#> autopilot too #1#"
 #Event AutoPilot "#*#[MQ2] autopilot too #1#"
 Sub Event_AutoPilot(eventText, route)
-  /if (${Debug} || ${Debug_AutoPilot}) /echo |- Event_AutoPilot ==> 
+  /if (${Debug} || ${Debug_AutoPilot}) /echo |- Event_AutoPilot ==>
 
   /if (!${Defined[route]}) {
-    /bc You must supply a route param. 
+    /bc You must supply a route param.
   } else {
     /call DoAutoPilot ${route}
   }
