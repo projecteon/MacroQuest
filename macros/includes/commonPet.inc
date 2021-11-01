@@ -169,35 +169,34 @@ Sub SummonPet
   /if (${Debug} || ${Debug_Pet}) /echo <== SummonPet -|
 /return
 
-
-
 Sub WeaponizePet(int petID)
   /if (${Debug} || ${Debug_Pet}) /echo |- WeaponizePet ==> ${petID}
 
   /if (!${Bool[${petWeaponsSpell}]}) {
+    /echo  !!! Not set <<${petWeaponsSpell}>> !!!
     /goto :endWeaponizePet
   }
 
   /if (!${Me.Gem[${petWeaponsSpell}]}) {
-    /bca !!! SPELL NOT MEMORIZED <<${petWeaponsSpell}>> !!!
+    /bcaa !!! SPELL NOT MEMORIZED <<${petWeaponsSpell}>> !!!
     /goto :endWeaponizePet
   }
 
-  /if (!${Defined[petID]}) {
-    /declare petID int local ${Me.Pet.ID}
-  } else /if (${petID} == 0) {
-    /varset petID ${Me.Pet.ID}
+  /declare innerPetID int local ${petID}
+
+  /if (!${Bool[${innerPetID}]}) {
+    /varset innerPetID ${Me.Pet.ID}
   }
 
   | check is of <pcpet> in spawn filter
-  /if (!${petID} && !${Spawn[pet id ${petID}].ID}) {
-    /bca No pet to weaponize, missing pet id: <${petID}>
+  /if (!${Bool[${innerPetID}]} || !${Spawn[pet id ${innerPetID}].ID}) {
+    /bcaa No pet to weaponize, missing pet id: <${innerPetID}>
     /goto :endWeaponizePet
   }
 
   | check is of <pcpet> in spawn filter
-  /if (!${petID} && !${Spawn[pcpet radius 100 id ${petID}].LineOfSight}) {
-    /bca Pet outside range or line of sight: <${petID}> <${Spawn[pet id ${petID}]}>
+  /if (!${Spawn[pcpet radius 100 id ${innerPetID}].LineOfSight}) {
+    /bca Pet outside range or line of sight: <${innerPetID}> <${Spawn[pet id ${innerPetID}]}>
     /goto :endWeaponizePet
   }
 
@@ -212,7 +211,7 @@ Sub WeaponizePet(int petID)
     /goto :endWeaponizePet
   }
 
-  /call EnsureTarget ${petID}
+  /call EnsureTarget ${innerPetID}
 
   /declare tradeAttemps int local 1
   /declare k  int local
@@ -244,7 +243,7 @@ Sub WeaponizePet(int petID)
     /if (${Cursor.ID} && ${tradeAttemps} < 3) /goto :tradePet
 
     /if (${Cursor.ID}) {
-      /bcaa Could not hand <${Cursor}> to <${Target}> <${petID}>
+      /bcaa Could not hand <${Cursor}> to <${Target}> <${innerPetID}>
       /beep
     }
   /next k
@@ -252,7 +251,7 @@ Sub WeaponizePet(int petID)
   :endWeaponizePet
 
   /if (${Debug} || ${Debug_Pet}) /echo <== WeaponizePet -|
-/Return
+/return
 
 Sub BuffPet
   /if (${Debug} || ${Debug_Pet}) /echo |- BuffPet ==>
