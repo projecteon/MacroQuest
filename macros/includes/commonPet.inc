@@ -178,7 +178,7 @@ Sub WeaponizePet(int petID)
   }
 
   /if (!${Me.Gem[${petWeaponsSpell}]}) {
-    /bcaa !!! SPELL NOT MEMORIZED <<${petWeaponsSpell}>> !!!
+    /bca !!! SPELL NOT MEMORIZED <<${petWeaponsSpell}>> !!!
     /goto :endWeaponizePet
   }
 
@@ -190,7 +190,7 @@ Sub WeaponizePet(int petID)
 
   | check is of <pcpet> in spawn filter
   /if (!${Bool[${innerPetID}]} || !${Spawn[pet id ${innerPetID}].ID}) {
-    /bcaa No pet to weaponize, missing pet id: <${innerPetID}>
+    /bca No pet to weaponize, missing pet id: <${innerPetID}>
     /goto :endWeaponizePet
   }
 
@@ -206,7 +206,7 @@ Sub WeaponizePet(int petID)
 
   /call ClearCursor
   /if (${Cursor.ID}) {
-    /bcaa Cursor not empty <${Cursor}>, cancelling pet weaponizing
+    /bca Cursor not empty <${Cursor}>, cancelling pet weaponizing
     /beep
     /goto :endWeaponizePet
   }
