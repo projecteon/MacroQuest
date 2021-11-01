@@ -116,6 +116,8 @@ Sub SummonPet
     /goto :endSummonPet
   }
 
+  /if (${Bool[${Me.Pet.ID}]}) /goto :endSummonPet
+
   /if (!${Bool[${Me.Pet.ID}]} && !${Bool[${Me.Casting}]} && ${Me.SpellReady[${petSpell}]} && ${Me.CurrentMana} > ${Spell[${petSpell}].Mana}) {
     /if (${Bool[${petFocusItem}]} && ${Bool[${FindItem[=${petFocusItem}]}]} && ${FindItem[=${petFocusItem}].ItemSlot} >=23) {
       /if (!${Me.FreeInventory}) {
@@ -127,12 +129,13 @@ Sub SummonPet
       /call CheckAllBagsAreOpen
       /delay 10
       /declare currentMainHand string local ${Me.Inventory[mainhand]}
-      /declare currentOffHand  string local ${Me.Inventory[offhand]}
-      /if (${Bool[${Me.Inventory[offhand]}]}) {
+       | 14 -> offhand
+      /declare currentOffHand  string local ${Me.Inventory[14]}
+      /if (${Bool[${Me.Inventory[14]}]}) {
         /call UnequipOffhand ${numInventorySlots}
-        /if (${Cursor.ID} || ${Bool[${Me.Inventory[offhand]}]}) { | 14 -> offhand
+        /if (${Cursor.ID} || ${Bool[${Me.Inventory[14]}]}) {
           /call ClearCursor
-          /bcaa Could not unequip offhand
+          /bcaa Could not unequip offhand <${Cursor.ID}> <${Me.Inventory[14]}]>
           /beep
           /goto :endSummonPet
         }
