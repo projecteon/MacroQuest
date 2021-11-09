@@ -70,7 +70,7 @@ Sub InitAutopilot(string iniFile)
 Sub Event_AutoPilot(eventText, route)
   /if (${Debug} || ${Debug_AutoPilot}) /echo |- Event_AutoPilot ==>
 
-  /if (!${Defined[route]}) {
+  /if (!${Defined[route]} || ${route.Equal[NULL]}) {
     /bc You must supply a route param.
   } else {
     /call DoAutoPilot ${route}
