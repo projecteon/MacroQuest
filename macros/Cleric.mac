@@ -6,11 +6,12 @@
 #include includes\commonHealer.inc
 #include includes\commonBuffer.inc
 #include includes\commonNuke.inc
+#include includes\heal_chain.inc
 #include includes\wait4rez.inc
 #turbo 150
 
 Sub Main
-    /declare clericIniFileName        string  local "ini/${MacroQuest.Server}/Cleric_${Me.CleanName}.ini"
+  /declare clericIniFileName        string  local "ini/${MacroQuest.Server}/Cleric_${Me.CleanName}.ini"
 
 	/call CheckPlugin MQ2EQBC
 	/call CheckPlugin MQ2NetBots
@@ -19,32 +20,33 @@ Sub Main
 	/call CheckPlugin MQ2CastTimer
     /call CheckPlugin MQ2Nav
 
-    /call InitClericIni ${clericIniFileName}
+  /call InitClericIni ${clericIniFileName}
 
-    /echo "Cleric all set!"
-    /bca "Cleric all set!"
-    :ClericLoop
-        /call Wait4Rez_Background_Events
-        /if (${Me.Invis}) /goto :ClericLoop
-        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :ClericLoop
+  /echo "Cleric all set!"
+  /bca "Cleric all set!"
+  :ClericLoop
+    /call Wait4Rez_Background_Events
+    /if (${Me.Invis}) /goto :ClericLoop
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :ClericLoop
 
-        /call DoHeal
-        /call TryMedidate
-        /call DoNuke
-        /call DoBuffs
-        /call DoCommonEvents
-        /goto :ClericLoop
+    /call DoHeal
+    /call TryMedidate
+    /call DoNuke
+    /call DoBuffs
+    /call DoHealChain
+    /call DoCommonEvents
+    /goto :ClericLoop
 /return
 
 | ###############################################################################
 | # Checks the tank and specified PC's for hitpoint levels and heals accordingly.
-| # This gets called in the main loop for every healer. It is the primary point 
+| # This gets called in the main loop for every healer. It is the primary point
 | # for all healing.
 | ###############################################################################
 Sub DoHeal
 	|- Do we use a group heal?
 	/call GroupAOEHeal
-	
+
 	|- Check for heals
     /call CheckHeals
 
@@ -66,8 +68,8 @@ Sub GroupAOEHeal
     /next x
 
 	/if (${groupMembersWithLowHealthCount} >= ${groupHealNum}) {
-		/gsay <<< ${areaGroupHeal} >>>			
-		/bca <<< ${areaGroupHeal} >>>			
+		/gsay <<< ${areaGroupHeal} >>>
+		/bca <<< ${areaGroupHeal} >>>
         /call cast "${areaGroupHeal}" gem${Me.Gem[${areaGroupHeal}]} 0 CancelGroupHeal 3
 		|- Delay to give everyones hp time to update
 		/delay 5
@@ -80,56 +82,61 @@ Sub CancelGroupHeal
 /return
 
 Sub InitClericIni(string iniFileName)
-    /declare options            string  local "HealingOptions"
-    /declare parentInitResult   int     local 1
-    /declare areaGroupHeal      string  outer "GroupAOEHeal" 
-    /declare areaGroupHealPct   int     outer 0
-    /declare groupHealNum       int     outer 4
+  /declare options            string  local "HealingOptions"
+  /declare parentInitResult   int     local 1
+  /declare areaGroupHeal      string  outer "GroupAOEHeal"
+  /declare areaGroupHealPct   int     outer 0
+  /declare groupHealNum       int     outer 4
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-        
-    /call InitHealIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitBufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitNukeIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /if (${Ini[${iniFileName},${options},AreaGroupHeal].Length}) {
-        /varset areaGroupHeal "${Ini[${iniFileName},${options},AreaGroupHeal]}"
-    } else {
-        /ini "${iniFileName}" "${options}" "AreaGroupHeal" "${areaGroupHeal}"
-    }
-    
-    /if (${Ini[${iniFileName},${options},AreaGroupHealPct].Length}) {
-        /varset areaGroupHealPct ${Ini[${iniFileName},${options},AreaGroupHealPct]} 
-    } else {
-        /ini "${iniFileName}" "${options}" "AreaGroupHealPct" "${areaGroupHealPct}"
-    }
-    
-    /if (${Ini[${iniFileName},${options},AreaGroupHealNum].Length}) {
-        /varset groupHealNum ${Ini[${iniFileName},${options},AreaGroupHealNum]} 
-    } else {
-        /ini "${iniFileName}" "${options}" "AreaGroupHealNum" "${groupHealNum}"
-    }
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
 
-    /if (${parentInitResult} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${clericIniFileName}"
-        /endmacro
-    }
+  /call InitHealIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+      /varset parentInitResult 0
+  }
 
-/return 
+  /call InitBufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+      /varset parentInitResult 0
+  }
+
+  /call InitNukeIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitHealChain "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+      /varset parentInitResult 0
+  }
+
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+      /varset parentInitResult 0
+  }
+
+  /if (${Ini[${iniFileName},${options},AreaGroupHeal].Length}) {
+    /varset areaGroupHeal "${Ini[${iniFileName},${options},AreaGroupHeal]}"
+  } else {
+    /ini "${iniFileName}" "${options}" "AreaGroupHeal" "${areaGroupHeal}"
+  }
+
+  /if (${Ini[${iniFileName},${options},AreaGroupHealPct].Length}) {
+    /varset areaGroupHealPct ${Ini[${iniFileName},${options},AreaGroupHealPct]}
+  } else {
+    /ini "${iniFileName}" "${options}" "AreaGroupHealPct" "${areaGroupHealPct}"
+  }
+
+  /if (${Ini[${iniFileName},${options},AreaGroupHealMinCount].Length}) {
+    /varset groupHealNum ${Ini[${iniFileName},${options},AreaGroupHealMinCount]}
+  } else {
+    /ini "${iniFileName}" "${options}" "AreaGroupHealMinCount" "${groupHealNum}"
+  }
+
+  /if (${parentInitResult} == 0) {
+    /echo "Bootstrapped INI file, please update variables in: ${clericIniFileName}"
+    /endmacro
+  }
+
+/return
