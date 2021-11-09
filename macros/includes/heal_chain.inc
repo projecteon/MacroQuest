@@ -18,7 +18,7 @@ Sub DoHealChain
 
     /declare numberOfHealers    int local
     /while (${chainState.Equal[HEALING]}) {
-      /if (!${Defined[prevHealer]})  	/declare prevHealer string local
+      /if (!${Defined[prevHealer]}) /declare prevHealer string local
       /if (!${Defined[currTank]})  	/declare currTank   string local
       /if (${chainHealers.Length} > 0) {
           /if (${chainNextHealTimer} < 2) {
