@@ -6,8 +6,8 @@
 #turbo 150
 
 Sub Main
-    /declare bardIniFileName        string  outer "ini/${MacroQuest.Server}/Bard_${Me.CleanName}.ini"
-    /declare Debug_Bard             bool    outer FALSE
+  /declare bardIniFileName        string  outer "ini/${MacroQuest.Server}/Bard_${Me.CleanName}.ini"
+  /declare Debug_Bard             bool    outer FALSE
 
 	/call CheckPlugin MQ2EQBC
 	/call CheckPlugin MQ2NetBots
@@ -15,32 +15,32 @@ Sub Main
 	/call CheckPlugin MQ2Cast
 	/call CheckPlugin MQ2BagWindow
 	/call CheckPlugin MQ2Exchange
-    /call CheckPlugin MQ2BardSwap
-    /call CheckPlugin MQ2Twist
-    /call CheckPlugin MQ2Nav
+  /call CheckPlugin MQ2BardSwap
+  /call CheckPlugin MQ2Twist
+  /call CheckPlugin MQ2Nav
 
-    /call InitBardIni ${bardIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${bardIniFileName}"
-        /endmacro
-    }
+  /call InitBardIni ${bardIniFileName}
+  /if (${Macro.Return} == 0) {
+    /echo "Bootstrapped INI file, please update variables in: ${bardIniFileName}"
+    /endmacro
+  }
 
-    /if (!${BardSwap}) /bardswap
+  /if (!${BardSwap}) /bardswap
 
-    /echo "Bard rock'n'rolling!"
-    /bca "Bard rock'n'rolling!"
+  /echo "Bard rock'n'rolling!"
+  /bca "Bard rock'n'rolling!"
 
-    :BardLoop
-        /call Wait4Rez_Background_Events
-        /call CheckAllBagsAreOpen
-        
-        /if (${Me.Invis}) /goto :BardLoop
-        /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :BardLoop
+  :BardLoop
+    /call Wait4Rez_Background_Events
+    /call CheckAllBagsAreOpen
 
-        /call DoKill
-        /call DoCommonEvents
-        /call DoBardEvents   
-        /goto :BardLoop
+    /if (${Me.Invis}) /goto :BardLoop
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :BardLoop
+
+    /call DoKill
+    /call DoCommonEvents
+    /call DoBardEvents
+    /goto :BardLoop
 /return
 
 |------------------------------------------------------------------------|
@@ -48,63 +48,63 @@ Sub Main
 #EVENT StartMelody "[#1#] Melody #2#"
 #EVENT StartMelody "#1# tells you, 'Melody #2#'"
 SUB EVENT_StartMelody(string line, string chatSender, string melodyName)
-    /if (${Debug}|| ${Debug_Bard}) /echo |- EVENT_StartMelody ==>
-    
-    /call InitSpell
-    /call IniSpellArray ${bardIniFileName} "Melody" "Song" melodies
-    /if (!${Defined[melodies]}) {
-        /bct ${chatSender} <${melodyName}> has invalid or no setup in <${bardIniFileName}>
-        /goto :endEVENT_StartMelody
-    }
-    
-    /declare songGem  int    local
-    /declare songList string local
-    /declare k  int local
-    /for k 1 to ${Math.Calc[${melodies.Size}/${spellPropsDimentions}]}
-        /if (!${Me.Book[${melodies[${k},${spellNameProp}]}]}) {
-            /bct ${chatSender} I don't have <${melodies[${k},${spellNameProp}]}> in my spellbook, playing the melody without it.
+  /if (${Debug}|| ${Debug_Bard}) /echo |- EVENT_StartMelody ==>
+
+  /call InitSpell
+  /call IniSpellArray ${bardIniFileName} "Melody" "Song" melodies
+  /if (!${Defined[melodies]}) {
+    /bct ${chatSender} <${melodyName}> has invalid or no setup in <${bardIniFileName}>
+    /goto :endEVENT_StartMelody
+  }
+
+  /declare songGem  int    local
+  /declare songList string local
+  /declare k  int local
+  /for k 1 to ${Math.Calc[${melodies.Size}/${spellPropsDimentions}]}
+    /if (!${Me.Book[${melodies[${k},${spellNameProp}]}]}) {
+      /bct ${chatSender} I don't have <${melodies[${k},${spellNameProp}]}> in my spellbook, playing the melody without it.
+    } else {
+      /if (!${Me.Gem[${melodies[${k},${spellNameProp}]}]}) {
+        /if (!${Bool[${melodies[${k},${spellGem}]}]}) {
+          /bct ${chatSender} No spell gem is defined for <${melodies[${k},${spellNameProp}]}>
+        } else /if (${Select[${melodies[${k},${spellGem}]},${songList}]}) {
+          /bct ${chatSender} Spell gem <${melodies[${k},${spellGem}]}> for <${melodies[${k},${spellNameProp}]}> is already busy for <${Me.Gem[${melodies[${k},${spellGem}]}]}>.
         } else {
-            /if (!${Me.Gem[${melodies[${k},${spellNameProp}]}]}) {
-                /if (!${Bool[${melodies[${k},${spellGem}]}]}) {
-                    /bct ${chatSender} No spell gem is defined for <${melodies[${k},${spellNameProp}]}>
-                } else /if (${Select[${melodies[${k},${spellGem}]},${songList}]}) {
-                    /bct ${chatSender} Spell gem <${melodies[${k},${spellGem}]}> for <${melodies[${k},${spellNameProp}]}> is already busy for <${Me.Gem[${melodies[${k},${spellGem}]}]}>.
-                } else {
-                    /memorize "${melodies[${k},${spellNameProp}]}" "${melodies[${k},${spellGem}]}"
-                    /if (${Cast.Status.Find[M]}) /delay 3s !${Cast.Status.Find[M]}
-                    /varset songList ${songList} ${melodies[${k},${spellGem}]}
-                }
-            } else {
-                /varset songList ${songList} ${Me.Gem[${melodies[${k},${spellNameProp}]}]}
-            }
+          /memorize "${melodies[${k},${spellNameProp}]}" "${melodies[${k},${spellGem}]}"
+          /if (${Cast.Status.Find[M]}) /delay 3s !${Cast.Status.Find[M]}
+          /varset songList ${songList} ${melodies[${k},${spellGem}]}
+        }
+      } else {
+        /varset songList ${songList} ${Me.Gem[${melodies[${k},${spellNameProp}]}]}
+      }
+    }
+  /next k
 
-        }        
-    /next k 
+  /bct ${chatSender} Playing <${melodyName}>.
+  /twist ${songList}
 
-    /bct ${chatSender} Playing <${melodyName}>.
-    /twist ${songList}
-
-    :endEVENT_StartMelody
-    /if (${Debug} || ${Debug_Bard}) /echo <== EVENT_StartMelody -|
+  :endEVENT_StartMelody
+  /if (${Debug} || ${Debug_Bard}) /echo <== EVENT_StartMelody -|
 /return
 
 Sub DoBardEvents
-    /doevents StartMelody
+  /doevents StartMelody
 /return
 
 Sub InitBardIni(string iniFileName)
-    /declare bardOptions       string  outer "BardOptions"
-    /declare parentInitResult  int     local 1
+  /declare bardOptions       string  outer "BardOptions"
+  /declare parentInitResult  int     local 1
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-    
-    /call InitMeleeIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
+
+  /call InitMeleeIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 /return ${parentInitResult}

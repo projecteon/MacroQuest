@@ -18,7 +18,7 @@ Sub Main
 	/call CheckPlugin MQ2Moveutils
 	/call CheckPlugin MQ2Cast
 	/call CheckPlugin MQ2CastTimer
-    /call CheckPlugin MQ2Nav
+  /call CheckPlugin MQ2Nav
 
   /call InitClericIni ${clericIniFileName}
 
@@ -93,12 +93,12 @@ Sub InitClericIni(string iniFileName)
 
   /call InitHealIni "${iniFileName}"
   /if (${Macro.Return} == 0) {
-      /varset parentInitResult 0
+    /varset parentInitResult 0
   }
 
   /call InitBufferIni "${iniFileName}"
   /if (${Macro.Return} == 0) {
-      /varset parentInitResult 0
+    /varset parentInitResult 0
   }
 
   /call InitNukeIni "${iniFileName}"
@@ -108,12 +108,12 @@ Sub InitClericIni(string iniFileName)
 
   /call InitHealChain "${iniFileName}"
   /if (${Macro.Return} == 0) {
-      /varset parentInitResult 0
+    /varset parentInitResult 0
   }
 
   /call InitWait4Rez "${iniFileName}"
   /if (${Macro.Return} == 0) {
-      /varset parentInitResult 0
+    /varset parentInitResult 0
   }
 
   /if (${Ini[${iniFileName},${options},AreaGroupHeal].Length}) {
@@ -138,5 +138,4 @@ Sub InitClericIni(string iniFileName)
     /echo "Bootstrapped INI file, please update variables in: ${clericIniFileName}"
     /endmacro
   }
-
 /return
