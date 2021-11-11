@@ -24,9 +24,7 @@ SUB LootNearestCorpse
 
   /if (!${Bool[${Spawn[${closestCorpseID}]}]}) /goto :skipCorpse
 
-  /if (${Target.ID}!=${closestCorpseID}) /call EnsureTarget ${closestCorpseID}
-
-  /delay 2s ${Target.ID}==${closestCorpseID}
+  /call EnsureTarget ${closestCorpseID}
   /if (!${Target.ID}) {
     /if (${Debug} || ${Debug_Loot}) /echo Cant Target ${closestCorpseID}
     /goto :skipCorpse
@@ -58,6 +56,7 @@ SUB LootCorpse
   /if (!${Defined[canLootCorpse]}) /declare canLootCorpse bool outer TRUE
 
   /varset canLootCorpse TRUE
+  /call ClearCursor
   /loot
   /delay 5 ${Window[LootWnd].Open}
   /doevents CheckCanLootCorpse
@@ -88,7 +87,7 @@ SUB LootCorpse
     /delay 1s ${Corpse.Item[${i}].ID}
 
     /varset itemName ${Corpse.Item[${i}].Name}
-    /if (${Debug} || ${Debug_Loot}) /bca "|- Looting ${itemName}"
+    /if (${Debug} || ${Debug_Loot}) /echo |- Looting ${itemName}
 
     | Lore check
     /if (${Corpse.Item[${i}].Lore}) {
