@@ -6,7 +6,7 @@ SUB LootNearestCorpse
   /declare startX         int     ${Me.X}
   /declare startY         int     ${Me.Y}
   /declare isTwisting    bool    ${Twist.Twisting}
-  /squelch /hidecor looted
+  /squelch /hidecorpse looted
   /if (${isTwisting}) {
     /squelch /twist stop
     /delay 20 !${Me.Casting.ID}
