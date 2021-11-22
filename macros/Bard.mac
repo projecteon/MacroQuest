@@ -66,8 +66,10 @@ SUB EVENT_StartMelody(string line, string chatSender, string melodyName)
     } else {
       /if (!${Me.Gem[${melodies[${k},${spellNameProp}]}]}) {
         /if (!${Bool[${melodies[${k},${spellGem}]}]}) {
+          /beep
           /bct ${chatSender} No spell gem is defined for <${melodies[${k},${spellNameProp}]}>
         } else /if (${Select[${melodies[${k},${spellGem}]},${songList}]}) {
+          /beep
           /bct ${chatSender} Spell gem <${melodies[${k},${spellGem}]}> for <${melodies[${k},${spellNameProp}]}> is already busy for <${Me.Gem[${melodies[${k},${spellGem}]}]}>.
         } else {
           /memorize "${melodies[${k},${spellNameProp}]}" "${melodies[${k},${spellGem}]}"
