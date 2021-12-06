@@ -339,8 +339,6 @@ Sub CheckAllBagsAreOpen
 /return
 
 Sub CheckPlugin(string pluginName)
-  /if (${Debug} || ${Debug_Common}) /echo |- CheckPlugin ==>
-
   /if (!${Bool[${Plugin[${pluginName}]}]}) {
     /squelch /plugin ${pluginName}
     /echo ${pluginName} not detected! This macro requires it! Loading ...
@@ -350,8 +348,6 @@ Sub CheckPlugin(string pluginName)
       /endmac
     }
   }
-
-  /if (${Debug} || ${Debug_Common}) /echo <== CheckPlugin -|
 /return
 
 | #####################################################################################
