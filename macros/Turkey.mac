@@ -1,23 +1,23 @@
 #include includes\spell_routines.inc
 #turbo 20
 
-Sub Main(numberOfStacks)
+Sub Main(int numberOfStacks)
   /declare foodSpell string outer Endless Turkeys
   /declare foodItem string outer Cooked Turkey
 
-  /if (${Defined[numberOfStacks]}) /declare numberOfStacks int outer 1
+  /if (!${Defined[numberOfStacks]}) /declare numberOfStacks int outer 1
   /if (${numberOfStacks}<1 || ${numberOfStacks}>20) /varset numberOfStacks 1
 
   /echo Summoning ${numberOfStacks} stack(s) of ${foodItem}.
-  /call SummonFood
+  /call SummonFood ${numberOfStacks}
   /echo Done summoning stuff!
 /return
 
-Sub SummonFood
+Sub SummonFood(int numberOfStacks)
   /echo |- SummonFood ==>
 
-  /declare foodCount  int local
-  /if (${FindItemCount[=${foodItem}]} < ${Math.Calc[20*${numberOfStacks}]}) {
+  /declare foodCount  int local ${Math.Calc[${FindItemCount[=${foodItem}]}]}
+  /if (${foodCount} < ${Math.Calc[20*${numberOfStacks}]}) {
     /if (!${FindItemCount[=${foodSpell}]}) {
       /echo |- Missing item: ${foodSpell}
       /echo <== SummonFood -|
@@ -30,9 +30,10 @@ Sub SummonFood
         :FoodLoop
           /if (!${Me.State.Equal[STAND]} || ${Cursor.ID} || ${Me.Casting.ID}) {
             /autoinv
-            /delay 2s
+            /delay 1s
             /goto :FoodLoop
           }
+          /echo |- Summoning: ${foodItem} > ${foodCount}/${Math.Calc[20*${numberOfStacks}]}
           /call Summon "${foodSpell}"
           /autoinv
       }
@@ -40,12 +41,14 @@ Sub SummonFood
       /if (${Math.Calc[20*${numberOfStacks}]}>=${Math.Calc[${FindItemCount[=${foodItem}]}]}) /goto :BigLoop
   }
 
+  /beep .\sounds\mail1.wav
   /echo <== SummonFood -|
 /return
 
-Sub Summon(string itemSpell)
-  /itemnotify "${itemSpell}"
-  /delay 510
+Sub Summon(string itemName)
+  /itemnotify "${itemName}" rightmouseup
+  /delay 2s
   /autoinv
-  /delay 510
+  /declare delay int local ${Math.Calc[${FindItem[${itemName}].TimerReady}*10]}
+  /delay ${delay}
 /return
