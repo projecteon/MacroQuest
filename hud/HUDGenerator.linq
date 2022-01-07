@@ -1,3 +1,7 @@
+<Query Kind="Statements">
+  <IncludeUncapsulator>false</IncludeUncapsulator>
+</Query>
+
 string macroHeader = @"[Elements] 
 ; |====================================== Target Class and lvl ===>
 TargetName=3,15,285,000,255,000,${If[${Target.ID},${Target.CleanName},]}
@@ -18,7 +22,7 @@ TargetDist_Info=3,65,315,000,255,000,${Target.Distance3D}
 ";
 
 var initalXAxis = 15;
-var initalYAxis = 400;
+var initalYAxis = 200;
 
 string GenerateHud((string netbot, bool petuser) groupMember, int counter) {
 	var netbot = groupMember.netbot;
@@ -113,38 +117,38 @@ void GenerateGroupHud(IList<(string netbot, bool petuser)> group) {
 
 var group1 = new List<(string netbot, bool petuser)>() {
 	("Eredhrin", false)
+	,("Marillion", false)
 	,("Hamfast", false)
-	,("Ithildin", false)
 	,("Newt", false)
 	,("Bill", true)
-	,("Tedd", true)
+	,("Ithildin", false)
 };
 
 var group2 = new List<(string netbot, bool petuser)>() {
-	("Regis", false)
-	,("Aredhel", false)
+	("Soundgarden", false)
+	,("Inara", false)
 	,("Freyja", true)
-	,("Marillion", false)
-	,("Ronin", false)
-	,("Osiris", true)
+	,("Araushnee", true)
+	,("Tedd", true)
+	,("Milamber", false)
 };
 
 var group3 = new List<(string netbot, bool petuser)>() {
-	("Sheperd", false)
-	,("Renaissance", false)
-	,("Soundgarden", false)
-	,("Inara", false)
-	,("Milamber", false)
+	("Renaissance", false)
+	,("Lolth", false)
 	,("Tyrion", false)
+	,("Ronin", false)
+	,("Sheperd", false)
+	,("Valsharess", false)
 };
 
 var group4 = new List<(string netbot, bool petuser)>() {
-	("Lolth", false)
+	("Genesis", false)
+	,("Regis", false)
 	,("Vierna", false)
 	,("Eilistraee", false)
-	,("Valsharess", false)
-	,("Araushnee", true)
-	,("Genesis", false)
+	,("Aredhel", false)
+	,("Osiris", true)
 };
 
 Console.WriteLine(macroHeader);
