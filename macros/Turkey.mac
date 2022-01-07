@@ -36,9 +36,12 @@ Sub SummonFood(int numberOfStacks)
           /echo |- Summoning: ${foodItem} > ${foodCount}/${Math.Calc[20*${numberOfStacks}]}
           /call Summon "${foodSpell}"
           /autoinv
+      } else {
+        /declare delay int local ${Math.Calc[${FindItem[${itemName}].TimerReady}*10]}
+        /delay ${delay}
       }
 
-      /if (${Math.Calc[20*${numberOfStacks}]}>=${Math.Calc[${FindItemCount[=${foodItem}]}]}) /goto :BigLoop
+      /if (${Math.Calc[20*${numberOfStacks}]}>=${foodCount}) /goto :BigLoop
   }
 
   /beep .\sounds\mail1.wav
@@ -49,6 +52,5 @@ Sub Summon(string itemName)
   /itemnotify "${itemName}" rightmouseup
   /delay 2s
   /autoinv
-  /declare delay int local ${Math.Calc[${FindItem[${itemName}].TimerReady}*10]}
-  /delay ${delay}
+  /delay 5
 /return
