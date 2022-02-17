@@ -31,9 +31,10 @@ Sub SummonFood
       /if (${Cast.Ready[${foodSpell}]} && ${FindItem[${foodSpell}].TimerReady}==0 && ${maxFoodCount}>${foodCount}) {
         /echo |- Summoning: ${foodItem} >  ${foodCount}/${maxFoodCount}
         /call Summon "${foodSpell}"
+        /delay ${Math.Calc[${FindItem[${foodSpell}].TimerReady}+1]}
       }
 
-      /if (${maxFoodCount}>=${Math.Calc[${FindItemCount[=${foodItem}]}]}) /goto :BigLoop
+      /if (${maxFoodCount}>${Math.Calc[${FindItemCount[=${foodItem}]}]}) /goto :BigLoop
   }
 
   /beep .\sounds\mail1.wav
@@ -41,5 +42,9 @@ Sub SummonFood
 /return
 
 Sub Summon(string itemName)
-  /itemnotify ${itemName} rightmouseup
+  /itemnotify "${itemName}" rightmouseup
+  /delay 1s
+  /if (${Cursor.ID}) {
+    /autoinv
+  }
 /return
