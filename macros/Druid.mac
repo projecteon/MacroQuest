@@ -8,65 +8,71 @@
 #include includes\commonDebuffer.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 150
 
 Sub Main
-    /declare druidIniFileName        string  local "ini/${MacroQuest.Server}/Druid_${Me.CleanName}.ini"
+  /declare druidIniFileName        string  local "ini/${MacroQuest.Server}/Druid_${Me.CleanName}.ini"
 
-    /call InitDruidIni ${druidIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${druidIniFileName}"
-        /endmacro
-    }
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+	/call CheckPlugin MQ2CastTimer
+  /call CheckPlugin MQ2Nav
 
-    /echo "Druid sow'ed up!"
-    /bca "Druid sow'ed up!"
+  /call InitDruidIni ${druidIniFileName}
+  /if (${Macro.Return} == 0) {
+      /echo "Bootstrapped INI file, please update variables in: ${druidIniFileName}"
+      /endmacro
+  }
 
-    :DruidLoop
-        /call Wait4Rez_Background_Events
-        /if (${Me.Invis}) /goto :DruidLoop
-        /if (${Stick.Status.Equal[ON]}) /goto :DruidLoop
-        
-        /call CheckHeals
-        /if (${Macro.Return} == 1) /goto :DruidLoop
-        /call CheckManaStatus
-        /call TryMedidate
-        /call DoDeBuffs 
-        /call DoNuke
-        /call DoBuffs
-        /call DoCommonEvents
-        /goto :DruidLoop
+  /echo "Druid sow'ed up!"
+  /bca "Druid sow'ed up!"
+
+  :DruidLoop
+    /call Wait4Rez_Background_Events
+    /if (${Me.Invis}) /goto :DruidLoop
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :DruidLoop
+
+    /call CheckHeals
+    /if (${Macro.Return} == 1) /goto :DruidLoop
+    /call TryMedidate
+    /call DoDeBuffs
+    /call DoNuke
+    /call DoBuffs
+    /call DoCommonEvents
+    /goto :DruidLoop
 /return
 
 Sub InitDruidIni(string iniFileName)
-    /declare parentInitResult    int     local 1
+  /declare parentInitResult    int     local 1
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-        
-    /call InitHealIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitBufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitDebufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitNukeIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
+
+  /call InitHealIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitBufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitDebufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitNukeIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
 /return ${parentInitResult}

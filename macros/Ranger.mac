@@ -11,54 +11,60 @@
 #include includes\commonMelee.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 150
 
 Sub Main
-    /declare rangerIniFileName        string  outer "ini/${MacroQuest.Server}/Ranger_${Me.CleanName}.ini"
+  /declare rangerIniFileName        string  outer "ini/${MacroQuest.Server}/Ranger_${Me.CleanName}.ini"
 
-    /call InitRangerIni ${rangerIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${rangerIniFileName}"
-        /endmacro
-    }
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+	/call CheckPlugin MQ2CastTimer
+  /call CheckPlugin MQ2Nav
 
-    /echo "Ranger ready to roll!"
-    /bca "Ranger ready to roll!"
-    :RangerLoop
-        /call Wait4Rez_Background_Events
-        /if (${Me.Invis}) /goto :RangerLoop        
-        | /if (${Me.Attacking}) /goto :RangerLoop
-        /if (${Stick.Status.Equal[ON]}) /goto :RangerLoop
+  /call InitRangerIni ${rangerIniFileName}
+  /if (${Macro.Return} == 0) {
+    /echo "Bootstrapped INI file, please update variables in: ${rangerIniFileName}"
+    /endmacro
+  }
 
-        /call DoBuffs
-        | /call DoNuke
-        /call DoCommonEvents
-        /goto :RangerLoop
+  /echo "Ranger ready to roll!"
+  /bca "Ranger ready to roll!"
+  :RangerLoop
+    /call Wait4Rez_Background_Events
+    /if (${Me.Invis}) /goto :RangerLoop
+    | /if (${Me.Attacking}) /goto :RangerLoop
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :RangerLoop
+
+    /call DoBuffs
+    | /call DoNuke
+    /call DoCommonEvents
+    /goto :RangerLoop
 /return
 
 Sub InitRangerIni(string iniFileName)
-    /declare rangerOptions   string  outer "RangerOptions"
-    /declare parentInitResult   int     local 1
+  /declare rangerOptions   string  outer "RangerOptions"
+  /declare parentInitResult   int     local 1
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-    
-    /call InitMeleeIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-    
-    /call InitBufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitNukeIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
 
+  /call InitMeleeIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
+
+  /call InitBufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitNukeIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 /return ${parentInitResult}

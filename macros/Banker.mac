@@ -1,11 +1,11 @@
 #include includes\commonItems.inc
-#turbo 40
+#turbo 150
 
 Sub Main
-    /if (!${Defined[numInventorySlots]})    /declare numInventorySlots  int	    outer 8    
-    /if (!${Defined[Debug]})	            /declare Debug     	        bool    outer FALSE 
+  /if (!${Defined[numInventorySlots]})    /declare numInventorySlots  int	    outer 8
+  /if (!${Defined[Debug]})	            /declare Debug     	        bool    outer FALSE
 
-    :BankerLoop
-        /call DoItemEvents
-        /goto :BankerLoop
+  :BankerLoop
+    /call DoItemEvents
+    /goto :BankerLoop
 /return

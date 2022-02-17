@@ -1,0 +1,11 @@
+#include includes\ini.inc
+#include includes\commonAutopilot.inc
+#turbo 150
+
+Sub Main
+  /call InitAutopilot
+
+  :autopilotLoop
+    /call DoAutoPilotEvents
+    /goto :autopilotLoop
+/return

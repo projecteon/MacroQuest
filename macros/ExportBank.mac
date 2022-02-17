@@ -1,90 +1,75 @@
-#turbo 40
+#turbo 150
 
 Sub Main
-    /declare exportIniFileName  string  outer "ini/${MacroQuest.Server}/BankExport_${Me.CleanName}.ini"
-    /declare numInventorySlots  int	    outer 8    
-    /declare Debug     	        bool    outer TRUE 
+  /declare exportIniFileName  string  outer "ini/${MacroQuest.Server}/BankExport_${Me.CleanName}.ini"
+  /declare numInventorySlots  int	    outer 8
+  /declare Debug     	        bool    outer TRUE
 
-    /call ExportItemsOnToon
-    /call ExportItemsInBank
+  /call ExportItemsOnToon
+  /call ExportItemsInBank
 /return
 
 Sub ExportItemsOnToon
-    /if (${Debug}) /echo |- FindItemsOnToon ==> InventorySlots[${numInventorySlots}] ${exportIniFileName}
+  /if (${Debug}) /echo |- FindItemsOnToon ==> InventorySlots[${numInventorySlots}] ${exportIniFileName}
 
-    /declare i int local
-    /declare c int local
-  
-    /for i 1 to ${numInventorySlots} {
-        /if (${Debug}) /echo Start [InvSlot[${i}]]
-        
+  /declare i int local
+  /declare c int local
 
-        /ini ${exportIniFileName} "InventorySlots" "InventorySlot${i}" "${Me.Inventory[pack${i}]},(${Me.Inventory[pack${i}].Stack})"
+  /for i 1 to ${numInventorySlots}
+    /if (${Debug}) /echo Start [InvSlot[${i}]]
 
+    /ini ${exportIniFileName} "InventorySlots" "InventorySlot${i}" "${Me.Inventory[pack${i}]},(${Me.Inventory[pack${i}].Stack})"
 
-        /if (${Debug}) /echo Done [InvSlot[${i}]]
-        
-        /next i
-    }
-  
-    /for i 1 to ${numInventorySlots} {
-        /if (${Debug}) /echo Start [InvSlot[${i}]]
+    /if (${Debug}) /echo Done [InvSlot[${i}]]
+  /next i
 
-        /if (${Me.Inventory[pack${i}].Container}) {
-            /if (${Debug}) /echo [InvSlot[${i}]] -> Container[${Me.Inventory[pack${i}].Container}]
-            /for c 1 to ${Me.Inventory[pack${i}].Container} {
-                /ini ${exportIniFileName} "InventorySlots" "InventorySlot${i}PackSlot${c}" "${Me.Inventory[pack${i}].Item[${c}]},(${Me.Inventory[pack${i}].Item[${c}].Stack})"
-                /if (${Debug}) /echo Done InvSlot[${i}] -> PackSlot[${c}]]
-                
-                /next c
-            }
+  /for i 1 to ${numInventorySlots}
+    /if (${Debug}) /echo Start [InvSlot[${i}]]
 
-            /if (${Debug}) /echo Done [InvSlot[${i}]] Container
-        }
+    /if (${Me.Inventory[pack${i}].Container}) {
+      /if (${Debug}) /echo [InvSlot[${i}]] -> Container[${Me.Inventory[pack${i}].Container}]
+      /for c 1 to ${Me.Inventory[pack${i}].Container}
+          /ini ${exportIniFileName} "InventorySlots" "InventorySlot${i}PackSlot${c}" "${Me.Inventory[pack${i}].Item[${c}]},(${Me.Inventory[pack${i}].Item[${c}].Stack})"
+          /if (${Debug}) /echo Done InvSlot[${i}] -> PackSlot[${c}]]
+      /next c
 
-        /if (${Debug}) /echo Done [InvSlot[${i}]]
-        
-        /next i
+      /if (${Debug}) /echo Done [InvSlot[${i}]] Container
     }
 
-    /if (${Debug}) /echo <== FindItemsOnToon -|
+    /if (${Debug}) /echo Done [InvSlot[${i}]]
+  /next i
+
+  /if (${Debug}) /echo <== FindItemsOnToon -|
 /return
 
 Sub ExportItemsInBank
-    /if (${Debug}) /echo |- ExportItemsInBank ==>
+  /if (${Debug}) /echo |- ExportItemsInBank ==>
 
-    /declare i int local
-    /declare c int local
-  
-    /for i 1 to 16 {
-        /if (${Debug}) /echo Start [BankSlot[${i}]]
+  /declare i int local
+  /declare c int local
 
-        /ini ${exportIniFileName} "BankSlots" "BankSlot${i}" "${Me.Bank[${i}].Name},(${Me.Bank[${i}].Stack})"
-        
-        /if (${Debug}) /echo Done [BankSlot[${i}]]
-        
-        /next i
+  /for i 1 to 16
+    /if (${Debug}) /echo Start [BankSlot[${i}]]
+
+    /ini ${exportIniFileName} "BankSlots" "BankSlot${i}" "${Me.Bank[${i}].Name},(${Me.Bank[${i}].Stack})"
+
+    /if (${Debug}) /echo Done [BankSlot[${i}]]
+  /next i
+
+  /for i 1 to 16
+    /if (${Debug}) /echo Start [BankSlot[${i}]]
+
+    /if (${Me.Bank[${i}].Container}) {
+      /if (${Debug}) /echo [BankSlot[${i}]] -> Container[${Me.Bank[${i}].Container}]
+      /for c 1 to ${Me.Bank[${i}].Container}
+        /ini ${exportIniFileName} "BankSlots" "BankSlot${i}PackSlot${c}" "${Me.Bank[${i}].Item[${c}]},(${Me.Bank[${i}].Item[${c}].Stack})"
+        /if (${Debug}) /echo Done BankSlot[${i}] -> PackSlot[${c}]]
+      /next c
+
+      /if (${Debug}) /echo Done [BankSlot[${i}]] Container
     }
-  
-    /for i 1 to 16 {
-        /if (${Debug}) /echo Start [BankSlot[${i}]]
-        
-        /if (${Me.Bank[${i}].Container}) {
-            /if (${Debug}) /echo [BankSlot[${i}]] -> Container[${Me.Bank[${i}].Container}]
-            /for c 1 to ${Me.Bank[${i}].Container} {
-                /ini ${exportIniFileName} "BankSlots" "BankSlot${i}PackSlot${c}" "${Me.Bank[${i}].Item[${c}]},(${Me.Bank[${i}].Item[${c}].Stack})"
+    /if (${Debug}) /echo Done [BankSlot[${i}]]
+  /next i
 
-                /if (${Debug}) /echo Done BankSlot[${i}] -> PackSlot[${c}]]
-                
-                /next c
-            }
-
-            /if (${Debug}) /echo Done [BankSlot[${i}]] Container
-        }
-        /if (${Debug}) /echo Done [BankSlot[${i}]]
-        
-        /next i
-    }
-
-    /if (${Debug}) /echo <== ExportItemsInBank -|
+  /if (${Debug}) /echo <== ExportItemsInBank -|
 /return

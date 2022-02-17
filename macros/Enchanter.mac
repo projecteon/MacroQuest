@@ -10,106 +10,113 @@
 #include includes\commonDebuffer.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 150
 
 Sub Main
-    /declare enchanterIniFileName   string  local "ini/${MacroQuest.Server}/Enchanter_${Me.CleanName}.ini"
+  /declare enchanterIniFileName   string  local "ini/${MacroQuest.Server}/Enchanter_${Me.CleanName}.ini"
 
-    /call InitEnchanterIni ${enchanterIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${enchanterIniFileName}"
-        /endmacro
-    }
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+	/call CheckPlugin MQ2CastTimer
+  /call CheckPlugin MQ2Nav
 
-    /declare stayInMezzDebuffLoop bool local
-    
-    /echo "Enchanter all mezzed up!"
-    /bca "Enchanter all mezzed up!"
-    :EnchanterLoop
-        /call Wait4Rez_Background_Events
-        /if (${Me.Invis}) /goto :EnchanterLoop
-        /if (${Stick.Status.Equal[ON]}) /goto :EnchanterLoop
-        
-        /call DoMezz
-        /call DoDeBuffs        
-        | /varset stayInMezzDebuffLoop ${Bool[${Macro.Return}]}
-        | /if (${stayInMezzDebuffLoop}) /goto :EnchanterLoop
-        /call CheckManaStatus
-        /call TryMedidate
-        /call DoNuke
-        /call DoBuffs
-        /call DoCommonEvents
-        /goto :EnchanterLoop
+  /call InitEnchanterIni ${enchanterIniFileName}
+  /if (${Macro.Return} == 0) {
+    /echo "Bootstrapped INI file, please update variables in: ${enchanterIniFileName}"
+    /endmacro
+  }
+
+  /declare stayInMezzDebuffLoop bool local
+
+  /echo "Enchanter all mezzed up!"
+  /bca "Enchanter all mezzed up!"
+  :EnchanterLoop
+    /call Wait4Rez_Background_Events
+    /if (${Me.Invis}) /goto :EnchanterLoop
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :EnchanterLoop
+
+    /call DoMezz
+    /call DoDeBuffs
+    | /varset stayInMezzDebuffLoop ${Bool[${Macro.Return}]}
+    | /if (${stayInMezzDebuffLoop}) /goto :EnchanterLoop
+    /call TryMedidate
+    /call DoNuke
+    /call DoBuffs
+    /call DoCommonEvents
+    /goto :EnchanterLoop
 /return
 
 sub DoMezz
-    /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz ==>
+  /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz ==>
 
-    /if (${autoMezz}) {
-        /call GetMainAssist
-        /declare mainAssist string	local ${Macro.Return}
+  /if (${autoMezz}) {
+    /call GetMainAssist
+    /declare mainAssist string	local ${Macro.Return}
 
-        /declare canMezzMob     bool local TRUE
-        /declare retry          int local
-        /declare i              int local 0
-        /declare mezTarg        int local
-        /declare maTargetId     int local ${NetBots[${mainAssist}].TargetID}
-        /declare mezTargetCount int local ${SpawnCount[npc los targetable radius ${mezzRadius}]}
+    /declare canMezzMob     bool local TRUE
+    /declare retry          int local
+    /declare i              int local
+    /declare mezTarg        int local
+    /declare maTargetId     int local ${NetBots[${mainAssist}].TargetID}
+    /declare mezTargetCount int local ${SpawnCount[npc los targetable radius ${mezzRadius}]}
 
-        /if (!${mezTargetCount} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana}) /goto :endDoMezz
+    /if (!${mezTargetCount} || ${Me.CurrentMana} < ${Spell[${mezzSpell}].Mana}) /goto :endDoMezz
 
-        /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz - # of mezz targets: ${mezTargetCount}
-        /for i 1 to ${mezTargetCount}
-            /varset mezTarg ${NearestSpawn[${i},npc los targetable radius ${mezzRadius}].ID}
-            /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz - mezz target: ${mezTarg}
-            /if (${mezTarg}!=${maTargetId}) {
-                /call CheckCanMezzMob ${mezTarg}
-                /varset canMezzMob ${Macro.Return}
-                /if (${canMezzMob} && ${SpellTimer[${mezTarg},any,${mezzSpell}]} < 8) {
-                    /call EnsureTarget ${mezTarg}
+    /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz - # of mezz targets: ${mezTargetCount}
+    /for i 1 to ${mezTargetCount}
+      /varset mezTarg ${NearestSpawn[${i},npc los targetable radius ${mezzRadius}].ID}
+      /if (${Debug} || ${Debug_Mezz}) /echo |- DoMezz - mezz target: ${mezTarg} ma target: ${maTargetId}
+      /if (${mezTarg}!=${maTargetId}) {
+        /call CheckCanMezzMob ${mezTarg}
+        /varset canMezzMob ${Macro.Return}
+        /if (${canMezzMob} && ${SpellTimer[${mezTarg},any,${mezzSpell}]} < 8) {
+          /call EnsureTarget ${mezTarg}
 
-                    /if (!${Cast.Ready[${mezzSpell}]}) /delay 3s ${Cast.Ready[${mezzSpell}]}
+          /if (!${Cast.Ready[${mezzSpell}]}) /delay 3s ${Cast.Ready[${mezzSpell}]}
 
-                    /if (${Cast.Ready[${mezzSpell}]} && ${Target.Distance} < ${Spell[${mezzSpell}].Range}) {
-                        /call cast "${mezzSpell}" gem${Me.Gem[${mezzSpell}]} 0 CancelMezz 3
-                        /if (${castReturn.Equal[CAST_IMMUNE]}) {
-                            /declare targetName string  local ${Spawn[${targetId}].Name}
-                            /bca "Mezz immune - " ${Target.Name}
-                            /ini "${mesmerizeSettingsFileName}" "Immune" "${targetName}" "TRUE"
-                        } else /if (${castReturn.Equal[CAST_RESISTED]}) {
-                            /bca "Mezz resited 3 times, retrying next run - " ${Target.Name}
-                        } else {
-                            /bca ${Target.Name} " mezzed for " ${SpellTimer[${mezTarg},any,${mezzSpell}]}
-                        }
-                    }
-                }
+          /if (${Cast.Ready[${mezzSpell}]} && ${Target.Distance} < ${Spell[${mezzSpell}].Range}) {
+            /call cast "${mezzSpell}" gem${Me.Gem[${mezzSpell}]} 0 CancelMezz 3
+            /if (${castReturn.Equal[CAST_IMMUNE]}) {
+              /declare targetName string  local ${Spawn[${mezTarg}].Name}
+              /bca "Mezz immune - " ${Target.Name}
+              /ini "${mesmerizeSettingsFileName}" "Immune" "${targetName}" "TRUE"
+            } else /if (${castReturn.Equal[CAST_RESISTED]}) {
+              /bca "Mezz resited 3 times, retrying next run - " ${Target.Name}
+            } else {
+              /delay 10
+              /bca ${Target.Name} mezzed for ${SpellTimer[${mezTarg},any,${mezzSpell}]}s
             }
-            /next i
-    }
+          }
+        }
+      }
+    /next i
+  }
 
-    :endDoMezz
-    /if (${Debug} || ${Debug_Mezz}) /echo <== DoMezz -|
+  :endDoMezz
+  /if (${Debug} || ${Debug_Mezz}) /echo <== DoMezz -|
 /return
 
 Sub CheckCanMezzMob(int targetId)
-    /if (${Debug} || ${Debug_Mezz}) /echo |- CheckCanMezzMob ==>
+  /if (${Debug} || ${Debug_Mezz}) /echo |- CheckCanMezzMob ==>
 
-    /declare canMezzMob bool    local TRUE   
-    /declare targetName string  local ${Spawn[${targetId}].Name}
+  /declare canMezzMob bool    local TRUE
+  /declare targetName string  local ${Spawn[${targetId}].Name}
 
-    /if (${Ini[${mesmerizeSettingsFileName},"Immune",${targetName}].Length}) {
-        /if (${Bool[${Ini["MesmerizeSettings.ini","Immune",${targetName}]}]}) {
-            /varset canMezzMob FALSE
-        }
-    } 
+  /if (${Ini[${mesmerizeSettingsFileName},"Immune",${targetName}].Length}) {
+    /if (${Bool[${Ini["MesmerizeSettings.ini","Immune",${targetName}]}]}) {
+      /varset canMezzMob FALSE
+    }
+  }
 
-    /if (!${canMezzMob} && ${Ini[${mesmerizeSettingsFileName},"NeverMezz",${targetName}].Length}) {
-       /if (${Bool[${Ini[${mesmerizeSettingsFileName},"NeverMezz",${targetName}]}]}) {
-            /varset canMezzMob FALSE
-       }
-    } 
+  /if (!${canMezzMob} && ${Ini[${mesmerizeSettingsFileName},"NeverMezz",${targetName}].Length}) {
+    /if (${Bool[${Ini[${mesmerizeSettingsFileName},"NeverMezz",${targetName}]}]}) {
+      /varset canMezzMob FALSE
+    }
+  }
 
-    /if (${Debug} || ${Debug_Mezz}) /echo <== CheckCanMezzMob -|
+  /if (${Debug} || ${Debug_Mezz}) /echo <== CheckCanMezzMob -|
 /return ${canMezzMob}
 
 Sub CancelMezz
@@ -118,62 +125,61 @@ Sub CancelMezz
 /return
 
 Sub InitEnchanterIni(string iniFileName)
-    /declare mesmerizeSettingsFileName  string  outer "ini/MesmerizeSettings.ini"
-    /declare enchanterOptions           string  outer "EnchanterOptions"
-    /declare autoMezz                   int     outer 1
-    /declare mezzRadius                 int     outer 100
-    /declare mezzSpell                  string  outer "Dazzle"
-    /declare Debug_Mezz                 bool    outer FALSE
-    /declare parentInitResult           int     local 1
+  /declare mesmerizeSettingsFileName  string  outer "data/MesmerizeSettings.ini"
+  /declare enchanterOptions           string  outer "EnchanterOptions"
+  /declare autoMezz                   int     outer 1
+  /declare mezzRadius                 int     outer 100
+  /declare mezzSpell                  string  outer "Dazzle"
+  /declare Debug_Mezz                 bool    outer FALSE
+  /declare parentInitResult           int     local 1
 
-    /if (${Ini[${iniFileName},${enchanterOptions},AutoMezz].Length}) {
-       /varset autoMezz ${Ini[${iniFileName},${enchanterOptions},AutoMezz]}     
-    } else {
-        /ini "${iniFileName}" "${enchanterOptions}" "AutoMezz" "${autoMezz}"
-    }
+  /if (${Ini[${iniFileName},${enchanterOptions},AutoMezz].Length}) {
+    /varset autoMezz ${Ini[${iniFileName},${enchanterOptions},AutoMezz]}
+  } else {
+    /ini "${iniFileName}" "${enchanterOptions}" "AutoMezz" "${autoMezz}"
+  }
 
-    /if (${Ini[${iniFileName},${enchanterOptions},AutoMezzRadius].Length}) {
-       /varset mezzRadius ${Ini[${iniFileName},${enchanterOptions},AutoMezzRadius]}     
-    } else {
-        /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzRadius" "${mezzRadius}"
-    }
+  /if (${Ini[${iniFileName},${enchanterOptions},AutoMezzRadius].Length}) {
+    /varset mezzRadius ${Ini[${iniFileName},${enchanterOptions},AutoMezzRadius]}
+  } else {
+    /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzRadius" "${mezzRadius}"
+  }
 
-    /if (${Ini[${iniFileName},${enchanterOptions},AutoMezzSpell].Length}) {
-       /varset mezzSpell "${Ini[${iniFileName},${enchanterOptions},AutoMezzSpell]}"   
-    } else {
-        /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzSpell" "${mezzSpell}"
-    }
+  /if (${Ini[${iniFileName},${enchanterOptions},AutoMezzSpell].Length}) {
+    /varset mezzSpell "${Ini[${iniFileName},${enchanterOptions},AutoMezzSpell]}"
+  } else {
+    /ini "${iniFileName}" "${enchanterOptions}" "AutoMezzSpell" "${mezzSpell}"
+  }
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
 
-    /call InitCasterIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitCasterIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
-    /call InitNukeIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitNukeIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
-    /call InitBufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitBufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
-    /call InitDebufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitDebufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
-    /if (${Ini[${iniFileName},Debug,Debug_Mezz].Length}) {
-       /varset Debug_Mezz ${Bool[${Ini[${iniFileName},Debug,Debug_Mezz]}]}     
-    } 
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
+  /if (${Ini[${iniFileName},Debug,Debug_Mezz].Length}) {
+    /varset Debug_Mezz ${Bool[${Ini[${iniFileName},Debug,Debug_Mezz]}]}
+  }
 /return ${parentInitResult}

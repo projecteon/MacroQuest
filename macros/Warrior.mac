@@ -3,48 +3,53 @@
 #include includes\commonMelee.inc
 #include includes\commonTank.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 150
 
 Sub Main
-    /declare warriorIniFileName        string  outer "ini/${MacroQuest.Server}/Warrior_${Me.CleanName}.ini"
+  /declare warriorIniFileName        string  outer "ini/${MacroQuest.Server}/Warrior_${Me.CleanName}.ini"
 
-    /call InitWarriorIni ${warriorIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${warriorIniFileName}"
-        /endmacro
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+  /call CheckPlugin MQ2Nav
+
+  /call InitWarriorIni ${warriorIniFileName}
+  /if (${Macro.Return} == 0) {
+    /echo "Bootstrapped INI file, please update variables in: ${warriorIniFileName}"
+    /endmacro
+  }
+
+  /echo "Warrior tankin' and spankin'!"
+  /bca "Warrior tankin' and spankin'!"
+
+  :WarriorLoop
+    /call Wait4Rez_Background_Events
+    /if (${Me.Invis}) /goto :WarriorLoop
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :WarriorLoop
+
+    /if (!${Melee.Combat}) {
+      /call DoKill
     }
 
-    /echo "Warrior tankin' and spankin'!"
-    /bca "Warrior tankin' and spankin'!"
-
-    :WarriorLoop
-        /call Wait4Rez_Background_Events
-        /if (${Me.Invis}) /goto :WarriorLoop
-        /if (${Stick.Status.Equal[ON]}) /goto :WarriorLoop
-            
-        /if (!${Melee.Combat}) {
-            /call DoKill
-        }
-
-        /call DoTankEvents
-        /call DoCommonEvents
-        /goto :WarriorLoop
+    /call DoTankEvents
+    /call DoCommonEvents
+    /goto :WarriorLoop
 /return
 
 Sub InitWarriorIni(string iniFileName)
-    /declare warriorOptions       string  outer "WarriorOptions"
-    /declare parentInitResult     int     local 1
-    /declare Debug_Tank           bool    outer FALSE
+  /declare warriorOptions       string  outer "WarriorOptions"
+  /declare parentInitResult     int     local 1
+  /declare Debug_Tank           bool    outer FALSE
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-    
-    /call InitMeleeIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
 
+  /call InitMeleeIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
+
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 /return ${parentInitResult}

@@ -6,44 +6,42 @@
 #include includes\commonNuke.inc
 
 Sub Main(string ability)
+  | https://www.redguides.com/community/threads/spell-skill-up-macro.9117/
+  | https://www.redguides.com/community/threads/skills-auto-skill-raiser.27492/
+  | https://www.redguides.com/community/threads/lockpick-mac.12231/
 
-    | https://www.redguides.com/community/threads/spell-skill-up-macro.9117/
-    | https://www.redguides.com/community/threads/skills-auto-skill-raiser.27492/
-    | https://www.redguides.com/community/threads/lockpick-mac.12231/
+  :trainloop
+    /if (!${Bool[${Me.Skill[${ability}]}]}) {
+      /echo You do not have the skill: ${ability}
+      /endmac
+    }
 
-    :trainloop
-        /if (!${Bool[${Me.Skill[${ability}]}]}) {
-            /echo You do not have the skill: ${ability}
-            /endmac
-        }
+    /if (!${Bool[${Me.Ability[${ability}]}]}) {
+      /echo Ability is not mapped to action button: ${ability}
+      /endmac
+    }
 
-        /if (!${Bool[${Me.Ability[${ability}]}]}) {
-            /echo Ability is not mapped to action button: ${ability}
-            /endmac
-        }
+    /if (${Me.Skill[${ability}]} == ${Skill[${ability}].SkillCap} ) {
+      /echo You maxed the skill: ${ability}
+      /endmac
+    }
 
-        /if (${Me.Skill[${ability}]} == ${Skill[${ability}].SkillCap} ) {
-            /echo You maxed the skill: ${ability}
-            /endmac
-        }
+    /if (${Me.Sneaking}) {
+      /doability Sneak
+    }
 
-        /if (${Me.Sneaking}) {
-                /doability Sneak  
+    /if (${Bool[${Me.AbilityReady[${ability}]}]}) {
+      /doability "${ability}"
+      /delay 2
+    }
 
-        }
+    /if (${Bool[${Cursor.ID}]}) {
+      /autoinv
+    }
 
-        /if (${Bool[${Me.AbilityReady[${ability}]}]}) {
-            /doability "${ability}"
-            /delay 2       
-        } 
+    /if (${Me.Feigning}) {
+      /stand
+    }
 
-        /if (${Bool[${Cursor.ID}]}) {
-            /autoinv
-        }
-
-        /if (${Me.Feigning}) {
-            /stand
-        }
-
-        /goto :trainloop
+    /goto :trainloop
 /return

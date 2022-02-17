@@ -1,0 +1,50 @@
+#include includes\spell_routines.inc
+#turbo 20
+
+Sub Main()
+  /declare foodSpell string outer Endless Turkeys
+  /declare foodItem string outer Cooked Turkey
+  /declare maxFoodCount int outer 5
+
+  /echo Summoning ${maxFoodCount} of ${foodItem}.
+  /call SummonFood
+  /echo Done summoning stuff!
+/return
+
+Sub SummonFood
+  /echo |- SummonFood ==> <${foodItem}>
+
+  /declare foodCount  int local
+  /if (${FindItemCount[=${foodItem}]} < ${maxFoodCount}) {
+    /if (!${FindItemCount[=${foodSpell}]}) {
+      /echo |- Missing item/spell: ${foodSpell}
+      /echo <== SummonFood -|
+      /endmac
+    }
+
+    :BigLoop
+      /if (${Cursor.ID}) {
+        /autoinv
+      }
+
+      /varset foodCount ${Math.Calc[${FindItemCount[=${foodItem}]}]}
+      /if (${Cast.Ready[${foodSpell}]} && ${FindItem[${foodSpell}].TimerReady}==0 && ${maxFoodCount}>${foodCount}) {
+        /echo |- Summoning: ${foodItem} >  ${foodCount}/${maxFoodCount}
+        /call Summon "${foodSpell}"
+        /delay ${Math.Calc[${FindItem[${foodSpell}].TimerReady}+1]}
+      }
+
+      /if (${maxFoodCount}>${Math.Calc[${FindItemCount[=${foodItem}]}]}) /goto :BigLoop
+  }
+
+  /beep .\sounds\mail1.wav
+  /echo <== SummonFood -|
+/return
+
+Sub Summon(string itemName)
+  /itemnotify "${itemName}" rightmouseup
+  /delay 1s
+  /if (${Cursor.ID}) {
+    /autoinv
+  }
+/return

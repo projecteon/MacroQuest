@@ -9,91 +9,96 @@
 #include includes\commonPet.inc
 #include includes\commonNuke.inc
 #include includes\wait4rez.inc
-#turbo 40
+#turbo 150
 
 Sub Main
-    /declare shamanIniFileName        string  local "ini/${MacroQuest.Server}/Shaman_${Me.CleanName}.ini"
+  /declare shamanIniFileName        string  local "ini/${MacroQuest.Server}/Shaman_${Me.CleanName}.ini"
 
-    /call InitShamanIni ${shamanIniFileName}
-    /if (${Macro.Return} == 0) {
-        /echo "Bootstrapped INI file, please update variables in: ${shamanIniFileName}"
-        /endmacro
-    }
+	/call CheckPlugin MQ2EQBC
+	/call CheckPlugin MQ2NetBots
+	/call CheckPlugin MQ2Moveutils
+	/call CheckPlugin MQ2Cast
+	/call CheckPlugin MQ2CastTimer
+	/call CheckPlugin MQ2Exchange
+  /call CheckPlugin MQ2Nav
 
-    /echo "Shaman in trance!"
-    /bca "Shaman in trance!"
-    :ShamanLoop
-        /call Wait4Rez_Background_Events
-        /if (${Me.Invis}) /goto :ShamanLoop
-        /if (${Stick.Status.Equal[ON]}) /goto :ShamanLoop
-        
-        /call CheckHeals
-        /if (${Macro.Return} == 1) /goto :ShamanLoop
-        
-        /call CheckManaStatus
-        /call DoCannibalize
-        /call TryMedidate
-        /call DoPet
-        /call DoDeBuffs
-        /call DoNuke
-        /call DoBuffs
-        /call DoCommonEvents
-        /goto :ShamanLoop
+  /call InitShamanIni ${shamanIniFileName}
+  /if (${Macro.Return} == 0) {
+    /echo "Bootstrapped INI file, please update variables in: ${shamanIniFileName}"
+    /endmacro
+  }
+
+  /echo "Shaman in trance!"
+  /bca "Shaman in trance!"
+  :ShamanLoop
+    /call Wait4Rez_Background_Events
+    /if (${Me.Invis}) /goto :ShamanLoop
+    /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :ShamanLoop
+
+    /call CheckHeals
+    /if (${Macro.Return} == 1) /goto :ShamanLoop
+
+    /call DoCannibalize
+    /call TryMedidate
+    /call DoPet
+    /call DoDeBuffs
+    /call DoNuke
+    /call DoBuffs
+    /call DoCommonEvents
+    /goto :ShamanLoop
 /return
 
 
 Sub DoCannibalize
-    /if (${Debug}) /echo |- DoCannibalize ==>
+  /if (${Debug}) /echo |- DoCannibalize ==>
 
-    /if (${Me.Gem[${cannibalizeSpell}]} && !${Me.Invis} && ${Me.PctHPs} > 65 && !${Me.Casting.ID} && ${Me.PctMana} < 80) {
-        
-        /call CheckNPCInRange
-        /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
-        
-        /if (!${hasNpcInCamp} || ${Me.PctMana} < 4) {
-            /call cast "${cannibalizeSpell}" gem${Me.Gem[${cannibalizeSpell}]} 0
-        }
+  /if (${Me.Gem[${cannibalizeSpell}]} && !${Me.Invis} && ${Me.PctHPs} > 65 && !${Me.Casting.ID} && ${Me.PctMana} < 80) {
+    /call CheckNPCInRange
+    /declare hasNpcInCamp bool local ${Bool[${Macro.Return}]}
+
+    /if (!${hasNpcInCamp} || ${Me.PctMana} < 4) {
+      /call cast "${cannibalizeSpell}" gem${Me.Gem[${cannibalizeSpell}]} 0 EmptyCancelCast
     }
-    
-    /if (${Debug}) /echo <== DoCannibalize -|
+  }
+
+  /if (${Debug}) /echo <== DoCannibalize -|
 /return
 
 Sub InitShamanIni(string iniFileName)
-    /declare options            string  local "HealingOptions"
-    /declare parentInitResult   int     local 1
-    /declare cannibalizeSpell   string  outer "Cannibalize"
+  /declare options            string  local "HealingOptions"
+  /declare parentInitResult   int     local 1
+  /declare cannibalizeSpell   string  outer "Cannibalize"
 
-    /call InitGenralIni "${iniFileName}"
-    /varset parentInitResult ${Macro.Return}
-        
-    /call InitHealIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitBufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitDebufferIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset bootstrapInitResult 0
-    }
-    
-    /call InitNukeIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitGenralIni "${iniFileName}"
+  /varset parentInitResult ${Macro.Return}
 
-    /call InitPetIni "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
-    
-    /call InitWait4Rez "${iniFileName}"
-    /if (${Macro.Return} == 0) {
-        /varset parentInitResult 0
-    }
+  /call InitHealIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 
+  /call InitBufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitDebufferIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset bootstrapInitResult 0
+  }
+
+  /call InitNukeIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitPetIni "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
+
+  /call InitWait4Rez "${iniFileName}"
+  /if (${Macro.Return} == 0) {
+    /varset parentInitResult 0
+  }
 /return ${parentInitResult}

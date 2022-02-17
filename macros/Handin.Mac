@@ -2,64 +2,62 @@
 | https://www.mmobugs.com/forums/index.php?threads/simplify-quest-turn-in.34738/
 | https://www.mmobugs.com/forums/index.php?threads/hand-in-macro-help-request.32770/
 
-#turbo 40
+#turbo 150
 #Event Exp             "You gain#*#experience#*#"
 Sub Main
-/declare  ReportExp          bool	outer	TRUE
-/declare  LDExp              float      outer   ${Me.PctGroupLeaderExp}
-/declare  AAExp              float      outer   ${Me.PctAAExp}
-/declare  Exp                float      outer   ${Me.PctExp}
-/declare Kills int outer 0
-/declare kCount int outer 0
+   /declare  ReportExp          bool	outer	TRUE
+   /declare  LDExp              float      outer   ${Me.PctGroupLeaderExp}
+   /declare  AAExp              float      outer   ${Me.PctAAExp}
+   /declare  Exp                float      outer   ${Me.PctExp}
+   /declare Kills int outer 0
+   /declare kCount int outer 0
 
-/declare l0 int local
-/declare minItemsPerHandin int local 1
-/declare maxItemsPerHandin int local 4
-/declare turnin string outer Bottle of Milk
-/declare handinNPC string outer "Mojax Hikspin"
+   /declare l0 int local
+   /declare minItemsPerHandin int local 4
+   /declare maxItemsPerHandin int local 4
+   /declare turnin string outer Left Goblin Ear
+   /declare handinNPC string outer "Captain Bosec"
 
+   /target npc ${handinNPC}
 
+   :Loop
+      /if (${FindItemCount[=${turnin}]}<${minItemsPerHandin}) /goto :Done
 
-/target npc ${handinNPC}
+      /for l0 1 to ${maxItemsPerHandin}
+            /ctrl /itemnotify ${FindItem[=${turnin}].InvSlot} leftmouseup
+            /delay 20 ${Cursor.ID}
+            /delay 0
+            /if (${l0}==1) {
+               /click left target
+               /delay 20 ${Window[GiveWnd].Open}
+               /delay 0
+            } else {
+               /notify GiveWnd GVW_MyItemSlot${Math.Calc[${l0}-1].Int} leftmouseup
+               /delay 20 !${Cursor.ID}
+               /delay 0
+            }
+            /if (!${FindItemCount[=${turnin}]}) /goto :handin
+         /next l0
 
-:Loop
-/if (${FindItemCount[=${turnin}]}<${minItemsPerHandin}) /goto :Done
-
-/for l0 1 to ${maxItemsPerHandin}
-   /ctrl /itemnotify ${FindItem[=${turnin}].InvSlot} leftmouseup
-   /delay 20 ${Cursor.ID}
-   /delay 0
-   /if (${l0}==1) {
-      /click left target
-      /delay 20 ${Window[GiveWnd].Open}
+      :handin
+      /notify GiveWnd GVW_Give_Button leftmouseup
+      /delay 20 !${Window[GiveWnd].Open}
       /delay 0
-   } else {
-      /notify GiveWnd GVW_MyItemSlot${l0} leftmouseup
-      /delay 20 !${Cursor.ID}
-      /delay 0
-   }
-/if (!${FindItemCount[=${turnin}]}) /goto :handin
-/next l0
+      /doevents
 
-:handin
-/notify GiveWnd GVW_Give_Button leftmouseup
-/delay 20 !${Window[GiveWnd].Open}
-/delay 0
-/doevents
+      /goto :Loop
 
-/goto :Loop
-
-:Done
-/echo out of ${turnin}
+   :Done
+   /echo out of ${turnin}
 /return
 
 Sub Event_Exp(string Line)
-  |- Experience calculation and reporting
- /if (${ReportExp}) /echo ** XP-Delta: REG (${Math.Calc[${Me.PctExp}-${Exp}]}%), AA (${Math.Calc[${Me.PctAAExp}-${AAExp}]}%), LDR (${Math.Calc[${Me.PctGroupLeaderExp}-${LDExp}]}%)
-  /varset LDExp ${Me.PctGroupLeaderExp}
+   |- Experience calculation and reporting
+   |  /if (${ReportExp}) /echo ** XP-Delta: REG (${Math.Calc[${Me.PctExp}-${Exp}]}%), AA (${Math.Calc[${Me.PctAAExp}-${AAExp}]}%), LDR (${Math.Calc[${Me.PctGroupLeaderExp}-${LDExp}]}%)
+   /if (${ReportExp}) /echo ** XP-Delta: REG (${Math.Calc[${Me.PctExp}-${Exp}]}%), AA (${Math.Calc[${Me.PctAAExp}-${AAExp}]}%)
+   |   /varset LDExp ${Me.PctGroupLeaderExp}
   /varset AAExp ${Me.PctAAExp}
   /varset Exp ${Me.PctExp}  
   /varcalc kCount ${kCount}+1
   /echo ${kCount} Handins - ${Int[${Math.Calc[${Macro.RunTime}/60]}]} Min, ${Int[${Math.Calc[${Macro.RunTime}-${Int[${Math.Calc[${Macro.RunTime}/60]}]}*60]}]} Sec.
- 
 /return
