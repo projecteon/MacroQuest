@@ -1,0 +1,17 @@
+#turbo 150
+
+#Event RaidInvite "#1# tells you, 'raid invite.'"
+#Event RaidInvite "#1# tells you, in #*#, 'raid invite.'"
+
+Sub Main
+  /declare allowedNames string outer "Eredhrin Renaissance Soundgarden"
+  /while (TRUE) {
+    /doevents
+  }
+/return
+
+Sub Event_RaidInvite(string line, string pcName)
+  /if (${Select[${pcName},${allowedNames}]}) {
+    /raidinvite ${pcName}
+  }
+/return
