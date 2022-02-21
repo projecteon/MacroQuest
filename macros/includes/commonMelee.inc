@@ -120,7 +120,9 @@ Sub DoMeleeDps(meleeAbilitySub)
     /goto :endDoMeleeDps
   }
 
-  /call StickToTarget ${targetId} 0.75
+  /if (!${Stick.Active} || !${Stick.StickTarget.Equal[${targetId}]}) {
+    /call StickToTarget ${targetId} 0.75
+  }
 
   :doMeleeDps
   /if (${Stick.Active}) {
