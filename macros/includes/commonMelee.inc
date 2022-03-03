@@ -214,7 +214,11 @@ Sub Event_GetCloser
     /doevents flush Event_GetCloser
     /squelch /face fast
     /declare stickDistance int local ${Math.Calc[${Stick.Distance}*0.75].Int}
-    /squelch /stick id ${Target.ID} moveback behind ${stickDistance} uw
+    /if (${Stick.MoveBehind}) {
+      /squelch /stick id ${Target.ID} moveback behind ${stickDistance} uw
+    } else {
+      /squelch /stick id ${Target.ID} moveback front ${stickDistance} uw
+    }
 	}
 
   /if (${Debug} || ${Debug_Melee}) /echo <== Event_GetCloser -|
