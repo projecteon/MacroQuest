@@ -91,7 +91,7 @@ Sub CheckSelfBuffs
   /for k 1 to ${Math.Calc[${SelfBuffs.Size}/${spellPropsDimentions}]}
     /varset buffSpell ${SelfBuffs[${k},${spellNameProp}]}
     /call CheckCanCastBuff "${buffSpell}" ${SelfBuffs[${k},${spellMinManaProp}]}
-    /if (${Macro.Return} == 1 && !${Me.Buff[${buffSpell}].ID} && ${Spell[${buffSpell}].Stacks}) {
+    /if (${Macro.Return} == 1 && !${Me.Buff[${buffSpell}].ID} && ${Spell[${buffSpell}].Stacks} && ${Spell[${buffSpell}].NewStacks}) {
       /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
     }
   /next k
