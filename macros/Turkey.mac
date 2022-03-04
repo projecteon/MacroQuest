@@ -32,6 +32,9 @@ Sub SummonFood
         /echo |- Summoning: ${foodItem} >  ${foodCount}/${maxFoodCount}
         /call Summon "${foodSpell}"
         /delay ${Math.Calc[${FindItem[${foodSpell}].TimerReady}+1]}
+        /if (${Cursor.ID}) {
+          /autoinv
+        }
       }
 
       /if (${maxFoodCount}>${Math.Calc[${FindItemCount[=${foodItem}]}]}) /goto :BigLoop
