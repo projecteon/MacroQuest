@@ -1,7 +1,7 @@
 Sub InitMeleeIni(string iniFileName)
     /declare meleeOptions       string  local "MeleeOptions"
     /declare Debug_Melee        bool    outer FALSE
-	/declare isEnraged          bool    outer FALSE
+	  /declare isEnraged          bool    outer FALSE
 
     /if (${Ini[${iniFileName},Debug,Debug_Melee].Length}) {
        /varset Debug_Melee ${Bool[${Ini[${iniFileName},Debug,Debug_Melee]}]}
@@ -59,7 +59,7 @@ Sub DoKill
     }
 
     /attack on
-	/killthis
+	  /killthis
 
     :gotoloopkeepfighting
         /if (${Target.ID} && ${NetBots[${Me}].Attacking} && ${Target.Type.Equal[NPC]}) {
@@ -76,6 +76,10 @@ Sub DoKill
 Sub DoMeleeDps(meleeAbilitySub)
   /if (${Debug} || ${Debug_Melee}) /echo |- DoMeleeDps ==>
 
+  /if (${Me.Combat} && !${Target.ID}) {
+    /attack off
+  }
+
 	/if (${Me.Combat} && ${Target.ID} && !${Target.Type.Equal[Corpse]}) {
     /if (${Debug} || ${Debug_Melee}) /echo |- Combat <${Me.Combat}> or Attacking <${NetBots[${Me}].Attacking}> - <${Target}>
     /goto :doMeleeDps
@@ -87,7 +91,7 @@ Sub DoMeleeDps(meleeAbilitySub)
   /if (${mainAssist.Equal[NULL]}) {
     /if (${Debug} || ${Debug_Melee}) /echo |- No main assist defined
     /if (${Me.Combat}) /attack off
-    /stick off
+    /if (${Stick.Active}) /stick off
     /varset isEnraged FALSE
     /goto :endDoMeleeDps
   }
@@ -95,6 +99,7 @@ Sub DoMeleeDps(meleeAbilitySub)
   /declare targetId int local ${NetBots[${mainAssist}].TargetID}
   /if (!${targetId} || ${Bool[${Spawn[id ${targetId}].Type.Equal[Corpse]}]}) {
     /if (${Me.Combat}) /attack off
+    /if (${Stick.Active}) /stick off
     /varset isEnraged FALSE
     /goto :endDoMeleeDps
   }
@@ -104,9 +109,9 @@ Sub DoMeleeDps(meleeAbilitySub)
   /declare hasLineOfSight local ${Spawn[${targetId}].LineOfSight}
   /declare targetHP       local ${NetBots[${mainAssist}].TargetHP}
 
-  /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight}) {
+  /if ((!${isNPC} && !${isPet}) || ${targetHP} > ${assistPct} || !${hasLineOfSight} || ${Spawn[${targetId}].Distance3D} > ${campRadius}) {
     /if (${Me.Combat}) /attack off
-    /stick off
+    /if (${Stick.Active}) /stick off
     /varset isEnraged FALSE
     /goto :endDoMeleeDps
   }
@@ -120,7 +125,7 @@ Sub DoMeleeDps(meleeAbilitySub)
     /goto :endDoMeleeDps
   }
 
-  /if (!${Stick.Active} || !${Stick.StickTarget.Equal[${targetId}]}) {
+  /if (!${Stick.Active} || !${Stick.StickTarget}==${targetId}) {
     /call StickToTarget ${targetId} 0.75
   }
 
@@ -150,6 +155,8 @@ Sub StickToTarget(int targetId, float modifier)
   /if (!${Stick.Active} || ${Stick.StickTarget} != ${targetId}) {
     /declare stickDistance int local ${Math.Calc[${Spawn[id ${targetId}].MaxRangeTo}*${modifier}].Int}
     /if (${Debug} || ${Debug_Melee}) /echo Stick distance <${stickDistance}> <${Stick.Distance}> <${Stick.DistMod}> <${Stick.DistModPercent}>
+
+    /if (${stickDistance} > 25) /varset stickDistance 25
 
     /call GetMainTank
     /declare mainTank string	local ${Macro.Return}
