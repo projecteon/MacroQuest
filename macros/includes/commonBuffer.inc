@@ -14,7 +14,7 @@ Sub InitBufferIni(string iniFileName)
 
 
   /if (!${Defined[noLevitateZones]})                  /declare noLevitateZones                string  outer "airplane"
-  /if (!${Defined[inDoorZone]})                       /declare inDoorZone                     string  outer "befallen blackburrow gukbottom guktop neriaka neriakb neriakc paw permafrost qcat runnyeye soldunga soldungb soltemple akanon kaladima kaladimb kedge"
+  /if (!${Defined[inDoorZone]})                       /declare inDoorZone                     string  outer "befallen blackburrow gukbottom guktop neriaka neriakb neriakc paw permafrost qcat runnyeye soldunga soldungb soltemple akanon kaladima kaladimb kedge kurn"
 
   /if (${Ini[${iniFileName},${options},DoBuffGroup].Length}) {
     /varset doBuffGroup ${Bool[${Ini[${iniFileName},${options},DoBuffGroup]}]}
@@ -92,7 +92,11 @@ Sub CheckSelfBuffs
     /varset buffSpell ${SelfBuffs[${k},${spellNameProp}]}
     /call CheckCanCastBuff "${buffSpell}" ${SelfBuffs[${k},${spellMinManaProp}]}
     /if (${Macro.Return} == 1 && !${Me.Buff[${buffSpell}].ID} && ${Spell[${buffSpell}].Stacks} && ${Spell[${buffSpell}].NewStacks}) {
-      /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
+      /if (${Bool[${SelfBuffs[${k},${itemCastProp}]}]}) {
+        /call ItemClickBuff "${SelfBuffs[${k},${itemCastProp}]}" "${buffSpell}" ${Me.ID} "${Me.Name}"
+      } else /if (${Cast.Ready[${buffSpell}]}) {
+        /call CastBuff "${buffSpell}" ${Me.ID} "${Me.Name}"
+      }
     }
   /next k
 
@@ -223,7 +227,7 @@ Sub CheckPetBuffs
 Sub CheckCanCastBuff(string buffSpell, int minMana)
   /if (${Debug}) /echo  |- CheckCanCastBuff ==> ${buffSpell} ${minMana}
 
-  /if (${Me.PctMana} < ${minMana} || ${Me.Casting.ID} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
+  /if ((${minMana} > 0 && ${Me.PctMana} < ${minMana}) || ${Me.Casting.ID} || ${Spell[${buffSpell}].SpellType.NotEqual[Beneficial]}) {
     /if (${Debug}) /echo <== CheckCanCastBuff 0 -|
     /return 0
   }
