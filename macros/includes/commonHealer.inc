@@ -312,15 +312,17 @@ Sub CancelHeal(int spellId)
       /call Interrupt
       /call CastHeal ${mainTankEmergencyHeal} ${Target.ID} ${Target.Name}
     }
+  } else /if (${isHealingGroup} && ${Target.PctHPs} > ${groupHealPct}) {
+     /call Interrupt
+  } else /if (${isHealingNetbots} && ${Target.PctHPs} > ${netbotsHealPct}) {
+    /call Interrupt
+  } else /if (${isHealingMaintank} && ${Target.PctHPs} > ${mainTankHealPct}) {
+    /call Interrupt
+  } else /if (${Target.PctHPs} > ${mainTankEmergencyHealPct} && ${spellId} == ${Spell[${mainTankEmergencyHeal}].ID}) {
+    | /call Interrupt
+  } else /if (${Target.Distance} > ${healDist}) {
+    /call Interrupt
+  } else /if (${Target.Type.Equal[Corpse]}) {
+    /call Interrupt
   }
-
-  | Following line has issue with NetBots update report, cancels heals when it shouldnt
-	/if (${isHealingGroup} && ${Target.PctHPs} > ${groupHealPct}) /call Interrupt
-	/if (${isHealingNetbots} && ${Target.PctHPs} > ${netbotsHealPct}) /call Interrupt
-	/if (${isHealingMaintank} && ${Target.PctHPs} > ${mainTankHealPct}) /call Interrupt
-	| /if (${Target.PctHPs} > ${mainTankEmergencyHealPct} && ${spellId} == ${Spell[${mainTankEmergencyHeal}].ID}) /call Interrupt
-	/if (${Target.Distance} > ${healDist}) /call Interrupt
-	/if (${Target.Type.Equal[Corpse]}) /call Interrupt
-	| /if (${Me.AltAbilityReady[Divine Arbitration]}) /call DivineArbitration
-	| /doevents StartCast
 /return
