@@ -121,6 +121,7 @@
 #event Stunned "You *CANNOT* cast spells, you have been silenced!#*#"
 
 Sub Cast(spellName,spellType,giveUpValue,mySub,int ResistTotal)
+/doevents flush Event_Stunned
 /declare castTime float local
 /if (!${Defined[castReturn]}) /declare castReturn string outer CAST_CANCELLED
 /call DoCastingEvents
@@ -457,4 +458,5 @@ Sub Event_Stunned
   /delay 7
 }
 /if (${Defined[castReturn]}) /varset castReturn CAST_STUNNED
+/doevents flush Event_Stunned
 /return
