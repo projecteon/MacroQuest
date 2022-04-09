@@ -1,7 +1,7 @@
 #turbo 150
 
 Sub Main
-  /declare exportIniFileName  string  outer "ini/${MacroQuest.Server}/BankExport_${Me.CleanName}.ini"
+  /declare exportIniFileName  string  outer "ini/${MacroQuest.Server}/Export/InventoryExport_${Me.CleanName}.ini"
   /declare numInventorySlots  int	    outer 8
   /declare Debug     	        bool    outer TRUE
 
