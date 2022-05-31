@@ -28,7 +28,7 @@ Sub SummonFood
       }
 
       /varset foodCount ${Math.Calc[${FindItemCount[=${foodItem}]}]}
-      /if (${Cast.Ready[${foodSpell}]} && ${FindItem[${foodSpell}].TimerReady}==0 && ${maxFoodCount}>${foodCount}) {
+      /if (${Cast.Ready[${foodSpell}]} && ${FindItem[${foodSpell}].TimerReady}==0 && ${maxFoodCount}>=${foodCount}) {
         /echo |- Summoning: ${foodItem} >  ${foodCount}/${maxFoodCount}
         /call Summon "${foodSpell}"
         /delay ${Math.Calc[${FindItem[${foodSpell}].TimerReady}+1]}
@@ -46,7 +46,7 @@ Sub SummonFood
 
 Sub Summon(string itemName)
   /itemnotify "${itemName}" rightmouseup
-  /delay 1s
+  /delay 3s ${Cursor.ID}
   /if (${Cursor.ID}) {
     /autoinv
   }
