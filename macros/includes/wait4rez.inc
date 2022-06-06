@@ -13,15 +13,15 @@
 
 Sub InitWait4Rez(string iniFileName)
     /declare options                        string  local "Wait4Rez"
-    /declare Debug_Wait4Rez                 bool    outer FALSE 
-    /declare wait4RezEnabled                bool    outer FALSE 
-    /declare wait4RezAlertCount             int     outer 1 
-    /declare waiting4Rez                    bool    outer FALSE 
-    /declare waiting4RezMemmedSpells        bool    outer FALSE 
-    /declare waiting4RezSpellset            string  outer  
+    /declare Debug_Wait4Rez                 bool    outer FALSE
+    /declare wait4RezEnabled                bool    outer FALSE
+    /declare wait4RezAlertCount             int     outer 1
+    /declare waiting4Rez                    bool    outer FALSE
+    /declare waiting4RezMemmedSpells        bool    outer FALSE
+    /declare waiting4RezSpellset            string  outer
 
     /if (${Ini[${iniFileName},${options},Enabled].Length}) {
-       /varset wait4RezEnabled ${Bool[${Ini[${iniFileName},${options},Enabled]}]}     
+       /varset wait4RezEnabled ${Bool[${Ini[${iniFileName},${options},Enabled]}]}
     } else {
         /ini "${iniFileName}" "${options}" "Enabled" "${wait4RezEnabled}"
     }
@@ -60,7 +60,7 @@ Sub Event_dead
 				/delay 1
 			/next a
 		}
-	
+
     	| Wait for a Rez.
 		| /docommand ${ChatToggle} I'm dead. Waiting for rez.
 		/bca I'm dead. Waiting for rez.
@@ -68,7 +68,7 @@ Sub Event_dead
 		/varset waiting4RezMemmedSpells FALSE
 		/call Wait4Rez
 	}
-    
+
     /if (${Debug} || ${Debug_Wait4Rez}) /echo <== Event_Dead -|
 /RETURN
 
@@ -79,7 +79,7 @@ Sub Event_dead
 #Event waitNow "<#1#> Wait4Rez"
 Sub Event_waitNow(line, chatSender)
     /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Event_WaitNow ==>
-    
+
     /if (!${checkEventArgs[${chatSender},${line},U,""]}) /return
 
     /if (${wait4RezEnabled}) {
@@ -91,7 +91,7 @@ Sub Event_waitNow(line, chatSender)
             /call Wait4Rez
         }
     }
-    
+
     /if (${Debug} || ${Debug_Wait4Rez}) /echo <== Event_WaitNow -|
 /RETURN
 
@@ -103,7 +103,7 @@ Sub Event_waitNow(line, chatSender)
 #Event lootNow "#1# tells you, 'Loot Now#*#"
 Sub Event_lootNow(line, chatSender)
     /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Event_lootNow ==>
-    
+
     /if (!${checkEventArgs[${chatSender},${line},U,""]}) /return
 
     /if (${wait4RezEnabled}) {
@@ -111,7 +111,7 @@ Sub Event_lootNow(line, chatSender)
         /call Wait4Rez LOOT_NOW
     }
 
-    /if (${Debug} || ${Debug_Wait4Rez}) /echo <== Event_lootNow -|	
+    /if (${Debug} || ${Debug_Wait4Rez}) /echo <== Event_lootNow -|
 /RETURN
 
 |------------------------------------------------------------------------------------|
@@ -119,22 +119,22 @@ Sub Event_lootNow(line, chatSender)
 |------------------------------------------------------------------------------------|
 Sub Wait4Rez(functionCall)
     /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez${If[${Defined[functionCall]}, ${functionCall},]} ==>
-	
+
 	/if (${functionCall.Equal[LOOT_NOW]}) /goto :Looting
-	
+
     /echo Awaiting rez: auto-accepting, and looting my corpse...
 	/call ConsentNetbots
 
     |Load Spells.
 	| /if (${Me.Class.CanCast}) /call check_Gems
-    
+
     |Wait for Rez------------------------------------------------------|
 	:rezmeffs
         /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez -| Waiting to accept rez.
 
         /call Wait4Rez_Background_Events
         /delay 10 ${Window[ConfirmationDialogBox].Open}
-        /if (!${waiting4RezMemmedSpells} && ${waiting4RezSpellset}) {
+        /if (!${waiting4RezMemmedSpells} && ${Bool[${waiting4RezSpellset}]}) {
             /loadspells ${waiting4RezSpellset}
             /varset waiting4RezMemmedSpells TRUE
         }
@@ -155,7 +155,7 @@ Sub Wait4Rez(functionCall)
         | /docommand ${ChatToggle} Looting...
 	:Looting
         /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez -| Attempting to loot my corpse.
-        
+
         /if (!${Defined[lootTotal]}) /declare lootTotal int local 0
         /call EnsureTarget ${Spawn[${Me}'s].ID}
         /if (${Target.Distance}<100 && ${Target.CleanName.Equal[${Me}'s corpse]}) {
@@ -189,13 +189,13 @@ Sub Wait4Rez(functionCall)
             }
             | /docommand ${ChatToggle} Ready to die again!
         }
-	
+
     /doevents flush
-	
+
     /varset waiting4RezMemmedSpells FALSE
     | /if (${buffAfterRez} && ${NetBots[${NetBots.Client[1]}].CombatState}>=3) /bc buff me
-    
-    /if (${Debug} || ${Debug_Wait4Rez}) /echo <== Wait4Rez -|	
+
+    /if (${Debug} || ${Debug_Wait4Rez}) /echo <== Wait4Rez -|
 /return
 
 Sub ConsentNetbots
