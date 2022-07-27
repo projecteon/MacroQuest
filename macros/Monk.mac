@@ -27,9 +27,24 @@ Sub Main
     /if (${Me.Invis}) /goto :MonkLoop
     /if (${Stick.Status.Equal[ON]} || ${Navigation.Active}) /goto :MonkLoop
 
-    /call DoKill
+    | /call DoKill
+    /call DoMeleeDps DoPunchesAndKicks
     /call DoCommonEvents
     /goto :MonkLoop
+/return
+
+Sub DoPunchesAndKicks
+  /if (${Debug} || ${Debug_Melee}) /echo |- DoPunchesAndKicks ==>
+
+  /if (${Me.AbilityReady[tigerclaw]}) {
+    /doability tigerclaw
+  }
+
+  /if (${Me.AbilityReady[flyingkick]}) {
+      /doability flyingkick
+  }
+
+  /if (${Debug} || ${Debug_Melee}) /echo <== DoPunchesAndKicks -|
 /return
 
 Sub InitMonkIni(string iniFileName)

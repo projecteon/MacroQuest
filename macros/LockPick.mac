@@ -1,3 +1,5 @@
+#include includes\common.inc
+
 Sub Main
   | https://www.redguides.com/community/threads/spell-skill-up-macro.9117/
   | https://www.redguides.com/community/threads/skills-auto-skill-raiser.27492/
