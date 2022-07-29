@@ -3,12 +3,12 @@ local mq = require('mq')
 
 local plugins = {}
 
-plugins.IsPluginLoaded = function(plugin)
+plugins.IsLoaded = function(plugin)
   return mq.TLO.Plugin(plugin).IsLoaded()
 end
 
-plugins.EnsurePluginLoaded = function(plugin)
-  if (plugins.IsPluginLoaded(plugin) == false) then
+plugins.EnsureIsLoaded = function(plugin)
+  if (plugins.IsLoaded(plugin) == false) then
     print(string.format("[PLUGINS] Loading <%s>..."), plugin)
     mq.cmd("/plugin " .. plugin)
   end

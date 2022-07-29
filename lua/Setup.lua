@@ -1,10 +1,10 @@
 local mq = require('mq')
-local plugins = require('lib/PluginUtils')
+local plugins = require('lib/pluginutils')
 
 -- load EQBC if needed
-plugins.EnsurePluginLoaded("mq2eqbc")
-mq.delay('1s', plugins.IsPluginLoaded("mq2eqbc"))
-if (plugins.IsPluginLoaded("mq2eqbc") == false) then
+plugins.EnsureIsLoaded("mq2eqbc")
+mq.delay('1s', plugins.IsLoaded("mq2eqbc"))
+if (plugins.IsLoaded("mq2eqbc") == false) then
   print("[SETUP] MQ2EQBC.dll has failed to load, ending script!")
   mq.exit()
 end
@@ -26,9 +26,9 @@ if (mq.TLO.EQBC.Connected() == false) then
 end
 
 -- load Netbots if needed
-plugins.EnsurePluginLoaded("mq2netbots")
-mq.delay('1s', plugins.IsPluginLoaded("mq2netbots"))
-if (plugins.IsPluginLoaded("mq2netbots") == false) then
+plugins.EnsureIsLoaded("mq2netbots")
+mq.delay('1s', plugins.IsLoaded("mq2netbots"))
+if (plugins.IsLoaded("mq2netbots") == false) then
   print("[SETUP] MQ2Netbots.dll has failed to load, ending script!")
   mq.exit()
 end
