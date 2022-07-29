@@ -1,4 +1,5 @@
 local mq = require('mq')
+local luautils = require('lib/luautils')
 
 -- Make includes easier
 local scriptPath = (debug.getinfo(1, "S").source:sub(2)):match("(.*[\\|/]).*$")
@@ -16,7 +17,9 @@ local util = require "cjson.util"
 local luaDir = mq.TLO.Lua.Dir
 local serverName = mq.TLO.MacroQuest.Server
 local fileName = mq.TLO.Me.Name()
-local configDir = string.format("%s/config/%s/%s.json", luaDir, serverName, fileName)
+local configFilePath = string.format("%s/config/%s/%s.json", luaDir, serverName, fileName)
+
+luautils.EnsureFileExists(configFilePath)
 
 local function tableMerge(default, loaded)
   for key, value in pairs(default) do
@@ -34,14 +37,14 @@ local function tableMerge(default, loaded)
 end
 
 local function LoadConfig(key, default)
-  local json_text = util.file_load(configDir)
+  local json_text = util.file_load(configFilePath)
   local loadedConfig = json.decode(json_text)
   return tableMerge(default, loadedConfig[key] or {})
 end
 
 local function SaveConfig(config)
   local json_text = json.encode(config)
-  util.file_save(configDir, json_text)
+  util.file_save(configFilePath, json_text)
 end
 
 return function () return LoadConfig, SaveConfig end

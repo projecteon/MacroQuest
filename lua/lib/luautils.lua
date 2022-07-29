@@ -1,5 +1,7 @@
+local utils = {}
+
 -- https://stackoverflow.com/questions/1283388/how-to-merge-two-tables-overwriting-the-elements-which-are-in-both
-function tableMerge(t1, t2)
+utils.TableMerge(t1, t2)
   for k,v in pairs(t2) do
       if type(v) == "table" then
           if type(t1[k] or false) == "table" then
@@ -13,3 +15,18 @@ function tableMerge(t1, t2)
   end
   return t1
 end
+
+
+utils.EnsureFileExists(name)
+    local fileCreated = false
+    local f = io.open(name,"r")
+    if not f then 
+        f = io.open(name,"w")
+        f:write("{}")
+        fileCreated = true
+    end
+    io.close(f) 
+    return fileCreated
+end
+
+return utils
