@@ -3,12 +3,11 @@ local mq = require('mq')
 local MQEvent = {Name = '',  MatcherText = '', Callback = function() end}
 
 function MQEvent:new (name, matcherText, callback)
-  local o = {}
-  setmetatable(o, self)
   self.__index = self
-  self.Name = name or ''
-  self.MatcherText = matcherText  or ''
-  self.Callback = callback or function() end
+  local o = setmetatable({}, self)
+  o.Name = name or ''
+  o.MatcherText = matcherText  or ''
+  o.Callback = callback or function() end
   return o
 end
 

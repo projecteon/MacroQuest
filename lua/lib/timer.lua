@@ -1,11 +1,10 @@
 local Timer = {Duration = 0, StartTime = os.time()}
 
 function Timer:new (duration)
-  local o = {}
-  setmetatable(o, self)
   self.__index = self
-  self.Duration = duration or 0
-  self.StartTime = os.time()
+  local o = setmetatable({}, self)
+  o.Duration = duration or 0
+  o.StartTime = os.time()
   return o
 end
 

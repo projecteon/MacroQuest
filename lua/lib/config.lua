@@ -28,7 +28,7 @@ local function tableMerge(default, loaded)
         if type(loadedValue or false) == "table" then
             tableMerge(default[key] or {}, loadedValue or {})
         end
-    elseif type(value) == type(loadedValue or false) then
+    elseif type(value) == type(loadedValue) then
         default[key] = loadedValue
     end
   end
