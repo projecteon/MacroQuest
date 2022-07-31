@@ -1,7 +1,6 @@
 --- @type Mq
 local mq = require('mq')
 local log = require('lib/log')
-local timer = require('lib/timer')
 local ensureTarget = require('lib/target')
 
 local function consentNetbots()
@@ -44,13 +43,6 @@ local function doLoot()
       mq.delay("5s", function() return mq.TLO.Window("LootWnd") and mq.TLO.Window("LootWnd").Open() end)
       mq.delay("5s", function() return mq.TLO.Corpse.Items() ~= nil end)
       mq.delay(500)
-      -- log.WriteLog("|- Number of items<"..mq.TLO.Corpse.Items()..">")
-      -- local tryTimer = timer:new(5)
-      -- local corpseItemsCount = -1
-      -- while corpseItemsCount ~= mq.TLO.Corpse.Items() and tryTimer:IsRunning() do
-      --   mq.delay(20)
-      --   corpseItemsCount = mq.TLO.Corpse.Items()
-      -- end
       if not mq.TLO.Window("LootWnd") or not mq.TLO.Corpse.Items then
         log.WriteLog("|- Could not open loot window")
       else
@@ -75,7 +67,7 @@ local function doWait4Rez()
 	log.WriteLog("|- doWait4Rez ==>")
 
   mq.cmd("/bc Ready for rezz.")
-
+  mq.cmd("/consent guild")
   repeat
     mq.delay(10)
   until mq.TLO.Window("ConfirmationDialogBox").Open()
@@ -93,7 +85,7 @@ local function createAliases()
   mq.bind("/wait4rez", doWait4Rez)
   mq.bind("/waitforrez", doWait4Rez)
   mq.bind("/dead", doWait4Rez)
-  mq.bind("/lootCorpses", doLoot)
+  mq.bind("/lootCorpse", doLoot)
 end
 
 createAliases()

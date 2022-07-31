@@ -13,21 +13,10 @@ local function diedEvent()
   log.WriteLog("|- diedEvent <==")
 end
 
-local function lootEvent(line, chatSender)
-	log.WriteLog("|- lootEvent ==>")
-  
-  doLoot()
-
-  log.WriteLog("|- lootEvent <==")
-end
 
 local events = {
   mqEvents:new("slain", "You have been slain by #*#", diedEvent),
   mqEvents:new("died", "You died.", diedEvent),
-  mqEvents:new("loot1", "[#1#] Loot Now", lootEvent),
-  mqEvents:new("loot2", "<#1#> Loot Now#*#", lootEvent),
-  mqEvents:new("loot3", "#1# tells you, 'Loot Now#*#", lootEvent),
-  mqEvents:new("loot4", "#1# tells you, in #*#, 'Loot Now#*#", lootEvent),
 }
 
 for key, value in pairs(events) do
