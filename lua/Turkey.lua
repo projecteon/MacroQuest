@@ -3,7 +3,7 @@ local mq = require('mq')
 
 local function DoSummon (itemName)
   mq.cmdf('/itemnotify "%s" rightmouseup', itemName)
-  mq.delay(500, function() return mq.TLO.Cursor.ID() or false end)
+  mq.delay(500, function() return mq.TLO.Cursor.ID() and mq.TLO.Cursor.ID() > 0 end)
   if mq.TLO.Cursor.ID() then
     mq.cmd('/autoinv')
   end
