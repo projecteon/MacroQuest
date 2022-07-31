@@ -5,11 +5,11 @@ local state = require('lib/spells/state')
 local events = require('lib/spells/events')
 local log = require('lib/log')
 
+local castReturnTypes = types.CastReturn
+
 for key, value in pairs(events) do
   value:Register()
 end
-
-local castReturnTypes = types.CastReturn
 
 local function doCastEvents()
   for key, value in pairs(events) do
